@@ -54,14 +54,3 @@ model Tone {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
-
-
-model Gear {
-  id        String   @id @default(cuid())
-  type      String
-  brand     String
-  model     String
-  specs     Json?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/database';
 import { currentUser } from '@clerk/nextjs/server';
+import { client } from '@/lib/openai';
 
 interface ToneUpdateBody {
   name?: string;
@@ -12,9 +13,6 @@ interface ToneUpdateBody {
   pedals?: any;
   settings?: any;
   clipUrl?: string;
-  aiAmpSettings?: any;
-  aiPedalChain?: any;
-  aiNotes?: string;
 }
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
@@ -47,6 +45,73 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
     const body: ToneUpdateBody = await req.json();
 
+    const gearChanged =
+      body.guitar !== undefined ||
+      body.pickups !== undefined ||
+      body.strings !== undefined ||
+      body.amp !== undefined ||
+      body.pedals !== undefined;
+
+    let aiResult: any = {
+      ampSettings: body.settings ?? tone.settings,
+      pedalChain: body.pedals ?? tone.pedals,
+      notes: tone.aiNotes ?? '',
+    };
+
+    if (gearChanged) {
+      const artistSong = body.artist ?? tone.artist ?? 'Unknown Artist/Song';
+      const guitarMakeModel = body.guitar ?? tone.guitar ?? 'Unknown Guitar';
+      const ampMakeModel = body.amp ?? tone.amp ?? 'Unknown Amp';
+      const pickupsDesc = body.pickups ?? tone.pickups ?? 'default';
+      const stringsDesc = body.strings ?? tone.strings ?? 'default';
+      const pedalsDesc =
+        body.pedals && Array.isArray(body.pedals)
+          ? body.pedals.map((p: any) => p.name).join(', ')
+          : tone.pedals && Array.isArray(tone.pedals)
+            ? tone.pedals.map((p: any) => p.name).join(', ')
+            : 'none';
+
+      const openAIResponse = await client.chat.completions.create({
+        model: 'gpt-5',
+        messages: [
+          {
+            role: 'system',
+            content: `
+              You are a professional guitar tone engineer.
+              Analyze a user's desired tone based on artist/song and gear (guitar, pickups, strings, amp, pedals) and return precise amp and pedal settings.
+              Output in JSON format:
+              {
+                "ampSettings": { "gain": number, "treble": number, "mid": number, "bass": number, "volume": number },
+                "pedalChain": [ { "name": string, "settings": object } ],
+                "notes": string
+              }
+              Keep explanations short and technical.`.trim(),
+          },
+          {
+            role: 'user',
+            content: `
+              Artist/Song: ${artistSong}
+              Guitar: ${guitarMakeModel}
+              Pickups: ${pickupsDesc}
+              Strings: ${stringsDesc}
+              Amp: ${ampMakeModel}
+              Pedals: ${pedalsDesc}`.trim(),
+          },
+        ],
+      });
+
+      try {
+        aiResult = JSON.parse(openAIResponse.choices?.[0]?.message?.content?.trim() || '{}');
+      } catch (err) {
+        console.warn('Failed to parse AI response, storing raw text', err);
+        aiResult = {
+          ampSettings: body.settings ?? tone.settings,
+          pedalChain: body.pedals ?? tone.pedals,
+          notes: openAIResponse.choices?.[0]?.message?.content?.trim() ?? '',
+        };
+      }
+    }
+
     const updatedTone = await prisma.tone.update({
       where: { id: params.id },
       data: {
@@ -56,16 +121,17 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         ...(body.pickups && { pickups: body.pickups }),
         ...(body.strings && { strings: body.strings }),
         ...(body.amp && { amp: body.amp }),
-        ...(body.pedals && { pedals: body.pedals }),
-        ...(body.settings && { settings: body.settings }),
         ...(body.clipUrl && { clipUrl: body.clipUrl }),
-        ...(body.aiAmpSettings && { aiAmpSettings: body.aiAmpSettings }),
-        ...(body.aiPedalChain && { aiPedalChain: body.aiPedalChain }),
-        ...(body.aiNotes && { aiNotes: body.aiNotes }),
+        pedals: aiResult.pedalChain,
+        settings: aiResult.ampSettings,
+        aiNotes: aiResult.notes,
       },
     });
 
-    return NextResponse.json({ message: 'Tone updated', tone: updatedTone }, { status: 200 });
+    return NextResponse.json(
+      { message: 'Successfully updated tone', tone: updatedTone },
+      { status: 200 }
+    );
   } catch (error) {
     console.error(`Failed to update tone ${params.id} for user ${user.id}:`, error);
     return NextResponse.json({ message: 'Failed to update tone' }, { status: 500 });
@@ -84,7 +150,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
 
     await prisma.tone.delete({ where: { id: params.id } });
 
-    return NextResponse.json({ message: 'Tone deleted' }, { status: 200 });
+    return NextResponse.json({ message: 'Successfully deleted tone' }, { status: 200 });
   } catch (error) {
     console.error(`Failed to delete tone ${params.id} for user ${user.id}:`, error);
     return NextResponse.json({ message: 'Failed to delete tone' }, { status: 500 });
