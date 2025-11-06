@@ -8,48 +8,51 @@ datasource db {
 }
 
 model User {
-  id         String      @id @default(cuid())
-  clerkId    String      @unique
-  email      String      @unique
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
-  tones      Tone[]
+  id            String          @id @default(cuid())
+  clerkId       String          @unique
+  email         String          @unique
+  firstName     String?
+  lastName      String?
+  stripeId      String?         // Stripe customer ID
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  tones         Tone[]
   subscriptions Subscription[]
+}
+
+model Subscription {
+  id                String   @id @default(cuid())
+  stripeId          String   @unique
+  status            String   // active, canceled, etc.
+  priceId           String
+  currentPeriodEnd  DateTime
+  user              User     @relation(fields: [userId], references: [id])
+  userId            String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }
 
 model Tone {
   id           String   @id @default(cuid())
-  name         String   // Optional: user-defined name for this tone
-  artist       String   // Artist whose tone is being emulated
-  description  String?  // Optional description
-  guitar       String   // Guitar used
-  amp          String   // Amp used
-  pedals       Json     // Array of pedal objects {name, settings}
-  settings     Json     // Detailed tone settings (EQ, reverb, gain, etc.)
+  name         String
+  artist       String
+  description  String?
+  guitar       String
+  amp          String
+  pedals       Json
+  settings     Json
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   user         User     @relation(fields: [userId], references: [id])
   userId       String
 }
 
-model Subscription {
-  id          String   @id @default(cuid())
-  stripeId    String   @unique // Stripe subscription ID
-  status      String   // e.g., active, canceled, past_due
-  priceId     String   // Stripe price ID
-  currentPeriodEnd DateTime
-  user        User     @relation(fields: [userId], references: [id])
-  userId      String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
 model Gear {
   id        String   @id @default(cuid())
-  type      String   // e.g., guitar, amp, pedal
+  type      String  
   brand     String
   model     String
-  specs     Json?    // Optional: JSON for detailed specs
+  specs     Json?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

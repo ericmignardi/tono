@@ -4,32 +4,35 @@ import './globals.css';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { ClerkProvider } from '@clerk/nextjs';
+import { auth } from '@clerk/nextjs/server';
 
 const robotoSans = Roboto({
-  variable: '--font-roboto-sans',
+  variable: '--font-roboto',
   subsets: ['latin'],
   weight: ['200', '300', '400', '500', '600', '700', '800', '900'],
 });
 
 export const metadata: Metadata = {
-  title: 'Tonifier – Find Any Guitar Tone, Instantly',
+  title: 'tonifier – find any guitar tone, instantly',
   description:
     'Use AI to recreate signature guitar tones or craft your own. Generate, tweak, and save tones in seconds.',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const { userId } = await auth();
+  const isSignedIn = Boolean(userId);
   return (
     <ClerkProvider>
       <html lang="en">
-        <body className={`${robotoSans.variable} antialiased`}>
+        <body className={`${robotoSans.variable} ${robotoSans.className} antialiased`}>
           <div className="flex min-h-screen flex-col">
-            <Header />
+            {!isSignedIn && <Header />}
             <main className="flex-1">{children}</main>
-            <Footer />
+            {!isSignedIn && <Footer />}
           </div>
         </body>
       </html>

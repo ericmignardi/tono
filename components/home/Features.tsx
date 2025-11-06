@@ -1,6 +1,26 @@
 import { Music2, Music3, Stars } from 'lucide-react';
 
 export default function Features() {
+  const features = [
+    {
+      Icon: Stars,
+      title: 'AI Tone Generator',
+      description:
+        'Describe any artist or song and let our AI generate the perfect tone settings for you in seconds.',
+    },
+    {
+      Icon: Music2,
+      title: 'Intuitive Tone Editor',
+      description:
+        'Fine-tune every aspect of your sound with our powerful and easy-to-use digital effects editor.',
+    },
+    {
+      Icon: Music3,
+      title: 'Personal Tone Library',
+      description:
+        'Save, organize, and access all your favourite and custom-created tones from any device, anytime.',
+    },
+  ];
   return (
     <section
       id="features"
@@ -12,30 +32,16 @@ export default function Features() {
         tones.
       </p>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <div className="border-border bg-primary-foreground flex flex-col gap-2 rounded-2xl border p-4">
-          <Stars className="text-primary" />
-          <h3 className="font-semibold">AI Tone Generator</h3>
-          <p className="text-xs">
-            Describe any artist or song and let our AI generate the perfect tone settings for you in
-            seconds.
-          </p>
-        </div>
-        <div className="border-border bg-primary-foreground flex flex-col gap-2 rounded-2xl border p-4">
-          <Music2 className="text-primary" />
-          <h3 className="font-semibold">Intuitive Tone Editor</h3>
-          <p className="text-xs">
-            Fine-tune every aspect of your sound with our powerful and easy-to-use digital effects
-            editor.
-          </p>
-        </div>
-        <div className="border-border bg-primary-foreground flex flex-col gap-2 rounded-2xl border p-4">
-          <Music3 className="text-primary" />
-          <h3 className="font-semibold">Personal Tone Library</h3>
-          <p className="text-xs">
-            Save, organize, and access all your favourite and custom-created tones from any device,
-            anytime.
-          </p>
-        </div>
+        {features.map(({ Icon, title, description }) => (
+          <div
+            key={title}
+            className="border-border bg-primary-foreground flex flex-col gap-2 rounded-2xl border p-4 shadow-md"
+          >
+            <Icon className="text-primary" />
+            <h3 className="font-semibold">{title}</h3>
+            <p className="text-xs">{description}</p>
+          </div>
+        ))}
       </div>
     </section>
   );
