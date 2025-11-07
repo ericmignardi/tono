@@ -15,7 +15,7 @@ model User {
   email         String          @unique
   firstName     String?
   lastName      String?
-  stripeId      String?         // Stripe customer ID
+  stripeId      String?         @unique
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
   tones         Tone[]
