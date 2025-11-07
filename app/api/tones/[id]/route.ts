@@ -138,21 +138,21 @@ export async function PUT(req: NextRequest, context: { params: { id: string } })
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, context: { params: { id: string } }) {
   const user = await currentUser();
   if (!user) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 
   try {
     const tone = await prisma.tone.findFirst({
-      where: { id: params.id, userId: user.id },
+      where: { id: context.params.id, userId: user.id },
     });
     if (!tone) return NextResponse.json({ message: 'Tone not found' }, { status: 404 });
 
-    await prisma.tone.delete({ where: { id: params.id } });
+    await prisma.tone.delete({ where: { id: context.params.id } });
 
     return NextResponse.json({ message: 'Successfully deleted tone' }, { status: 200 });
   } catch (error) {
-    console.error(`Failed to delete tone ${params.id} for user ${user.id}:`, error);
+    console.error(`Failed to delete tone ${context.params.id} for user ${user.id}:`, error);
     return NextResponse.json({ message: 'Failed to delete tone' }, { status: 500 });
   }
 }
