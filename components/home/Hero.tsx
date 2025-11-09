@@ -5,23 +5,23 @@ export default function Hero() {
   return (
     <section
       id="hero"
-      className="flex flex-col items-start justify-center gap-4 py-24 lg:items-center"
+      className="flex flex-1 flex-col items-start justify-center gap-4 py-64 lg:items-center"
     >
-      <h1 className="text-5xl font-black">
-        Find Any Guitar{' '}
-        <span className="from-accent via-foreground to-primary bg-linear-to-r bg-clip-text text-transparent uppercase italic">
+      <h1 className="text-7xl font-black">
+        Find Any Guitar <br />
+        <span className="from-accent via-foreground to-primary bg-linear-to-r bg-clip-text text-transparent shadow-2xl">
           Tone
         </span>
         , Instantly.
       </h1>
-      <p>
+      <p className="text-muted-foreground">
         Use AI to recreate the signature sounds of your favourite artists or craft your own unique
         tone
       </p>
       <div className="flex items-center gap-3">
         <SignedOut>
           <SignUpButton>
-            <Button>Create your tone for free</Button>
+            <Button>Get started</Button>
           </SignUpButton>
           <SignInButton>
             <Button variant={'outline'}>Sign in</Button>

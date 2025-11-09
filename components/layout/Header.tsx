@@ -10,25 +10,20 @@ export default function Header() {
   const [mobileMenu, setMobileMenu] = useState<boolean>(false);
 
   return (
-    <header className="border-b-border relative border-b">
+    <header className="border-b-border fixed top-0 right-0 left-0 z-50 border-b shadow-sm backdrop-blur-2xl">
       <div className="flex items-center justify-between p-4">
         <Link href="/">
-          <h1 className="text-2xl font-bold italic">
-            tonifi<span className="text-primary">e</span>r
-          </h1>
+          <h1 className="text-2xl font-bold italic">tonifier</h1>
         </Link>
-        <nav className="hidden items-center gap-4 lg:flex">
+        <nav className="hidden items-center justify-between gap-4 lg:flex">
           <SignedOut>
+            <Link href="/pricing">Pricing</Link>
             <SignUpButton>
-              <Button variant={'ghost'}>Sign up</Button>
+              <Button variant={'outline'}>Sign up</Button>
             </SignUpButton>
             <SignInButton>
-              <Button variant={'ghost'}>Log in</Button>
+              <Button>Sign in</Button>
             </SignInButton>
-
-            <Link href="/pricing">
-              <Button>Get started</Button>
-            </Link>
           </SignedOut>
 
           <SignedIn>
@@ -40,7 +35,7 @@ export default function Header() {
           className="z-20 h-6 w-6 cursor-pointer lg:hidden"
           aria-label="Toggle mobile menu"
         >
-          {mobileMenu ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          {mobileMenu ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
         {mobileMenu && (
           <>
@@ -56,7 +51,7 @@ export default function Header() {
                   <Button variant={'ghost'}>Sign up</Button>
                 </SignUpButton>
                 <SignInButton>
-                  <Button variant="ghost">Log in</Button>
+                  <Button variant="ghost">Sign in</Button>
                 </SignInButton>
                 <Link href="/pricing">
                   <Button>Get started</Button>

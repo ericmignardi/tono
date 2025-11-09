@@ -19,10 +19,14 @@ export default function HowItWorks() {
   return (
     <section
       id="how-it-works"
-      className="mx-auto flex max-w-6xl flex-col items-center justify-center gap-4 py-24"
+      className="mx-auto flex max-w-6xl flex-col items-center justify-center gap-16 py-32"
     >
-      <h2 className="text-3xl font-bold">How It Works</h2>
-      <p className="text-sm">Get the perfect tone in just three simple steps.</p>
+      <div className="flex flex-col items-center justify-center gap-2">
+        <h2 className="text-3xl font-bold">How It Works</h2>
+        <p className="text-muted-foreground text-sm">
+          Get the perfect tone in just three simple steps.
+        </p>
+      </div>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {steps.map(({ number, title, description }) => (
           <div key={title} className="flex flex-col items-center gap-2 p-4 text-center">

@@ -1,4 +1,5 @@
 import { Music2, Music3, Stars } from 'lucide-react';
+import FeatureCard from './FeatureCard';
 
 export default function Features() {
   const features = [
@@ -24,23 +25,18 @@ export default function Features() {
   return (
     <section
       id="features"
-      className="mx-auto flex max-w-6xl flex-col items-center justify-center gap-4 py-24"
+      className="mx-auto flex max-w-6xl flex-col items-center justify-center gap-16 py-24"
     >
-      <h2 className="text-3xl font-bold">Everything You Need in One Place</h2>
-      <p className="text-sm">
-        Our platform provides a seamless experience for finding, creating, and managing your guitar
-        tones.
-      </p>
+      <div className="flex flex-col items-center justify-center gap-2">
+        <h2 className="text-3xl font-bold">Everything You Need in One Place</h2>
+        <p className="text-muted-foreground text-sm">
+          Our platform provides a seamless experience for finding, creating, and managing your
+          guitar tones.
+        </p>
+      </div>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {features.map(({ Icon, title, description }) => (
-          <div
-            key={title}
-            className="border-border bg-primary-foreground flex flex-col gap-2 rounded-2xl border p-4 shadow-md"
-          >
-            <Icon className="text-primary" />
-            <h3 className="font-semibold">{title}</h3>
-            <p className="text-xs">{description}</p>
-          </div>
+        {features.map(({ Icon, title, description }, idx) => (
+          <FeatureCard key={idx} icon={Icon} title={title} description={description} />
         ))}
       </div>
     </section>

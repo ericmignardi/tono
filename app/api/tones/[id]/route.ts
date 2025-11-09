@@ -15,11 +15,11 @@ interface ToneUpdateBody {
   clipUrl?: string;
 }
 
-export async function GET(req: NextRequest, context: any) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const user = await currentUser();
   if (!user) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 
-  const id = context.params.id;
+  const { id } = await params;
 
   try {
     const tone = await prisma.tone.findFirst({
@@ -28,18 +28,18 @@ export async function GET(req: NextRequest, context: any) {
 
     if (!tone) return NextResponse.json({ message: 'Tone not found' }, { status: 404 });
 
-    return NextResponse.json({ message: 'Successfully fetched tone', tone });
+    return NextResponse.json({ message: 'Successfully fetched tone', tone }, { status: 200 });
   } catch (error) {
     console.error(`Failed to fetch tone ${id} for user ${user.id}:`, error);
     return NextResponse.json({ message: 'Failed to fetch tone' }, { status: 500 });
   }
 }
 
-export async function PUT(req: NextRequest, context: any) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const user = await currentUser();
   if (!user) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 
-  const id = context.params.id;
+  const { id } = await params;
   const body: ToneUpdateBody = await req.json();
 
   try {
@@ -131,18 +131,21 @@ export async function PUT(req: NextRequest, context: any) {
       },
     });
 
-    return NextResponse.json({ message: 'Successfully updated tone', tone: updatedTone });
+    return NextResponse.json(
+      { message: 'Successfully updated tone', tone: updatedTone },
+      { status: 200 }
+    );
   } catch (error) {
     console.error(`Failed to update tone ${id} for user ${user.id}:`, error);
     return NextResponse.json({ message: 'Failed to update tone' }, { status: 500 });
   }
 }
 
-export async function DELETE(req: NextRequest, context: any) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const user = await currentUser();
   if (!user) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 
-  const id = context.params.id;
+  const { id } = await params;
 
   try {
     const tone = await prisma.tone.findFirst({
@@ -152,7 +155,7 @@ export async function DELETE(req: NextRequest, context: any) {
 
     await prisma.tone.delete({ where: { id } });
 
-    return NextResponse.json({ message: 'Successfully deleted tone' });
+    return NextResponse.json({ message: 'Successfully deleted tone' }, { status: 204 });
   } catch (error) {
     console.error(`Failed to delete tone ${id} for user ${user.id}:`, error);
     return NextResponse.json({ message: 'Failed to delete tone' }, { status: 500 });
