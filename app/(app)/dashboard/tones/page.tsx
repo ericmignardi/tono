@@ -7,17 +7,21 @@ import { Button } from '@/components/ui/button';
 
 export default async function Tones() {
   const { userId } = await auth();
+
   if (!userId) {
     redirect('/sign-in');
   }
+
   const dbUser = await prisma.user.findUnique({
     where: { clerkId: userId },
     select: { id: true },
   });
+
   const tones = await prisma.tone.findMany({
     where: { userId: dbUser?.id },
     orderBy: { createdAt: 'desc' },
   });
+
   return (
     <section className="flex flex-col gap-4">
       <div className="flex justify-between">

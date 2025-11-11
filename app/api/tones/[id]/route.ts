@@ -162,11 +162,14 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     const tone = await prisma.tone.findFirst({
       where: { id, userId: user.id },
     });
+
     if (!tone) return NextResponse.json({ message: 'Tone not found' }, { status: 404 });
 
-    await prisma.tone.delete({ where: { id } });
+    await prisma.tone.delete({
+      where: { id },
+    });
 
-    return NextResponse.json({ message: 'Successfully deleted tone' }, { status: 204 });
+    return NextResponse.json({ message: 'Successfully deleted tone' }, { status: 200 });
   } catch (error) {
     console.error(`Failed to delete tone ${id} for user ${user.id}:`, error);
     return NextResponse.json({ message: 'Failed to delete tone' }, { status: 500 });

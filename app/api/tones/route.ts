@@ -161,3 +161,36 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+export async function GET(req: NextRequest) {
+  const user = await currentUser();
+  if (!user) {
+    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  }
+
+  try {
+    const dbUser = await prisma.user.findUnique({
+      where: { clerkId: user.id },
+    });
+
+    if (!dbUser) {
+      return NextResponse.json({ message: 'User not found in database' }, { status: 404 });
+    }
+
+    const tones = await prisma.tone.findMany({
+      where: { userId: dbUser.id },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return NextResponse.json({ message: 'Successfully fetched tones', tones }, { status: 200 });
+  } catch (error) {
+    console.error(`Failed to fetch tones for user ${user?.id}:`, error);
+    return NextResponse.json(
+      {
+        message: 'Failed to fetch tones',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 }
+    );
+  }
+}

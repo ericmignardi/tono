@@ -1,30 +1,72 @@
+'use client';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
-export default function ToneForm() {
-  const initialForm = {
-    name: '',
-    artist: '',
-    description: '',
-    guitar: '',
-    pickups: '',
-    strings: '',
-    amp: '',
+type FormValues = {
+  name: string;
+  artist: string;
+  description: string;
+  guitar: string;
+  pickups: string;
+  strings: string;
+  amp: string;
+};
+
+type Tone = {
+  id: string;
+  name: string;
+  artist: string;
+  description: string;
+  guitar: string;
+  pickups: string;
+  strings: string | null; // Changed to match Prisma schema
+  amp: string;
+  userId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  aiAmpSettings: any; // JsonValue from Prisma
+  aiNotes: string;
+};
+
+interface ToneFormProps {
+  tone?: Tone | null;
+}
+
+export default function ToneForm({ tone }: ToneFormProps) {
+  const router = useRouter();
+  const isEditing = !!tone;
+
+  const initialForm: FormValues = {
+    name: tone?.name || '',
+    artist: tone?.artist || '',
+    description: tone?.description || '',
+    guitar: tone?.guitar || '',
+    pickups: tone?.pickups || '',
+    strings: tone?.strings || '', // Handles null case with ||
+    amp: tone?.amp || '',
   };
 
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState(initialForm);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
 
     try {
-      const res = await fetch('/api/tones', {
-        method: 'POST',
+      const url = isEditing ? `/api/tones/${tone.id}` : '/api/tones';
+      const method = isEditing ? 'PUT' : 'POST';
+
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
@@ -32,29 +74,57 @@ export default function ToneForm() {
       const json = await res.json();
 
       if (res.ok) {
-        setFormData(initialForm);
+        if (isEditing) {
+          router.push('/dashboard/tones');
+          router.refresh();
+        } else {
+          setFormData(initialForm);
+        }
       } else {
-        console.error('Error sending OpenAI request');
+        console.error('Error sending request:', json.message);
       }
     } catch (err) {
       console.error(err);
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  const fields: Array<keyof FormValues> = [
+    'name',
+    'artist',
+    'description',
+    'guitar',
+    'pickups',
+    'strings',
+    'amp',
+  ];
+
   return (
-    <form onSubmit={handleSubmit}>
-      {Object.keys(initialForm).map((key) => (
-        <div key={key}>
-          <label htmlFor={key}>{key.charAt(0).toUpperCase() + key.slice(1)}</label>
-          <input
-            name={key}
-            id={key}
-            type="text"
-            value={formData[key as keyof typeof initialForm]}
+    <form onSubmit={onSubmit} className="flex flex-col gap-4">
+      {fields.map((fieldName) => (
+        <div key={fieldName} className="flex flex-col gap-2">
+          <Label htmlFor={fieldName}>
+            {fieldName.charAt(0).toUpperCase() + fieldName.slice(1)}
+          </Label>
+          <Input
+            id={fieldName}
+            name={fieldName}
+            value={formData[fieldName]}
             onChange={handleChange}
+            required
           />
         </div>
       ))}
-      <Button type="submit">Submit</Button>
+      <Button type="submit" disabled={isLoading}>
+        {isLoading
+          ? isEditing
+            ? 'Updating...'
+            : 'Creating...'
+          : isEditing
+            ? 'Update Tone'
+            : 'Create Tone'}
+      </Button>
     </form>
   );
 }

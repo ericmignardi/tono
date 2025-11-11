@@ -31,13 +31,12 @@ export default function Header() {
           variant="ghost"
           onClick={toggleTheme}
           aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-          className="h-9 w-9"
         >
           {mounted ? (
             isDark ? (
-              <Sun />
+              <Sun className="h-4 w-4" />
             ) : (
-              <Moon />
+              <Moon className="h-4 w-4" />
             )
           ) : (
             <div className="h-4 w-4" /> // Placeholder to prevent layout shift

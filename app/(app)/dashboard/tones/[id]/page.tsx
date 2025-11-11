@@ -2,11 +2,22 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { prisma } from '@/lib/database';
 import { auth } from '@clerk/nextjs/server';
 import { notFound, redirect } from 'next/navigation';
-import { formatDistanceToNow } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { Guitar, Zap, Settings, ArrowLeft, Brain } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { Guitar, Settings, Brain } from 'lucide-react';
+
+// Server action
+async function deleteTone(formData: FormData) {
+  'use server';
+
+  const id = formData.get('toneId') as string;
+
+  await prisma.tone.delete({
+    where: { id },
+  });
+
+  redirect('/dashboard/tones');
+}
 
 export default async function Tone({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -33,15 +44,21 @@ export default async function Tone({ params }: { params: Promise<{ id: string }>
     <section className="flex flex-col gap-6">
       {/* Header */}
       <div className="flex flex-col gap-4">
-        <div className="flex justify-between">
+        <div className="flex justify-between lg:items-start">
           <div className="flex flex-col gap-2">
             <h1 className="text-3xl font-bold tracking-tight lg:text-4xl">Tones</h1>
             <p className="text-muted-foreground">View your personal library of tones.</p>
           </div>
-          <div>
+          <div className="flex flex-col items-center gap-2 lg:flex-row">
             <Link href={`/dashboard/tones/${id}/edit`}>
               <Button>Edit Tone</Button>
             </Link>
+            <form action={deleteTone}>
+              <input type="hidden" name="toneId" value={id} />
+              <Button variant="destructive" type="submit">
+                Delete Tone
+              </Button>
+            </form>
           </div>
         </div>
       </div>
@@ -97,7 +114,7 @@ export default async function Tone({ params }: { params: Promise<{ id: string }>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
                 <Settings className="text-primary" />
-                Amp Settings
+                AI Amp Settings
               </CardTitle>
               <CardDescription>AI-recommended amplifier configuration</CardDescription>
             </CardHeader>

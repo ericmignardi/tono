@@ -10,26 +10,22 @@ import {
 } from '@/components/ui/table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { prisma } from '@/lib/database';
-
-const stats = [
-  { label: 'Total Tones', value: 42 },
-  { label: 'Favourites Saved', value: 18 },
-  { label: 'Tones Shared', value: 9 },
-] as const;
+import Link from 'next/link';
 
 export default async function Dashboard() {
   const user = await currentUser();
-
   const dbUser = await prisma.user.findUnique({
     where: { clerkId: user?.id },
   });
-
   const recentTones = await prisma.tone.findMany({
     where: { userId: dbUser?.id },
     orderBy: { createdAt: 'desc' },
     take: 5,
   });
-
+  const toneCount = await prisma.tone.count({
+    where: { userId: dbUser?.id },
+  });
+  const stats = [{ label: 'Total Tones', value: toneCount }];
   const firstName = user?.firstName || user?.fullName?.split(' ')[0] || 'there';
 
   return (
@@ -72,18 +68,18 @@ export default async function Dashboard() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {recentTones.map(({ name, artist, createdAt }, idx) => (
-                  <TableRow key={idx}>
+                {recentTones.map(({ name, artist, createdAt, id }, idx) => (
+                  <TableRow key={idx} className="hover:bg-accent/50 cursor-pointer">
                     <TableCell>
-                      <div className="flex items-center gap-3">
-                        <div className="bg-accent flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
-                          <ListMusic className="text-primary h-5 w-5" />
+                      <Link href={`/dashboard/tones/${id}`} className="flex items-center gap-3">
+                        <div className="bg-background flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
+                          <ListMusic className="text-primary" />
                         </div>
                         <div className="min-w-0 flex-1">
                           <h3 className="truncate font-medium">{name}</h3>
                           <p className="text-muted-foreground truncate text-sm">{artist}</p>
                         </div>
-                      </div>
+                      </Link>
                     </TableCell>
                     <TableCell className="text-right">
                       <span className="text-muted-foreground text-sm whitespace-nowrap">
