@@ -53,9 +53,9 @@ export default function Sidebar() {
 
       {/* Upgrade CTA */}
       <div className="p-4">
-        <Link href="/pricing" className="block">
-          <Button className="w-full cursor-pointer items-center justify-center" size="default">
-            <Gift className="h-4 w-4 lg:mr-2" />
+        <Link href="/pricing">
+          <Button className="flex w-full cursor-pointer items-center gap-2">
+            <Gift />
             <span className="hidden lg:inline">Upgrade</span>
           </Button>
         </Link>

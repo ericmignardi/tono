@@ -6,12 +6,11 @@ import { client } from '@/lib/openai';
 interface ToneUpdateBody {
   name?: string;
   artist?: string;
+  description?: string;
   guitar?: string;
   pickups?: string;
   strings?: string;
   amp?: string;
-  pedals?: any;
-  settings?: any;
   clipUrl?: string;
 }
 
@@ -49,56 +48,72 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     if (!tone) return NextResponse.json({ message: 'Tone not found' }, { status: 404 });
 
     const gearChanged =
+      body.description !== undefined ||
       body.guitar !== undefined ||
       body.pickups !== undefined ||
       body.strings !== undefined ||
-      body.amp !== undefined ||
-      body.pedals !== undefined;
+      body.amp !== undefined;
 
     let aiResult: any = {
-      ampSettings: body.settings ?? tone.settings,
-      pedalChain: body.pedals ?? tone.pedals,
       notes: tone.aiNotes ?? '',
     };
 
     if (gearChanged) {
+      const toneDescription = body.description ?? tone.description ?? 'Unknown Description';
       const artistSong = body.artist ?? tone.artist ?? 'Unknown Artist/Song';
       const guitarMakeModel = body.guitar ?? tone.guitar ?? 'Unknown Guitar';
       const ampMakeModel = body.amp ?? tone.amp ?? 'Unknown Amp';
       const pickupsDesc = body.pickups ?? tone.pickups ?? 'default';
       const stringsDesc = body.strings ?? tone.strings ?? 'default';
-      const pedalsDesc =
-        body.pedals && Array.isArray(body.pedals)
-          ? body.pedals.map((p: any) => p.name).join(', ')
-          : tone.pedals && Array.isArray(tone.pedals)
-            ? tone.pedals.map((p: any) => p.name).join(', ')
-            : 'none';
 
       const openAIResponse = await client.chat.completions.create({
         model: 'gpt-5',
         messages: [
           {
             role: 'system',
-            content: `
-              You are a professional guitar tone engineer.
-              Analyze a user's desired tone based on artist/song and gear (guitar, pickups, strings, amp, pedals) and return precise amp and pedal settings.
-              Output in JSON format:
-              {
-                "ampSettings": { "gain": number, "treble": number, "mid": number, "bass": number, "volume": number },
-                "pedalChain": [ { "name": string, "settings": object } ],
-                "notes": string
-              }
-              Keep explanations short and technical.`.trim(),
+            content: `You are a professional guitar tone engineer with deep knowledge of classic and modern guitar tones. Your job is to provide SPECIFIC, ACTIONABLE settings that can be directly applied to the equipment.
+                      Output ONLY valid JSON with this exact structure:
+                      {
+                        "ampSettings": {
+                          "gain": number (0-10, in 0.5 increments),
+                          "treble": number (0-10, in 0.5 increments),
+                          "mid": number (0-10, in 0.5 increments),
+                          "bass": number (0-10, in 0.5 increments),
+                          "volume": number (0-10, in 0.5 increments),
+                          "presence": number (0-10, in 0.5 increments, if applicable),
+                          "reverb": number (0-10, in 0.5 increments, if built-in)
+                        },
+                        "notes": string (2-3 sentences explaining WHY these settings work for this tone)
+                      }
+                      CRITICAL REQUIREMENTS:
+                      1. Analyze the ENTIRE gear setup: guitar model, pickup type (single-coil vs humbucker affects gain/EQ), string gauge, and amp characteristics
+                      2. Consider the tone description carefully - match the sonic characteristics (bright/dark, compressed/dynamic, clean/overdriven)
+                      3. For amp settings: Be specific with numbers. Consider how the amp model's characteristics (British vs American, tube vs solid-state) affect the settings
+                      4. Match pickup characteristics: humbuckers need less gain, single-coils may need more mid boost
+                      5. Base recommendations on documented settings from the artist when possible, but adapt to the specific gear provided
+
+                      Keep notes technical but concise - explain the key tonal decisions made.`,
           },
           {
             role: 'user',
-            content: `
-              Artist/Song: ${artistSong}
-              Guitar: ${guitarMakeModel}
-              Pickups: ${pickupsDesc}
-              Strings: ${stringsDesc}
-              Amp: ${ampMakeModel}
-              Pedals: ${pedalsDesc}`.trim(),
+            content: `Create a tone preset to match this sonic goal:
+
+                      TARGET TONE:
+                      Artist/Song Reference: ${artistSong}
+                      Tone Description: ${toneDescription ?? "Match the artist's signature sound"}
+
+                      AVAILABLE GEAR:
+                      Guitar: ${guitarMakeModel}
+                      Pickups: ${pickupsDesc}
+                      Strings: ${stringsDesc}
+                      Amp: ${ampMakeModel}
+
+                      INSTRUCTIONS:
+                      - Provide EXACT numeric settings for every amp knob
+                      - For each pedal used, specify settings for ALL relevant parameters (not just generic suggestions)
+                      - Ensure the pedal chain order is technically correct
+                      - Account for how THIS specific guitar and pickup combination will interact with the amp
+                      - If the available gear can't achieve the exact tone, get as close as possible and explain the compromise in notes`,
           },
         ],
       });
@@ -108,8 +123,6 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       } catch (err) {
         console.warn('Failed to parse AI response, storing raw text', err);
         aiResult = {
-          ampSettings: body.settings ?? tone.settings,
-          pedalChain: body.pedals ?? tone.pedals,
           notes: openAIResponse.choices?.[0]?.message?.content?.trim() ?? '',
         };
       }
@@ -124,9 +137,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         ...(body.pickups && { pickups: body.pickups }),
         ...(body.strings && { strings: body.strings }),
         ...(body.amp && { amp: body.amp }),
-        ...(body.clipUrl && { clipUrl: body.clipUrl }),
-        pedals: aiResult.pedalChain,
-        settings: aiResult.ampSettings,
+        aiAmpSettings: aiResult.ampSettings,
         aiNotes: aiResult.notes,
       },
     });

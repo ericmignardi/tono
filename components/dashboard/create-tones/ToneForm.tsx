@@ -10,8 +10,6 @@ export default function ToneForm() {
     pickups: '',
     strings: '',
     amp: '',
-    pedals: '',
-    settings: '',
   };
 
   const [formData, setFormData] = useState(initialForm);
