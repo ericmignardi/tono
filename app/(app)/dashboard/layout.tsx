@@ -6,15 +6,25 @@ import { redirect } from 'next/navigation';
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { userId } = await auth();
+
   if (!userId) {
-    redirect('/sign-in?redirect_url=/dashboard');
+    redirect('/sign-in');
   }
+
   return (
-    <div className="flex min-h-screen">
+    <div className="relative h-screen overflow-hidden">
+      {/* Sidebar - Fixed positioning */}
       <Sidebar />
-      <div className="flex w-full flex-col">
+
+      {/* Main content area - Uses margin to account for sidebar */}
+      <div className="ml-16 flex h-full flex-col lg:ml-64">
+        {/* Header - Sticky within the scrollable container */}
         <Header />
-        <main className="flex-1 overflow-y-auto">{children}</main>
+
+        {/* Main content - Scrollable */}
+        <main className="flex-1 overflow-y-auto">
+          <div className="container mx-auto p-6 lg:p-8">{children}</div>
+        </main>
       </div>
     </div>
   );

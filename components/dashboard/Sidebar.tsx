@@ -9,49 +9,57 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
-// TODO: Complete styling to preference
+const navItems = [
+  { href: '/dashboard', label: 'Home', icon: Home },
+  { href: '/dashboard/tones', label: 'Tones', icon: Music },
+  { href: '/dashboard/create-tone', label: 'Create Tone', icon: FileMusic },
+] as const;
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const navItems = [
-    { href: '/dashboard', label: 'Home', icon: Home },
-    { href: '/dashboard/tones', label: 'Tones', icon: Music },
-    { href: '/dashboard/create-tone', label: 'Create Tone', icon: FileMusic },
-  ];
+
   return (
-    <aside className="border-r-border sticky top-0 flex min-h-screen w-16 shrink-0 flex-col justify-start gap-8 border-r p-4 lg:w-64">
-      <div className="flex">
-        <Link href="/">
+    <aside className="border-r-border bg-background fixed inset-y-0 left-0 z-50 flex w-16 flex-col border-r lg:w-64">
+      {/* Logo */}
+      <div className="border-border flex h-16 items-center justify-center border-b px-4 lg:justify-start">
+        <Link href="/" className="flex items-center">
           <picture>
             <source media="(min-width: 1024px)" srcSet={logo.src} />
-            <Image src={logoMobile} alt="tonifier logo" className="w-32" />
+            <Image src={logoMobile} alt="Tonifier logo" className="h-8 w-auto" priority />
           </picture>
         </Link>
       </div>
-      <div className="flex flex-1 flex-col items-center gap-4 lg:items-stretch">
+
+      {/* Navigation */}
+      <nav className="flex flex-1 flex-col items-center gap-1 p-4 lg:items-start">
         {navItems.map(({ href, label, icon: Icon }) => {
           const isActive = pathname === href;
+
           return (
             <Link
               key={href}
               href={href}
               className={cn(
-                'flex items-center gap-2 rounded-md p-2 transition-colors',
-                isActive && 'bg-primary/20'
+                'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all',
+                isActive ? '' : 'text-muted-foreground'
               )}
             >
-              <Icon className="text-primary" />
-              <span className="hidden lg:flex">{label}</span>
+              <Icon className="text-primary h-5 w-5 shrink-0 transition-colors" />
+              <span className="hidden truncate lg:block">{label}</span>
             </Link>
           );
         })}
+      </nav>
+
+      {/* Upgrade CTA */}
+      <div className="p-4">
+        <Link href="/pricing" className="block">
+          <Button className="w-full cursor-pointer items-center justify-center" size="default">
+            <Gift className="h-4 w-4 lg:mr-2" />
+            <span className="hidden lg:inline">Upgrade</span>
+          </Button>
+        </Link>
       </div>
-      <Link href="/pricing">
-        <Button className="w-full" aria-label="Upgrade">
-          <span className="hidden lg:inline">Upgrade</span>
-          <Gift className="inline lg:hidden" />
-        </Button>
-      </Link>
     </aside>
   );
 }

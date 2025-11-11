@@ -47,7 +47,6 @@ model Tone {
   amp          String
   pedals       Json        // user-selected pedals
   settings     Json        // user-selected settings
-  clipUrl      String?     // optional audio clip URL
   aiAmpSettings Json?      // AI-recommended amp settings
   aiPedalChain  Json?      // AI-recommended pedal chain
   aiNotes      String?     // AI notes

@@ -22,14 +22,12 @@ export default function Features() {
         'Save, organize, and access all your favourite and custom-created tones from any device, anytime.',
     },
   ];
+
   return (
-    <section
-      id="features"
-      className="mx-auto flex max-w-6xl flex-col items-center justify-center gap-16 py-24"
-    >
+    <section id="features" className="section">
       <div className="flex flex-col items-center justify-center gap-2">
         <h2 className="text-3xl font-bold">Everything You Need in One Place</h2>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-muted-foreground text-base">
           Our platform provides a seamless experience for finding, creating, and managing your
           guitar tones.
         </p>

@@ -3,14 +3,13 @@ import { CheckCircle } from 'lucide-react';
 
 export default function Tiers() {
   return (
-    <section
-      id="tiers"
-      className="mx-auto flex max-w-6xl flex-col items-center justify-center gap-4 py-24"
-    >
-      <h2 className="text-3xl font-bold">Find Your Perfect Tone.</h2>
-      <p className="text-sm">
-        Choose the plan that fits your journey, from casual jamming to professional tone chasing.
-      </p>
+    <section id="tiers" className="section">
+      <div className="flex flex-col items-center justify-center gap-2">
+        <h2 className="text-3xl font-bold">Find Your Perfect Tone.</h2>
+        <p className="text-muted-foreground text-base">
+          Choose the plan that fits your journey, from casual jamming to professional tone chasing.
+        </p>
+      </div>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {[
           {
@@ -37,14 +36,15 @@ export default function Tiers() {
           },
         ].map((tier) => {
           const cardClass = tier.isFeatured
-            ? 'border-primary bg-primary-foreground flex flex-col gap-4 rounded-2xl border p-4 shadow-md'
-            : 'border-border bg-primary-foreground flex flex-col gap-4 rounded-2xl border p-4 shadow-md';
+            ? 'flex flex-col gap-4 rounded-2xl border border-primary p-4 shadow-md'
+            : 'flex flex-col gap-4 rounded-2xl border border-border p-4 shadow-md';
           return (
             <div key={tier.name} className={cardClass}>
               <div>
-                <p className="text-lg font-semibold">{tier.name}</p>
-                <p className="text-2xl font-bold">
-                  ${tier.price} <span className="text-base font-normal">/mo</span>
+                <p className="text-foreground text-lg font-semibold">{tier.name}</p>
+                <p className="text-foreground text-3xl font-bold">
+                  ${tier.price}{' '}
+                  <span className="text-muted-foreground text-sm font-normal">/mo</span>
                 </p>
               </div>
               <Button {...(tier.isFeatured ? {} : { variant: 'outline' })}>{tier.cta}</Button>
@@ -53,7 +53,7 @@ export default function Tiers() {
                   {tier.features.map((feature) => (
                     <div key={feature} className="flex items-center gap-1">
                       <CheckCircle className="text-primary size-4" />
-                      <li className="text-sm">{feature}</li>
+                      <li className="text-foreground text-sm">{feature}</li>
                     </div>
                   ))}
                 </ul>

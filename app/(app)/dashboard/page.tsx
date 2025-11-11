@@ -8,90 +8,95 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { prisma } from '@/lib/database';
 
-// TODO: Implement API Route or Server Component/Server Action for retrieving Tones
+const stats = [
+  { label: 'Total Tones', value: 42 },
+  { label: 'Favourites Saved', value: 18 },
+  { label: 'Tones Shared', value: 9 },
+] as const;
 
 export default async function Dashboard() {
   const user = await currentUser();
 
-  const activityLog = [
-    {
-      title: 'Tone Created: "Plexi Crunch"',
-      description: 'A new high-gain sound was added to your library.',
-      time: '2 hours ago',
-    },
-    {
-      title: 'Tone Created: "Plexi Crunch"',
-      description: 'A new high-gain sound was added to your library.',
-      time: '2 hours ago',
-    },
-    {
-      title: 'Tone Created: "Plexi Crunch"',
-      description: 'A new high-gain sound was added to your library.',
-      time: '2 hours ago',
-    },
-    {
-      title: 'Tone Created: "Plexi Crunch"',
-      description: 'A new high-gain sound was added to your library.',
-      time: '2 hours ago',
-    },
-    {
-      title: 'Tone Created: "Plexi Crunch"',
-      description: 'A new high-gain sound was added to your library.',
-      time: '2 hours ago',
-    },
-  ];
+  const dbUser = await prisma.user.findUnique({
+    where: { clerkId: user?.id },
+  });
+
+  const recentTones = await prisma.tone.findMany({
+    where: { userId: dbUser?.id },
+    orderBy: { createdAt: 'desc' },
+    take: 5,
+  });
+
+  const firstName = user?.firstName || user?.fullName?.split(' ')[0] || 'there';
 
   return (
-    <section className="h-full border border-red-500 p-8">
-      <div className="flex flex-col gap-8">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-4xl font-bold">Welcome back, {user?.fullName}!</h1>
-          <p>Here's a quick overview of your tone profile.</p>
-        </div>
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
-          {[
-            { label: 'Total Tones', value: 42 },
-            { label: 'Favourites Saved', value: 18 },
-            { label: 'Tones Shared', value: 9 },
-          ].map(({ label, value }) => (
-            <div key={label} className="border-border rounded-2xl border p-4">
-              <p className="text-muted-foreground text-sm">{label}</p>
-              <span className="text-primary text-2xl font-semibold">{value}</span>
-            </div>
-          ))}
-        </div>
-        <div className="border-border flex flex-col gap-2 rounded-2xl border p-4">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Activity</TableHead>
-                <TableHead className="text-right">Time</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {activityLog.map(({ title, description, time }, idx) => (
-                <TableRow key={idx}>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <div className="bg-accent-foreground rounded-lg p-2">
-                        <ListMusic className="text-primary" />
-                      </div>
-                      <div className="flex flex-col">
-                        <h3>{title}</h3>
-                        <p className="text-muted-foreground text-sm">{description}</p>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <p className="text-sm">{time}</p>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+    <div className="section">
+      {/* Header Section */}
+      <div className="flex flex-col gap-2">
+        <h1 className="text-3xl font-bold tracking-tight lg:text-4xl">
+          Welcome back, {firstName}!
+        </h1>
+        <p className="text-muted-foreground">Here's a quick overview of your tone profile.</p>
       </div>
-    </section>
+
+      {/* Stats */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {stats.map(({ label, value }) => (
+          <Card key={label}>
+            <CardHeader>
+              <CardDescription>{label}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-primary text-2xl font-bold">{value}</div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Recent Tones */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Recent Tones</CardTitle>
+          <CardDescription>Your latest tone creations and modifications</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Tone</TableHead>
+                  <TableHead className="text-right">Created At</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {recentTones.map(({ name, artist, createdAt }, idx) => (
+                  <TableRow key={idx}>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <div className="bg-accent flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
+                          <ListMusic className="text-primary h-5 w-5" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <h3 className="truncate font-medium">{name}</h3>
+                          <p className="text-muted-foreground truncate text-sm">{artist}</p>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <span className="text-muted-foreground text-sm whitespace-nowrap">
+                        {new Date(createdAt).toLocaleDateString()}
+                      </span>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

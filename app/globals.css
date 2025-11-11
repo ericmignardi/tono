@@ -123,3 +123,12 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .heroSection {
+    @apply flex flex-1 flex-col items-start justify-center gap-4 py-64 lg:items-center;
+  }
+  .section {
+    @apply mx-auto flex max-w-6xl flex-col items-center justify-center gap-16 py-24;
+  }
+}

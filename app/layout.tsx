@@ -11,7 +11,7 @@ const interSans = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'tonifier – Find Any Guitar Tone, Instantly',
+  title: 'tonifier – Find Any Guitar Tone, Instantly.',
   description:
     'Use AI to recreate signature guitar tones or craft your own. Generate, tweak, and save tones in seconds.',
 };

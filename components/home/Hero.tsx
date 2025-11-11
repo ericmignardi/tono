@@ -3,18 +3,12 @@ import { SignedOut, SignInButton, SignUpButton } from '@clerk/nextjs';
 
 export default function Hero() {
   return (
-    <section
-      id="hero"
-      className="flex flex-1 flex-col items-start justify-center gap-4 py-64 lg:items-center"
-    >
-      <h1 className="text-7xl font-black">
+    <section id="hero" className="heroSection">
+      <h1 className="text-5xl font-bold lg:text-6xl">
         Find Any Guitar <br />
-        <span className="from-accent via-foreground to-primary bg-linear-to-r bg-clip-text text-transparent shadow-2xl">
-          Tone
-        </span>
-        , Instantly.
+        <span className="text-primary">Tone</span>, Instantly.
       </h1>
-      <p className="text-muted-foreground">
+      <p className="text-muted-foreground text-lg">
         Use AI to recreate the signature sounds of your favourite artists or craft your own unique
         tone
       </p>

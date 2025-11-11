@@ -1,5 +1,11 @@
+'use client';
+
+import ToneForm from '@/components/dashboard/create-tones/ToneForm';
+
 export default function CreateTone() {
-  return <section>CreateTone</section>;
+  return (
+    <section>
+      <ToneForm />
+    </section>
+  );
 }
-
-

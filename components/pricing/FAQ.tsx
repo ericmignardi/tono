@@ -1,5 +1,4 @@
 'use client';
-
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
@@ -30,27 +29,28 @@ export default function FAQ() {
   };
 
   return (
-    <section
-      id="faq"
-      className="mx-auto flex max-w-6xl flex-col items-center justify-center gap-4 py-24"
-    >
-      <h2 className="text-3xl font-bold">Frequently Asked Questions</h2>
-      <p className="text-sm">Find answers to common questions about tonifier plans.</p>
+    <section id="faq" className="section">
+      <div className="flex flex-col items-center justify-center gap-2">
+        <h2 className="text-3xl font-bold">Frequently Asked Questions</h2>
+        <p className="text-muted-foreground text-base">
+          Find answers to common questions about tonifier plans.
+        </p>
+      </div>
       <div className="flex flex-col gap-4">
         {faqs.map((faq, index) => (
           <div
             key={faq.question}
-            className="bg-primary-foreground border-border flex flex-col gap-2 rounded-2xl border p-4 shadow-md"
+            className="border-border flex flex-col gap-2 rounded-2xl border p-4 shadow-md"
           >
             <div className="flex items-center justify-between">
-              <p>{faq.question}</p>
-              <Button onClick={() => toggleFaq(index)}>
+              <p className="text-foreground text-base font-semibold">{faq.question}</p>
+              <Button onClick={() => toggleFaq(index)} variant="ghost" size="icon">
                 {!openStates[index] ? <ChevronDown /> : <ChevronUp />}
               </Button>
             </div>
             {openStates[index] && (
               <div className="flex flex-col gap-4">
-                <p className="text-muted-foreground text-sm">{faq.answer}</p>
+                <p className="text-foreground text-sm">{faq.answer}</p>
               </div>
             )}
           </div>

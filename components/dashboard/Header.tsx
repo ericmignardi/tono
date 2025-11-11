@@ -6,23 +6,44 @@ import { useEffect, useState } from 'react';
 import { Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
 
-// TODO: Implement additional features or routes
-
 export default function Header() {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const isDark = mounted ? resolvedTheme === 'dark' : false;
-  const toggleDarkMode = () => setTheme(isDark ? 'light' : 'dark');
+
+  const toggleTheme = () => {
+    setTheme(isDark ? 'light' : 'dark');
+  };
 
   return (
-    <header className="border-b-border sticky top-0 z-10 border-b p-4">
-      <nav className="flex items-center justify-end gap-2">
-        <Button className="cursor-pointer" variant="ghost" onClick={toggleDarkMode}>
-          {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+    <header className="border-b-border bg-background sticky top-0 z-40 flex h-16 items-center justify-between border-b p-4 backdrop-blur">
+      {/* Left side - Can add breadcrumbs or page title here */}
+      <div className="flex items-center gap-4">{/* Reserved for breadcrumbs or search */}</div>
+
+      {/* Right side - Actions */}
+      <nav className="flex items-center gap-2">
+        <Button
+          variant="ghost"
+          onClick={toggleTheme}
+          aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+          className="h-9 w-9"
+        >
+          {mounted ? (
+            isDark ? (
+              <Sun />
+            ) : (
+              <Moon />
+            )
+          ) : (
+            <div className="h-4 w-4" /> // Placeholder to prevent layout shift
+          )}
         </Button>
+
         <SignedIn>
           <UserButton />
         </SignedIn>

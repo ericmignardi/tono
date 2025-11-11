@@ -1,5 +1,4 @@
 'use client';
-
 import Link from 'next/link';
 import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from '@clerk/nextjs';
 import { Button } from '@/components/ui/button';
@@ -11,13 +10,15 @@ export default function Header() {
 
   return (
     <header className="border-b-border fixed top-0 right-0 left-0 z-50 border-b shadow-sm backdrop-blur-2xl">
-      <div className="flex items-center justify-between p-4">
+      <div className="relative flex items-center justify-between p-4">
         <Link href="/">
-          <h1 className="text-2xl font-bold italic">tonifier</h1>
+          <h1 className="text-xl font-bold italic">tonifier</h1>
         </Link>
         <nav className="hidden items-center justify-between gap-4 lg:flex">
           <SignedOut>
-            <Link href="/pricing">Pricing</Link>
+            <Link href="/pricing" className="hover:text-primary text-sm font-medium">
+              Pricing
+            </Link>
             <SignUpButton>
               <Button variant={'outline'}>Sign up</Button>
             </SignUpButton>
@@ -25,7 +26,6 @@ export default function Header() {
               <Button>Sign in</Button>
             </SignInButton>
           </SignedOut>
-
           <SignedIn>
             <UserButton />
           </SignedIn>
@@ -41,23 +41,24 @@ export default function Header() {
           <>
             {/* Backdrop */}
             <div
-              className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+              className="fixed inset-0 z-50 bg-black/50 lg:hidden"
               onClick={() => setMobileMenu(false)}
             />
             {/* Mobile menu */}
-            <nav className="bg-primary-foreground fixed top-0 right-0 z-50 flex h-screen w-[80%] flex-col items-center gap-4 p-6 pt-20 lg:hidden">
+            <nav className="bg-background fixed top-0 right-0 z-60 flex h-screen w-[80%] flex-col gap-4 border border-red-500 p-6 pt-20 lg:hidden">
               <SignedOut>
+                <Link href="/pricing" className="hover:text-primary text-sm font-medium">
+                  Pricing
+                </Link>
                 <SignUpButton>
-                  <Button variant={'ghost'}>Sign up</Button>
+                  <Button variant={'outline'} className="text-base">
+                    Sign up
+                  </Button>
                 </SignUpButton>
                 <SignInButton>
-                  <Button variant="ghost">Sign in</Button>
+                  <Button className="text-base">Sign in</Button>
                 </SignInButton>
-                <Link href="/pricing">
-                  <Button>Get started</Button>
-                </Link>
               </SignedOut>
-
               <SignedIn>
                 <UserButton />
               </SignedIn>

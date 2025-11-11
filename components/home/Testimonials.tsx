@@ -27,19 +27,19 @@ export default function Testimonials() {
       alt: 'Casey Williams profile picture',
     },
   ];
+
   return (
-    <section
-      id="testimonials"
-      className="mx-auto flex max-w-6xl flex-col items-center justify-center gap-4 py-24"
-    >
-      <h2 className="text-3xl font-bold">Loved By Guitarists Worldwide</h2>
+    <section id="testimonials" className="section">
+      <div className="flex flex-col items-center justify-center gap-2">
+        <h2 className="text-3xl font-bold">Loved By Guitarists Worldwide</h2>
+      </div>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {testimonials.map(({ quote, name, role, imageUrl, alt }) => (
           <div
             key={name}
-            className="border-border bg-primary-foreground flex flex-col gap-2 rounded-2xl border p-4 shadow-md"
+            className="border-border flex flex-col gap-2 rounded-2xl border p-4 shadow-2xl"
           >
-            <p className="text-sm">{quote}</p>
+            <p className="text-foreground text-base">{quote}</p>
             <div className="flex items-center gap-2">
               <Image
                 className="rounded-full object-contain"
@@ -49,8 +49,8 @@ export default function Testimonials() {
                 alt={alt}
               />
               <div>
-                <p className="font-semibold">{name}</p>
-                <p className="text-xs">{role}</p>
+                <p className="text-sm font-semibold">{name}</p>
+                <p className="text-muted-foreground text-xs">{role}</p>
               </div>
             </div>
           </div>
