@@ -7,14 +7,12 @@ type ToneCardProps = {
 
 export default function ToneCard({ tone }: ToneCardProps) {
   return (
-    <Card>
+    <Card className="flex flex-col gap-0 shadow-xl transition-transform hover:-translate-y-1">
       <CardHeader>
         <CardTitle>{tone.name}</CardTitle>
-        {tone.description && <CardDescription>{tone.description}</CardDescription>}
+        <CardDescription>{tone.description}</CardDescription>
       </CardHeader>
-      <CardContent>
-        <div>Created {new Date(tone.createdAt).toLocaleDateString()}</div>
-      </CardContent>
+      <CardContent></CardContent>
     </Card>
   );
 }

@@ -7,12 +7,11 @@ import { revalidatePath } from 'next/cache';
 interface ToneCreateBody {
   name?: string;
   artist?: string;
+  description?: string;
   guitar?: string;
   pickups?: string;
   strings?: string;
   amp?: string;
-  pedals?: any;
-  settings?: any;
 }
 
 interface AIToneResult {
@@ -23,11 +22,6 @@ interface AIToneResult {
     bass: number;
     volume: number;
   };
-  pedalChain: Array<{
-    name: string;
-    type?: string;
-    settings: Record<string, any>;
-  }>;
   notes: string;
 }
 
@@ -47,21 +41,17 @@ export async function POST(req: NextRequest) {
     }
 
     const body: ToneCreateBody = await req.json();
-    const { name, artist, guitar, pickups, strings, amp, pedals, settings } = body;
+    const { name, artist, description, guitar, pickups, strings, amp } = body;
 
     // TODO: Add validation
 
+    const toneDescription = description ?? 'Unknown Description';
     const artistSong = artist ?? 'Unknown Artist/Song';
     const guitarMakeModel = guitar ?? 'Unknown Guitar';
     const ampMakeModel = amp ?? 'Unknown Amp';
-    const pedalsDescription =
-      pedals && Array.isArray(pedals) && pedals.length > 0
-        ? pedals.map((p) => p.name || p).join(', ')
-        : 'none';
 
     let aiResult: AIToneResult = {
       ampSettings: { gain: 5, treble: 5, mid: 5, bass: 5, volume: 5 },
-      pedalChain: [],
       notes: 'Default settings applied',
     };
 
@@ -73,47 +63,48 @@ export async function POST(req: NextRequest) {
         messages: [
           {
             role: 'system',
-            content: `You are a professional guitar tone engineer. Analyze the gear and suggest optimal settings to achieve the desired tone.
+            content: `You are a professional guitar tone engineer with deep knowledge of classic and modern guitar tones. Your job is to provide SPECIFIC, ACTIONABLE settings that can be directly applied to the equipment.
                       Output ONLY valid JSON with this exact structure:
                       {
                         "ampSettings": {
-                          "gain": number (0-10),
-                          "treble": number (0-10),
-                          "mid": number (0-10),
-                          "bass": number (0-10),
-                          "volume": number (0-10)
+                          "gain": number (0-10, in 0.5 increments),
+                          "treble": number (0-10, in 0.5 increments),
+                          "mid": number (0-10, in 0.5 increments),
+                          "bass": number (0-10, in 0.5 increments),
+                          "volume": number (0-10, in 0.5 increments),
+                          "presence": number (0-10, in 0.5 increments, if applicable),
+                          "reverb": number (0-10, in 0.5 increments, if built-in)
                         },
-                        "pedalChain": [
-                          {
-                            "name": string,
-                            "type": string (e.g., "overdrive", "delay", "reverb", "chorus"),
-                            "settings": { "paramName": value }
-                          }
-                        ],
-                        "notes": string (brief technical explanation of the tone and settings)
+                        "notes": string (2-3 sentences explaining WHY these settings work for this tone)
                       }
-                      Base your recommendations on:
-                      - The artist's known tone characteristics
-                      - The specific gear provided (guitar, pickups, amp)
-                      - Proper signal chain order for pedals
-                      - Realistic and achievable settings
-                      Keep notes concise and technical.`,
+
+                      CRITICAL REQUIREMENTS:
+                      1. Analyze the ENTIRE gear setup: guitar model, pickup type (single-coil vs humbucker affects gain/EQ), string gauge, and amp characteristics
+                      2. Consider the tone description carefully - match the sonic characteristics (bright/dark, compressed/dynamic, clean/overdriven)
+                      3. For amp settings: Be specific with numbers. Consider how the amp model's characteristics (British vs American, tube vs solid-state) affect the settings
+                      4. Match pickup characteristics: humbuckers need less gain, single-coils may need more mid boost
+                      5. Base recommendations on documented settings from the artist when possible, but adapt to the specific gear provided
+
+                      Keep notes technical but concise - explain the key tonal decisions made.`,
           },
           {
             role: 'user',
-            content: `Create a tone preset for:
-                      Artist/Song: ${artistSong}
+            content: `Create a tone preset to match this sonic goal:
+
+                      TARGET TONE:
+                      Artist/Song Reference: ${artistSong}
+                      Tone Description: ${toneDescription ?? "Match the artist's signature sound"}
+
+                      AVAILABLE GEAR:
                       Guitar: ${guitarMakeModel}
                       Pickups: ${pickups ?? 'stock pickups'}
                       Strings: ${strings ?? 'standard gauge (.010-.046)'}
                       Amp: ${ampMakeModel}
-                      Available Pedals: ${pedalsDescription}
-                      ${
-                        pedals && Array.isArray(pedals) && pedals.length > 0
-                          ? `Pedal details: ${JSON.stringify(pedals)}`
-                          : 'Suggest a pedal chain if appropriate for this tone.'
-                      }
-                      Provide specific amp settings and pedal configuration to achieve this tone.`,
+
+                      INSTRUCTIONS:
+                      - Provide EXACT numeric settings for every amp knob
+                      - Account for how THIS specific guitar and pickup combination will interact with the amp
+                      - If the available gear can't achieve the exact tone, get as close as possible and explain the compromise in notes`,
           },
         ],
       });
@@ -129,7 +120,6 @@ export async function POST(req: NextRequest) {
         const parsed = JSON.parse(aiContent);
         aiResult = {
           ampSettings: parsed.ampSettings || aiResult.ampSettings,
-          pedalChain: parsed.pedalChain || aiResult.pedalChain,
           notes: parsed.notes || aiResult.notes,
         };
       } catch (parseErr) {
@@ -147,13 +137,12 @@ export async function POST(req: NextRequest) {
         userId: dbUser.id,
         name: name ?? `${artistSong} Tone`,
         artist: artist ?? '',
+        description: description ?? '',
         guitar: guitar ?? '',
         pickups: pickups ?? '',
         strings: strings ?? '',
         amp: amp ?? '',
-        pedals: aiResult.pedalChain.length > 0 ? aiResult.pedalChain : (pedals ?? []),
-        settings:
-          Object.keys(aiResult.ampSettings).length > 0 ? aiResult.ampSettings : (settings ?? {}),
+        aiAmpSettings: aiResult.ampSettings ?? {},
         aiNotes: aiResult.notes ?? '',
       },
     });

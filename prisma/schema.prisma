@@ -40,16 +40,13 @@ model Tone {
   userId       String
   name         String
   artist       String
-  description  String?
+  description  String
   guitar       String
-  pickups      String?
+  pickups      String
   strings      String?
   amp          String
-  pedals       Json        // user-selected pedals
-  settings     Json        // user-selected settings
-  aiAmpSettings Json?      // AI-recommended amp settings
-  aiPedalChain  Json?      // AI-recommended pedal chain
-  aiNotes      String?     // AI notes
+  aiAmpSettings Json
+  aiNotes      String
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }

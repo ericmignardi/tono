@@ -33,7 +33,7 @@ export default async function Dashboard() {
   const firstName = user?.firstName || user?.fullName?.split(' ')[0] || 'there';
 
   return (
-    <div className="section">
+    <section className="flex flex-col gap-4">
       {/* Header Section */}
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold tracking-tight lg:text-4xl">
@@ -97,6 +97,6 @@ export default async function Dashboard() {
           </div>
         </CardContent>
       </Card>
-    </div>
+    </section>
   );
 }
