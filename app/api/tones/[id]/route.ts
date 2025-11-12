@@ -5,31 +5,8 @@ import { revalidatePath } from 'next/cache';
 import { regenerateToneSettings } from '@/lib/services/openai/toneAiService';
 import type { AmpSettings, AIToneResult } from '@/lib/services/openai/toneAiService';
 import { toneRateLimit } from '@/lib/rateLimit';
-import { z } from 'zod';
-
-const ToneUpdateSchema = z.object({
-  name: z.string().trim().min(1, 'Name is required').optional(),
-  artist: z.string().trim().min(1, 'Artist is required').optional(),
-  description: z.string().trim().min(1, 'Description is required').optional(),
-  guitar: z.string().trim().min(1, 'Guitar is required').optional(),
-  pickups: z.string().trim().min(1, 'Pickups are required').optional(),
-  strings: z
-    .string()
-    .optional()
-    .default('.010–.046')
-    .transform((str) => str?.trim() || '.010–.046'),
-  amp: z.string().trim().min(1, 'Amp is required').optional(),
-});
-
-interface ToneUpdateBody {
-  name?: string;
-  artist?: string;
-  description?: string;
-  guitar?: string;
-  pickups?: string;
-  strings?: string;
-  amp?: string;
-}
+import { ToneUpdateSchema } from '@/utils/validation/toneValidation';
+import { ToneUpdateBody } from '@/types/toneValidationTypes';
 
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
   const user = await currentUser();

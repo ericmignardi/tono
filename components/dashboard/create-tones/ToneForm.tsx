@@ -4,38 +4,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { FormValues } from '@/types/toneTypes';
+import { Tone } from '@prisma/client';
 
-type FormValues = {
-  name: string;
-  artist: string;
-  description: string;
-  guitar: string;
-  pickups: string;
-  strings: string;
-  amp: string;
-};
-
-type Tone = {
-  id: string;
-  name: string;
-  artist: string;
-  description: string;
-  guitar: string;
-  pickups: string;
-  strings: string | null; // Changed to match Prisma schema
-  amp: string;
-  userId: string;
-  createdAt: Date;
-  updatedAt: Date;
-  aiAmpSettings: any; // JsonValue from Prisma
-  aiNotes: string;
-};
-
-interface ToneFormProps {
-  tone?: Tone | null;
-}
-
-export default function ToneForm({ tone }: ToneFormProps) {
+export default function ToneForm({ tone }: { tone?: Tone | null }) {
   const router = useRouter();
   const isEditing = !!tone;
 
@@ -45,7 +17,7 @@ export default function ToneForm({ tone }: ToneFormProps) {
     description: tone?.description || '',
     guitar: tone?.guitar || '',
     pickups: tone?.pickups || '',
-    strings: tone?.strings || '', // Handles null case with ||
+    strings: tone?.strings || '',
     amp: tone?.amp || '',
   };
 

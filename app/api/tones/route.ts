@@ -4,39 +4,9 @@ import { currentUser } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
 import { generateToneSettings } from '@/lib/services/openai/toneAiService';
 import { toneRateLimit } from '@/lib/rateLimit';
-import { z } from 'zod';
+import { ToneCreateSchema, ToneQuerySchema } from '@/utils/validation/toneValidation';
+import { ToneCreateBody } from '@/types/toneValidationTypes';
 
-// ----- Validation Schemas -----
-const ToneCreateSchema = z.object({
-  name: z.string().trim().min(1, 'Name is required'),
-  artist: z.string().trim().min(1, 'Artist is required'),
-  description: z.string().trim().min(1, 'Description is required'),
-  guitar: z.string().trim().min(1, 'Guitar is required'),
-  pickups: z.string().trim().min(1, 'Pickups are required'),
-  strings: z
-    .string()
-    .optional()
-    .default('.010–.046')
-    .transform((str) => str?.trim() || '.010–.046'),
-  amp: z.string().trim().min(1, 'Amp is required'),
-});
-
-const ToneQuerySchema = z.object({
-  page: z.string().optional().default('1'),
-  limit: z.string().optional().default('20'),
-});
-
-interface ToneCreateBody {
-  name: string;
-  artist: string;
-  description: string;
-  guitar: string;
-  pickups: string;
-  strings?: string;
-  amp: string;
-}
-
-// ----- POST: Create Tone -----
 export async function POST(req: NextRequest) {
   const user = await currentUser();
   if (!user) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
@@ -44,7 +14,10 @@ export async function POST(req: NextRequest) {
   const { success } = await toneRateLimit.limit(user.id);
   if (!success) return NextResponse.json({ message: 'Rate limit exceeded' }, { status: 429 });
 
-  const dbUser = await prisma.user.findUnique({ where: { clerkId: user.id } });
+  const dbUser = await prisma.user.findUnique({
+    where: { clerkId: user.id },
+    select: { id: true },
+  });
   if (!dbUser) return NextResponse.json({ message: 'User not found' }, { status: 404 });
 
   try {
@@ -57,8 +30,6 @@ export async function POST(req: NextRequest) {
       );
 
     const { name, artist, description, guitar, pickups, strings, amp } = parsed.data;
-
-    console.info(`[Tones POST] User ${user.id} creating a tone`);
 
     const aiResult = await generateToneSettings({
       artist,
@@ -99,7 +70,6 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// ----- GET: List Tones with Pagination -----
 export async function GET(req: NextRequest) {
   const user = await currentUser();
   if (!user) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
@@ -107,7 +77,10 @@ export async function GET(req: NextRequest) {
   const { success } = await toneRateLimit.limit(user.id);
   if (!success) return NextResponse.json({ message: 'Rate limit exceeded' }, { status: 429 });
 
-  const dbUser = await prisma.user.findUnique({ where: { clerkId: user.id } });
+  const dbUser = await prisma.user.findUnique({
+    where: { clerkId: user.id },
+    select: { id: true },
+  });
   if (!dbUser) return NextResponse.json({ message: 'User not found' }, { status: 404 });
 
   try {
@@ -118,8 +91,6 @@ export async function GET(req: NextRequest) {
 
     const page = Math.max(1, parseInt(queryParsed.page, 10));
     const limit = Math.min(100, Math.max(1, parseInt(queryParsed.limit, 10)));
-
-    console.info(`[Tones GET] User ${user.id} fetching tones (page ${page}, limit ${limit})`);
 
     const [tones, total] = await Promise.all([
       prisma.tone.findMany({

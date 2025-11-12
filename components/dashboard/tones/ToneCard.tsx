@@ -1,11 +1,7 @@
-import { Tone } from '@prisma/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tone } from '@prisma/client';
 
-type ToneCardProps = {
-  tone: Tone;
-};
-
-export default function ToneCard({ tone }: ToneCardProps) {
+export default function ToneCard({ tone }: { tone: Tone }) {
   return (
     <Card className="flex flex-col gap-0 shadow-xl transition-transform hover:-translate-y-1">
       <CardHeader>
