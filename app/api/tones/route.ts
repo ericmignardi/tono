@@ -3,6 +3,7 @@ import { prisma } from '@/lib/database';
 import { currentUser } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
 import { generateToneSettings } from '@/lib/services/toneAiService';
+import { toneRateLimit } from '@/lib/rateLimit';
 
 interface ToneCreateBody {
   name: string;
@@ -31,6 +32,11 @@ export async function POST(req: NextRequest) {
 
     const body: ToneCreateBody = await req.json();
     const { name, artist, description, guitar, pickups, strings, amp } = body;
+
+    const { success } = await toneRateLimit.limit(user.id);
+    if (!success) {
+      return NextResponse.json({ message: 'Rate limit exceeded' }, { status: 429 });
+    }
 
     const aiResult = await generateToneSettings({
       artist,

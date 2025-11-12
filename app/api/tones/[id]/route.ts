@@ -4,6 +4,7 @@ import { currentUser } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
 import { regenerateToneSettings } from '@/lib/services/toneAiService';
 import type { AmpSettings, AIToneResult } from '@/lib/services/toneAiService';
+import { toneRateLimit } from '@/lib/rateLimit';
 
 interface ToneUpdateBody {
   name?: string;
@@ -13,7 +14,6 @@ interface ToneUpdateBody {
   pickups?: string;
   strings?: string;
   amp?: string;
-  clipUrl?: string;
 }
 
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
@@ -88,6 +88,11 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       },
       notes: tone.aiNotes ?? '',
     };
+
+    const { success } = await toneRateLimit.limit(user.id);
+    if (!success) {
+      return NextResponse.json({ message: 'Rate limit exceeded' }, { status: 429 });
+    }
 
     if (gearChanged) {
       aiResult = await regenerateToneSettings(
