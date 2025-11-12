@@ -5,28 +5,31 @@ import { client } from '@/lib/openai';
 import { revalidatePath } from 'next/cache';
 
 interface ToneCreateBody {
-  name?: string;
-  artist?: string;
-  description?: string;
-  guitar?: string;
-  pickups?: string;
-  strings?: string;
-  amp?: string;
+  name: string;
+  artist: string;
+  description: string;
+  guitar: string;
+  pickups: string;
+  strings: string;
+  amp: string;
 }
 
 interface AIToneResult {
   ampSettings: {
-    gain: number;
-    treble: number;
     mid: number;
     bass: number;
+    gain: number;
+    reverb: number;
+    treble: number;
     volume: number;
+    presence: number;
   };
   notes: string;
 }
 
 export async function POST(req: NextRequest) {
   const user = await currentUser();
+
   if (!user) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }
@@ -41,23 +44,17 @@ export async function POST(req: NextRequest) {
     }
 
     const body: ToneCreateBody = await req.json();
+
     const { name, artist, description, guitar, pickups, strings, amp } = body;
 
-    // TODO: Add validation
-
-    const toneDescription = description ?? 'Unknown Description';
-    const artistSong = artist ?? 'Unknown Artist/Song';
-    const guitarMakeModel = guitar ?? 'Unknown Guitar';
-    const ampMakeModel = amp ?? 'Unknown Amp';
-
     let aiResult: AIToneResult = {
-      ampSettings: { gain: 5, treble: 5, mid: 5, bass: 5, volume: 5 },
+      ampSettings: { mid: 5, bass: 5, gain: 5, reverb: 5, treble: 5, volume: 5, presence: 5 },
       notes: 'Default settings applied',
     };
 
     try {
       const openAIResponse = await client.chat.completions.create({
-        model: 'gpt-4-turbo',
+        model: 'gpt-4o',
         temperature: 0.3,
         response_format: { type: 'json_object' },
         messages: [
@@ -92,14 +89,14 @@ export async function POST(req: NextRequest) {
             content: `Create a tone preset to match this sonic goal:
 
                       TARGET TONE:
-                      Artist/Song Reference: ${artistSong}
-                      Tone Description: ${toneDescription ?? "Match the artist's signature sound"}
+                      Artist/Song Reference: ${artist}
+                      Tone Description: ${description}
 
                       AVAILABLE GEAR:
-                      Guitar: ${guitarMakeModel}
-                      Pickups: ${pickups ?? 'stock pickups'}
-                      Strings: ${strings ?? 'standard gauge (.010-.046)'}
-                      Amp: ${ampMakeModel}
+                      Guitar: ${guitar}
+                      Pickups: ${pickups}
+                      Strings: ${strings}
+                      Amp: ${amp}
 
                       INSTRUCTIONS:
                       - Provide EXACT numeric settings for every amp knob
@@ -109,33 +106,38 @@ export async function POST(req: NextRequest) {
         ],
       });
 
-      const aiContent = openAIResponse.choices?.[0]?.message?.content?.trim();
+      const aiResponse = openAIResponse.choices?.[0]?.message?.content?.trim();
 
-      if (!aiContent) {
+      if (!aiResponse) {
         console.error('Empty response from OpenAI');
+
         throw new Error('Empty AI response');
       }
 
       try {
-        const parsed = JSON.parse(aiContent);
+        const parsed = JSON.parse(aiResponse);
+
         aiResult = {
           ampSettings: parsed.ampSettings || aiResult.ampSettings,
           notes: parsed.notes || aiResult.notes,
         };
       } catch (parseErr) {
         console.warn('Failed to parse AI response as JSON:', parseErr);
-        console.warn('AI Response:', aiContent);
-        aiResult.notes = aiContent || 'Unable to parse AI recommendations';
+
+        console.warn('AI Response:', aiResponse);
+
+        aiResult.notes = aiResponse || 'Unable to parse AI recommendations';
       }
     } catch (aiError) {
       console.error('OpenAI API error:', aiError);
+
       aiResult.notes = 'AI tone generation unavailable, using default settings';
     }
 
     const tone = await prisma.tone.create({
       data: {
         userId: dbUser.id,
-        name: name ?? `${artistSong} Tone`,
+        name: name ?? '',
         artist: artist ?? '',
         description: description ?? '',
         guitar: guitar ?? '',
@@ -152,6 +154,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: 'Successfully created tone', tone }, { status: 201 });
   } catch (error) {
     console.error(`Failed to create tone for user ${user?.id}:`, error);
+
     return NextResponse.json(
       {
         message: 'Failed to create tone',
@@ -164,6 +167,7 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   const user = await currentUser();
+
   if (!user) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }
@@ -185,6 +189,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ message: 'Successfully fetched tones', tones }, { status: 200 });
   } catch (error) {
     console.error(`Failed to fetch tones for user ${user?.id}:`, error);
+
     return NextResponse.json(
       {
         message: 'Failed to fetch tones',

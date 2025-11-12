@@ -30,21 +30,25 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     return NextResponse.json({ message: 'Successfully fetched tone', tone }, { status: 200 });
   } catch (error) {
     console.error(`Failed to fetch tone ${id} for user ${user.id}:`, error);
+
     return NextResponse.json({ message: 'Failed to fetch tone' }, { status: 500 });
   }
 }
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const user = await currentUser();
+
   if (!user) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 
   const { id } = await params;
+
   const body: ToneUpdateBody = await req.json();
 
   try {
-    const tone = await prisma.tone.findFirst({
+    const tone = await prisma.tone.findUnique({
       where: { id, userId: user.id },
     });
+
     if (!tone) return NextResponse.json({ message: 'Tone not found' }, { status: 404 });
 
     const gearChanged =
@@ -59,15 +63,16 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     };
 
     if (gearChanged) {
-      const toneDescription = body.description ?? tone.description ?? 'Unknown Description';
-      const artistSong = body.artist ?? tone.artist ?? 'Unknown Artist/Song';
-      const guitarMakeModel = body.guitar ?? tone.guitar ?? 'Unknown Guitar';
-      const ampMakeModel = body.amp ?? tone.amp ?? 'Unknown Amp';
-      const pickupsDesc = body.pickups ?? tone.pickups ?? 'default';
-      const stringsDesc = body.strings ?? tone.strings ?? 'default';
-
+      const toneDescription = body.description ?? tone.description;
+      const artistSong = body.artist ?? tone.artist;
+      const guitarMakeModel = body.guitar ?? tone.guitar;
+      const ampMakeModel = body.amp ?? tone.amp;
+      const pickupsDesc = body.pickups ?? tone.pickups;
+      const stringsDesc = body.strings ?? tone.strings;
       const openAIResponse = await client.chat.completions.create({
-        model: 'gpt-5',
+        model: 'gpt-4o',
+        temperature: 0.3,
+        response_format: { type: 'json_object' },
         messages: [
           {
             role: 'system',

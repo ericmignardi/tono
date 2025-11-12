@@ -51,11 +51,11 @@ export default async function Tone({ params }: { params: Promise<{ id: string }>
           </div>
           <div className="flex flex-col items-center gap-2 lg:flex-row">
             <Link href={`/dashboard/tones/${id}/edit`}>
-              <Button>Edit Tone</Button>
+              <Button variant={'outline'}>Edit Tone</Button>
             </Link>
             <form action={deleteTone}>
               <input type="hidden" name="toneId" value={id} />
-              <Button variant="destructive" type="submit">
+              <Button variant={'destructive'} type="submit">
                 Delete Tone
               </Button>
             </form>
