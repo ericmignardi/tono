@@ -8,7 +8,10 @@ import { toneRateLimit } from '@/lib/rateLimit';
 import { ToneUpdateSchema } from '@/utils/validation/toneValidation';
 import { ToneUpdateBody } from '@/types/toneValidationTypes';
 
-export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
+// ✅ Fixed for Next.js 16: params is now a Promise
+export async function GET(_req: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params;
+
   const user = await currentUser();
   if (!user) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 
@@ -19,12 +22,12 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   if (!dbUser) return NextResponse.json({ message: 'User not found' }, { status: 404 });
 
   try {
-    const tone = await prisma.tone.findFirst({ where: { id: params.id, userId: dbUser.id } });
+    const tone = await prisma.tone.findFirst({ where: { id, userId: dbUser.id } });
     if (!tone) return NextResponse.json({ message: 'Tone not found' }, { status: 404 });
 
     return NextResponse.json({ message: 'Successfully fetched tone', tone }, { status: 200 });
   } catch (error) {
-    console.error(`[Tone GET] Error fetching ${params.id} for user ${user.id}:`, error);
+    console.error(`[Tone GET] Error fetching ${id} for user ${user.id}:`, error);
     return NextResponse.json(
       {
         message: 'Failed to fetch tone',
@@ -35,7 +38,9 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   }
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params;
+
   const user = await currentUser();
   if (!user) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 
@@ -56,7 +61,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   const validatedBody = parsed.data;
 
   try {
-    const tone = await prisma.tone.findUnique({ where: { id: params.id } });
+    const tone = await prisma.tone.findUnique({ where: { id } });
     if (!tone || tone.userId !== dbUser.id)
       return NextResponse.json({ message: 'Tone not found' }, { status: 404 });
 
@@ -99,7 +104,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     }
 
     const updatedTone = await prisma.tone.update({
-      where: { id: params.id },
+      where: { id },
       data: { ...validatedBody, aiAmpSettings: aiResult.ampSettings, aiNotes: aiResult.notes },
     });
 
@@ -110,7 +115,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       { status: 200 }
     );
   } catch (error) {
-    console.error(`[Tone PUT] Error updating ${params.id} for user ${user.id}:`, error);
+    console.error(`[Tone PUT] Error updating ${id} for user ${user.id}:`, error);
     return NextResponse.json(
       {
         message: 'Failed to update tone',
@@ -121,7 +126,9 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(_req: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params;
+
   const user = await currentUser();
   if (!user) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 
@@ -132,16 +139,15 @@ export async function DELETE(_req: NextRequest, { params }: { params: { id: stri
   if (!dbUser) return NextResponse.json({ message: 'User not found' }, { status: 404 });
 
   try {
-    const tone = await prisma.tone.findFirst({ where: { id: params.id, userId: dbUser.id } });
+    const tone = await prisma.tone.findFirst({ where: { id, userId: dbUser.id } });
     if (!tone) return NextResponse.json({ message: 'Tone not found' }, { status: 404 });
 
-    await prisma.tone.delete({ where: { id: params.id } });
-
+    await prisma.tone.delete({ where: { id } });
     revalidatePath('/dashboard/tones');
 
     return NextResponse.json({ message: 'Successfully deleted tone' }, { status: 200 });
   } catch (error) {
-    console.error(`[Tone DELETE] Error deleting ${params.id} for user ${user.id}:`, error);
+    console.error(`[Tone DELETE] Error deleting ${id} for user ${user.id}:`, error);
     return NextResponse.json(
       {
         message: 'Failed to delete tone',
