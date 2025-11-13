@@ -28,7 +28,7 @@ model Subscription {
   stripeId          String   @unique
   status            String   // active, canceled, etc.
   priceId           String
-  currentPeriodEnd  DateTime
+  currentPeriodEnd  DateTime?
   user              User     @relation(fields: [userId], references: [id])
   userId            String
   createdAt         DateTime @default(now())
