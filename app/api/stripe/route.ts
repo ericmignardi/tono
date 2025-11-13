@@ -3,7 +3,9 @@ import Stripe from 'stripe';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/database';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: '2025-10-29.clover',
+});
 
 export async function POST(req: NextRequest) {
   try {
@@ -25,12 +27,14 @@ export async function POST(req: NextRequest) {
     }
 
     let customerId = user.stripeId;
-
     // Create Stripe customer if doesn't exist
     if (!customerId) {
       const customer = await stripe.customers.create({
         email: user.email,
-        metadata: { clerkId: user.clerkId },
+        metadata: {
+          clerkId: user.clerkId,
+          userId: user.id,
+        },
       });
 
       customerId = customer.id;
@@ -47,15 +51,29 @@ export async function POST(req: NextRequest) {
       customer: customerId,
       line_items: [{ price: priceId, quantity: 1 }],
       subscription_data: {
-        metadata: { clerkId: userId },
+        metadata: {
+          clerkId: userId,
+          userId: user.id,
+        },
+      },
+      metadata: {
+        clerkId: userId,
+        userId: user.id,
       },
       success_url: `${process.env.NEXT_PUBLIC_URL}/dashboard?success=true`,
       cancel_url: `${process.env.NEXT_PUBLIC_URL}/pricing?canceled=true`,
+      // allow_promotion_codes: true,
     });
 
     return NextResponse.json({ url: session.url });
   } catch (error) {
     console.error('Error creating checkout session:', error);
-    return NextResponse.json({ error: 'Failed to create checkout session' }, { status: 500 });
+
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+    return NextResponse.json(
+      { error: 'Failed to create checkout session', details: errorMessage },
+      { status: 500 }
+    );
   }
 }

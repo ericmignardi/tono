@@ -4,7 +4,7 @@ export default function Footer() {
   return (
     <footer className="border-t-border border-t">
       <div className="text-muted-foreground p-4 text-sm">
-        <p>© {year} tonifier. All rights reserved.</p>
+        <p>© {year} tono. All rights reserved.</p>
       </div>
     </footer>
   );

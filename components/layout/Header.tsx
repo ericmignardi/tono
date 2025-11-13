@@ -12,7 +12,7 @@ export default function Header() {
     <header className="border-b-border fixed top-0 right-0 left-0 z-50 border-b shadow-sm backdrop-blur-2xl">
       <div className="relative flex items-center justify-between p-4">
         <Link href="/">
-          <h1 className="text-xl font-bold italic">tonifier</h1>
+          <h1 className="text-xl font-bold italic">tono</h1>
         </Link>
         <nav className="hidden items-center justify-between gap-4 lg:flex">
           <SignedOut>

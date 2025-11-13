@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { prisma } from '@/lib/database';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: '2025-10-29.clover',
+});
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
 export async function POST(req: NextRequest) {
@@ -29,10 +31,8 @@ export async function POST(req: NextRequest) {
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
-
-        if (session.mode === 'subscription' && session.subscription) {
-          const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
-
+        if (session.mode === 'subscription' && typeof session.subscription === 'string') {
+          const subscription = await stripe.subscriptions.retrieve(session.subscription);
           await handleSubscriptionChange(subscription);
         }
         break;
@@ -47,12 +47,40 @@ export async function POST(req: NextRequest) {
 
       case 'customer.subscription.deleted': {
         const subscription = event.data.object as Stripe.Subscription;
-
-        await prisma.subscription.delete({
+        await prisma.subscription.deleteMany({
           where: { stripeId: subscription.id },
         });
-
         console.log(`🗑️ Subscription deleted: ${subscription.id}`);
+        break;
+      }
+
+      case 'invoice.payment_failed': {
+        const invoice = event.data.object as Stripe.Invoice;
+
+        const invoiceWithSubscription = invoice as Stripe.Invoice & {
+          subscription?: string | Stripe.Subscription;
+        };
+
+        let subscriptionId: string | undefined;
+        if (typeof invoiceWithSubscription.subscription === 'string') {
+          subscriptionId = invoiceWithSubscription.subscription;
+        } else if (
+          invoiceWithSubscription.subscription &&
+          typeof invoiceWithSubscription.subscription === 'object'
+        ) {
+          subscriptionId = invoiceWithSubscription.subscription.id;
+        }
+
+        if (!subscriptionId) {
+          console.warn('Invoice has no subscription ID, skipping');
+          break;
+        }
+
+        await prisma.subscription.updateMany({
+          where: { stripeId: subscriptionId },
+          data: { status: 'past_due' },
+        });
+        console.warn(`⚠️ Payment failed for subscription: ${subscriptionId}`);
         break;
       }
 
@@ -64,7 +92,7 @@ export async function POST(req: NextRequest) {
     return new NextResponse('Webhook handler failed', { status: 500 });
   }
 
-  return NextResponse.json({ received: true });
+  return new NextResponse('OK', { status: 200 });
 }
 
 async function handleSubscriptionChange(subscription: Stripe.Subscription) {
@@ -79,20 +107,28 @@ async function handleSubscriptionChange(subscription: Stripe.Subscription) {
     return;
   }
 
-  const subscriptionData = subscription as any;
-  const periodEnd = new Date(subscriptionData.current_period_end * 1000);
+  const currentPeriodEnd = (subscription as any).current_period_end as number | undefined;
+
+  if (!currentPeriodEnd) {
+    console.warn(`Subscription ${subscription.id} missing current_period_end`);
+    return;
+  }
+
+  const priceRaw = subscription.items.data[0]?.price;
+  const priceId = typeof priceRaw === 'string' ? priceRaw : (priceRaw?.id ?? 'unknown');
+  const periodEnd = new Date(currentPeriodEnd * 1000);
 
   await prisma.subscription.upsert({
     where: { stripeId: subscription.id },
     update: {
       status: subscription.status,
-      priceId: subscription.items.data[0].price.id,
+      priceId,
       currentPeriodEnd: periodEnd,
     },
     create: {
       stripeId: subscription.id,
       status: subscription.status,
-      priceId: subscription.items.data[0].price.id,
+      priceId,
       currentPeriodEnd: periodEnd,
       userId: user.id,
     },

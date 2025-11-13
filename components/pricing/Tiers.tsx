@@ -1,7 +1,73 @@
+'use client';
+
 import { Button } from '@/components/ui/button';
 import { CheckCircle } from 'lucide-react';
+import { useState } from 'react';
 
 export default function Tiers() {
+  const [loading, setLoading] = useState<string | null>(null);
+
+  const tiers = [
+    {
+      name: 'Basic',
+      price: 0,
+      cta: 'Start For Free',
+      isFeatured: false,
+      features: [
+        'Core features for beginners',
+        'Access to starter tones',
+        'Limited personal profiles',
+      ],
+      priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_BASIC,
+    },
+    {
+      name: 'Premium',
+      price: 9,
+      cta: 'Go Premium',
+      isFeatured: true,
+      features: [
+        'Advanced features for serious guitarists',
+        'Full Artist Tone Profiles',
+        'Unlimited Personal Profiles',
+      ],
+      priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO,
+    },
+  ];
+
+  const handleSubscribe = async (priceId: string | undefined) => {
+    if (!priceId) {
+      console.error('No price ID provided');
+      alert('Configuration error. Please contact support.');
+      return;
+    }
+
+    setLoading(priceId);
+    try {
+      const res = await fetch('/api/stripe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ priceId }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Failed to create checkout session');
+      }
+
+      const { url } = await res.json();
+
+      if (url) {
+        window.location.href = url;
+      } else {
+        throw new Error('No checkout URL returned');
+      }
+    } catch (err) {
+      console.error('Failed to create checkout session:', err);
+      alert('Failed to start checkout. Please try again.');
+      setLoading(null);
+    }
+  };
+
   return (
     <section id="tiers" className="section">
       <div className="flex flex-col items-center justify-center gap-2">
@@ -11,50 +77,34 @@ export default function Tiers() {
         </p>
       </div>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        {[
-          {
-            name: 'Free',
-            price: 0,
-            cta: 'Start For Free',
-            isFeatured: false,
-            features: [
-              'Core features for beginners',
-              'Access to starter tones',
-              'Limited personal profiles',
-            ],
-          },
-          {
-            name: 'Premium',
-            price: 9,
-            cta: 'Go Premium',
-            isFeatured: true,
-            features: [
-              'Advanced features for serious guitarists',
-              'Full Artist Tone Profiles',
-              'Unlimited Personal Profiles',
-            ],
-          },
-        ].map((tier) => {
+        {tiers.map((tier) => {
           const cardClass = tier.isFeatured
             ? 'flex flex-col gap-4 rounded-2xl border border-primary p-4 shadow-md'
             : 'flex flex-col gap-4 rounded-2xl border border-border p-4 shadow-md';
+
           return (
             <div key={tier.name} className={cardClass}>
               <div>
                 <p className="text-foreground text-lg font-semibold">{tier.name}</p>
                 <p className="text-foreground text-3xl font-bold">
-                  ${tier.price}{' '}
+                  ${tier.price}
                   <span className="text-muted-foreground text-sm font-normal">/mo</span>
                 </p>
               </div>
-              <Button {...(tier.isFeatured ? {} : { variant: 'outline' })}>{tier.cta}</Button>
+              <Button
+                {...(tier.isFeatured ? {} : { variant: 'outline' })}
+                onClick={() => handleSubscribe(tier.priceId)}
+                disabled={loading !== null}
+              >
+                {loading === tier.priceId ? 'Loading...' : tier.cta}
+              </Button>
               <div>
                 <ul className="flex flex-col gap-1">
                   {tier.features.map((feature) => (
-                    <div key={feature} className="flex items-center gap-1">
-                      <CheckCircle className="text-primary size-4" />
-                      <li className="text-foreground text-sm">{feature}</li>
-                    </div>
+                    <li key={feature} className="text-foreground flex items-center gap-1 text-sm">
+                      <CheckCircle className="text-primary h-4 w-4" />
+                      {feature}
+                    </li>
                   ))}
                 </ul>
               </div>
