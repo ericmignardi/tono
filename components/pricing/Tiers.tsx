@@ -86,7 +86,7 @@ export default function Tiers({ hasActiveSubscription = false }: TiersProps) {
   };
 
   return (
-    <section id="tiers" className="section">
+    <section id="tiers" className="flex flex-col gap-8">
       <div className="flex flex-col items-center justify-center gap-2">
         <h2 className="text-3xl font-bold">Find Your Perfect Tone.</h2>
         <p className="text-muted-foreground text-base">

@@ -9,8 +9,8 @@ export default function Header() {
   const [mobileMenu, setMobileMenu] = useState<boolean>(false);
 
   return (
-    <header className="border-b-border fixed top-0 right-0 left-0 z-50 border-b shadow-sm backdrop-blur-2xl">
-      <div className="relative flex items-center justify-between p-4">
+    <header className="bg-background fixed top-0 right-0 left-0 z-50 border-b shadow-sm">
+      <div className="relative mx-auto flex max-w-7xl items-center justify-between p-4">
         <Link href="/">
           <h1 className="text-xl font-bold italic">tono</h1>
         </Link>

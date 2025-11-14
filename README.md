@@ -1,20 +1,5 @@
 # 🎸 Tono - AI-Powered Guitar Tone Assistant
 
-<div align="center">
-
-**Transform your creative vision into the perfect guitar tone**
-
-[![Next.js](https://img.shields.io/badge/Next.js-14-black?style=flat-square&logo=next.js)](https://nextjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
-[![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](CONTRIBUTING.md)
-
-[Demo](https://tono.app) • [Documentation](https://docs.tono.app) • [Report Bug](https://github.com/ericmignardi/tono/issues) • [Request Feature](https://github.com/ericmignardi/tono/issues)
-
-</div>
-
----
-
 ## 📖 Overview
 
 **Tono** is a full-stack AI-powered SaaS application that helps guitarists achieve their desired sound instantly. Simply input your guitar and amp setup along with a creative goal like _"early Van Halen lead tone"_ or _"warm jazz clean sound"_, and Tono delivers precise amp settings, effects recommendations, and detailed tone analysis.
@@ -25,8 +10,6 @@
 - 🔧 **Gear-Specific** - Tailored settings for your exact equipment
 - 💾 **Save Configurations** - Build your personal library of tone presets
 - 🚀 **AI-Powered** - Leverages OpenAI to understand musical context and translate it into technical specs
-
----
 
 ## ✨ Features
 
@@ -43,8 +26,6 @@
 - **💳 Flexible Subscription Tiers** - Free and Pro plans managed through Stripe
 - **📱 Responsive Design** - Beautiful UI across all devices
 - **⚡ Fast Performance** - Optimized with edge caching and serverless architecture
-
----
 
 ## 🛠️ Technology Stack
 
@@ -85,8 +66,6 @@
 - **Hosting:** Vercel (Serverless)
 - **CI/CD:** GitHub Actions
 
----
-
 ## 🏗️ Architecture
 
 Tono follows a modern, scalable serverless architecture built on the Next.js App Router paradigm.
@@ -123,16 +102,12 @@ Tono follows a modern, scalable serverless architecture built on the Next.js App
 - **API Protection** - Rate limiting and authentication on all endpoints
 - **Caching Strategy** - Edge caching for stable data, on-demand for dynamic content
 
----
-
 ## 💰 Pricing
 
 | Tier     | Price | Monthly Submissions | Features                                                |
 | -------- | ----- | ------------------- | ------------------------------------------------------- |
 | **Free** | $0    | 5                   | Basic tone generation, Save configurations              |
 | **Pro**  | $9.99 | 50                  | Everything in Free, Priority support, Advanced analysis |
-
----
 
 ## 🚀 Getting Started
 
@@ -287,19 +262,3 @@ tono/
 ├── styles/             # Global styles
 └── tests/              # Test files
 ```
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## 🙏 Acknowledgments
-
-- [Next.js](https://nextjs.org/) - The React framework for production
-- [OpenAI](https://openai.com/) - AI-powered tone analysis
-- [Clerk](https://clerk.com/) - Authentication made easy
-- [Stripe](https://stripe.com/) - Payment infrastructure
-- [Vercel](https://vercel.com/) - Deployment platform

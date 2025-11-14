@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { ClerkProvider } from '@clerk/nextjs';
 import { Providers } from './providers';
+import { Toaster } from '@/components/ui/sonner';
 
 const interSans = Inter({
   variable: '--font-inter',
@@ -26,6 +27,7 @@ export default function RootLayout({
       <html lang="en" suppressHydrationWarning>
         <body className={`${interSans.variable} ${interSans.className} antialiased`}>
           <Providers>{children}</Providers>
+          <Toaster />
         </body>
       </html>
     </ClerkProvider>
