@@ -54,13 +54,8 @@ export async function POST(req: NextRequest) {
           userId: user.id,
         },
       },
-      metadata: {
-        clerkId: userId,
-        userId: user.id,
-      },
       success_url: `${process.env.NEXT_PUBLIC_URL}/dashboard?success=true`,
       cancel_url: `${process.env.NEXT_PUBLIC_URL}/pricing?canceled=true`,
-      // allow_promotion_codes: true,
     });
 
     return NextResponse.json({ url: session.url });
