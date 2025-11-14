@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/database';
+import { prisma } from '@/lib/prisma/database';
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import ToneForm from '@/components/dashboard/create-tones/ToneForm';

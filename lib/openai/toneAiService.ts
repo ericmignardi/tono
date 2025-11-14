@@ -1,4 +1,4 @@
-import { client } from '@/lib/services/openai/openai';
+import { client } from '@/lib/openai/openai';
 
 export interface AmpSettings {
   mid: number;

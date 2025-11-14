@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { prisma } from '@/lib/database';
+import { prisma } from '@/lib/prisma/database';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-10-29.clover',
 });
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+
+// Credit limits
+const FREE_CREDIT_LIMIT = 5;
+const PRO_CREDIT_LIMIT = 50;
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -42,25 +46,59 @@ export async function POST(req: NextRequest) {
           const subscription = await stripe.subscriptions.retrieve(session.subscription, {
             expand: ['items.data.price'],
           });
-          await handleSubscriptionChange(subscription);
+          await handleSubscriptionChange(subscription, 'created');
         }
         break;
       }
 
-      case 'customer.subscription.created':
+      case 'customer.subscription.created': {
+        const subscription = event.data.object as Stripe.Subscription;
+        console.log(`Subscription created: ${subscription.id}`);
+        await handleSubscriptionChange(subscription, 'created');
+        break;
+      }
+
       case 'customer.subscription.updated': {
         const subscription = event.data.object as Stripe.Subscription;
-        console.log(`Subscription ${event.type}: ${subscription.id}`);
-        await handleSubscriptionChange(subscription);
+        console.log(`Subscription updated: ${subscription.id}`);
+
+        // Log if user scheduled cancellation
+        if (subscription.cancel_at_period_end) {
+          console.log(`Subscription ${subscription.id} scheduled for cancellation at period end`);
+        }
+
+        await handleSubscriptionChange(subscription, 'updated');
         break;
       }
 
       case 'customer.subscription.deleted': {
         const subscription = event.data.object as Stripe.Subscription;
+        console.log(`Subscription deleted: ${subscription.id}`);
+
+        // Find user and restore to free tier
+        const customerId = subscription.customer as string;
+        const user = await prisma.user.findFirst({
+          where: { stripeId: customerId },
+        });
+
+        if (user) {
+          // Reset to free tier limits
+          await prisma.user.update({
+            where: { id: user.id },
+            data: {
+              generationsLimit: FREE_CREDIT_LIMIT,
+              // Cap used credits to free limit if they exceed it
+              generationsUsed:
+                user.generationsUsed > FREE_CREDIT_LIMIT ? FREE_CREDIT_LIMIT : user.generationsUsed,
+            },
+          });
+          console.log(`User ${user.email} downgraded to free tier`);
+        }
+
+        // Delete subscription record
         await prisma.subscription.deleteMany({
           where: { stripeId: subscription.id },
         });
-        console.log(`Subscription deleted: ${subscription.id}`);
         break;
       }
 
@@ -111,7 +149,10 @@ export async function POST(req: NextRequest) {
   }
 }
 
-async function handleSubscriptionChange(subscription: Stripe.Subscription) {
+async function handleSubscriptionChange(
+  subscription: Stripe.Subscription,
+  eventType: 'created' | 'updated'
+) {
   const customerId = subscription.customer as string;
 
   console.log(`Looking for user with Stripe ID: ${customerId}`);
@@ -150,9 +191,35 @@ async function handleSubscriptionChange(subscription: Stripe.Subscription) {
   const periodEnd = new Date(currentPeriodEnd * 1000);
 
   console.log(
-    `Upserting subscription: ${subscription.id}, status: ${subscription.status}, period end: ${periodEnd}`
+    `Processing subscription: ${subscription.id}, status: ${subscription.status}, period end: ${periodEnd}`
   );
 
+  // Only increase credit limit when subscription is created or becomes active
+  const isActiveSubscription = ['active', 'trialing'].includes(subscription.status);
+
+  if (eventType === 'created' && isActiveSubscription) {
+    // New subscription - upgrade to pro
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { generationsLimit: PRO_CREDIT_LIMIT },
+    });
+    console.log(`User ${user.email} upgraded to PRO (${PRO_CREDIT_LIMIT} credits)`);
+  } else if (eventType === 'updated') {
+    // Subscription updated - check status
+    if (isActiveSubscription) {
+      // Ensure they have pro limits
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { generationsLimit: PRO_CREDIT_LIMIT },
+      });
+      console.log(`User ${user.email} subscription active - PRO limits maintained`);
+    } else if (['canceled', 'unpaid', 'past_due'].includes(subscription.status)) {
+      // Subscription in bad state - consider downgrading
+      console.warn(`User ${user.email} subscription status: ${subscription.status}`);
+    }
+  }
+
+  // Upsert subscription record
   await prisma.subscription.upsert({
     where: { stripeId: subscription.id },
     update: {

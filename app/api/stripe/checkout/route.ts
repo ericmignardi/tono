@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { auth } from '@clerk/nextjs/server';
-import { prisma } from '@/lib/database';
+import { prisma } from '@/lib/prisma/database';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
@@ -20,11 +20,13 @@ export async function POST(req: NextRequest) {
     const user = await prisma.user.findUnique({
       where: { clerkId: userId },
     });
+
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     let customerId = user.stripeId;
+
     // Create Stripe customer if doesn't exist
     if (!customerId) {
       const customer = await stripe.customers.create({
@@ -34,7 +36,6 @@ export async function POST(req: NextRequest) {
           userId: user.id,
         },
       });
-
       customerId = customer.id;
 
       await prisma.user.update({
@@ -56,14 +57,13 @@ export async function POST(req: NextRequest) {
       },
       success_url: `${process.env.NEXT_PUBLIC_URL}/dashboard?success=true`,
       cancel_url: `${process.env.NEXT_PUBLIC_URL}/pricing?canceled=true`,
+      allow_promotion_codes: true,
     });
 
     return NextResponse.json({ url: session.url });
   } catch (error) {
     console.error('Error creating checkout session:', error);
-
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-
     return NextResponse.json(
       { error: 'Failed to create checkout session', details: errorMessage },
       { status: 500 }

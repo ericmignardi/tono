@@ -40,10 +40,10 @@ export default function Sidebar() {
               key={href}
               href={href}
               className={cn(
-                'flex w-full items-center gap-3 rounded-md px-3 py-2 text-[13px] font-normal transition-colors',
+                'flex w-full items-center gap-3 px-3 py-2 text-[13px] font-normal transition-colors',
                 isActive
                   ? 'bg-accent text-accent-foreground font-medium'
-                  : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
+                  : 'text-muted-foreground hover:bg-primary hover:text-foreground'
               )}
             >
               <Icon className="h-[18px] w-[18px] shrink-0" />

@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { FormValues } from '@/types/toneTypes';
+import { FormValues } from '@/types/tone/toneTypes';
 import { Tone } from '@prisma/client';
 
 export default function ToneForm({ tone }: { tone?: Tone | null }) {
@@ -88,7 +88,7 @@ export default function ToneForm({ tone }: { tone?: Tone | null }) {
           />
         </div>
       ))}
-      <Button type="submit" disabled={isLoading}>
+      <Button className="cursor-pointer" type="submit" disabled={isLoading} variant={'outline'}>
         {isLoading
           ? isEditing
             ? 'Updating...'

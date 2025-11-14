@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { prisma } from '@/lib/database';
+import { prisma } from '@/lib/prisma/database';
 import { auth } from '@clerk/nextjs/server';
 import { notFound, redirect } from 'next/navigation';
 import { Button } from '@/components/ui/button';

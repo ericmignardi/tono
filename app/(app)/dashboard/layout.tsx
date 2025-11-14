@@ -1,5 +1,5 @@
-import Header from '@/components/dashboard/Header';
-import Sidebar from '@/components/dashboard/Sidebar';
+import Header from '@/components/dashboard/layout/Header';
+import Sidebar from '@/components/dashboard/layout/Sidebar';
 import React from 'react';
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';

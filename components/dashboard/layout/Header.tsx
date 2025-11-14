@@ -21,13 +21,14 @@ export default function Header() {
   };
 
   return (
-    <header className="border-b-border bg-background sticky top-0 z-40 flex h-16 items-center justify-between border-b p-4 backdrop-blur">
+    <header className="bg-background sticky top-0 z-40 flex h-16 items-center justify-between border-b p-4">
       {/* Left side - Can add breadcrumbs or page title here */}
       <div className="flex items-center gap-4">{/* Reserved for breadcrumbs or search */}</div>
 
       {/* Right side - Actions */}
       <nav className="flex items-center gap-2">
         <Button
+          className="cursor-pointer"
           variant="ghost"
           onClick={toggleTheme}
           aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}

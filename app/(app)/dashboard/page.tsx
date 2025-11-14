@@ -1,4 +1,4 @@
-import { ListMusic } from 'lucide-react';
+import { ListMusic, AlertCircle } from 'lucide-react';
 import { currentUser } from '@clerk/nextjs/server';
 import {
   Table,
@@ -9,37 +9,96 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { prisma } from '@/lib/database';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { prisma } from '@/lib/prisma/database';
 import Link from 'next/link';
+import ManageSubscriptionButton from '@/components/dashboard/ManageSubscriptionButton';
 
 export default async function Dashboard() {
   const user = await currentUser();
+
   const dbUser = await prisma.user.findUnique({
     where: { clerkId: user?.id },
+    include: {
+      subscriptions: {
+        where: {
+          status: {
+            in: ['active', 'trialing'],
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+        take: 1,
+      },
+    },
   });
+
   const recentTones = await prisma.tone.findMany({
     where: { userId: dbUser?.id },
     orderBy: { createdAt: 'desc' },
     take: 5,
   });
+
   const toneCount = await prisma.tone.count({
     where: { userId: dbUser?.id },
   });
-  const stats = [{ label: 'Total Tones', value: toneCount }];
+
+  const creditCount = (dbUser?.generationsLimit ?? 5) - (dbUser?.generationsUsed ?? 0);
+  const hasActiveSubscription = dbUser?.subscriptions && dbUser.subscriptions.length > 0;
+  const activeSubscription = hasActiveSubscription ? dbUser.subscriptions[0] : null;
+  const subscriptionTier = hasActiveSubscription ? 'Premium' : 'Basic';
+
+  // Check if subscription is set to cancel
+  const isCanceling =
+    activeSubscription?.status === 'active' && activeSubscription.currentPeriodEnd;
+  const periodEndDate = activeSubscription?.currentPeriodEnd
+    ? new Date(activeSubscription.currentPeriodEnd).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
+    : null;
+
+  const stats = [
+    { label: 'Total Tones', value: toneCount },
+    { label: 'Credits Remaining', value: creditCount },
+    { label: 'Credit Limit', value: dbUser?.generationsLimit ?? 5 },
+    { label: 'Plan', value: subscriptionTier },
+  ];
+
   const firstName = user?.firstName || user?.fullName?.split(' ')[0] || 'there';
 
   return (
     <section className="flex flex-col gap-4">
       {/* Header Section */}
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold tracking-tight lg:text-4xl">
-          Welcome back, {firstName}!
-        </h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold tracking-tight lg:text-4xl">
+            Welcome back, {firstName}!
+          </h1>
+          {hasActiveSubscription && <ManageSubscriptionButton />}
+        </div>
         <p className="text-muted-foreground">Here's a quick overview of your tone profile.</p>
       </div>
 
+      {/* Cancellation Notice */}
+      {isCanceling && periodEndDate && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Subscription Ending</AlertTitle>
+          <AlertDescription>
+            Your Premium subscription will end on <strong>{periodEndDate}</strong>. You'll still
+            have full access until then. Your credit limit will return to 5 credits after this date.{' '}
+            <Link href="/pricing" className="font-medium underline">
+              Reactivate your subscription
+            </Link>
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {stats.map(({ label, value }) => (
           <Card key={label}>
             <CardHeader>
@@ -59,38 +118,44 @@ export default async function Dashboard() {
           <CardDescription>Your latest tone creations and modifications</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Tone</TableHead>
-                  <TableHead className="text-right">Created At</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {recentTones.map(({ name, artist, createdAt, id }, idx) => (
-                  <TableRow key={idx} className="hover:bg-accent/50 cursor-pointer">
-                    <TableCell>
-                      <Link href={`/dashboard/tones/${id}`} className="flex items-center gap-3">
-                        <div className="bg-background flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
-                          <ListMusic className="text-primary" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <h3 className="truncate font-medium">{name}</h3>
-                          <p className="text-muted-foreground truncate text-sm">{artist}</p>
-                        </div>
-                      </Link>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <span className="text-muted-foreground text-sm whitespace-nowrap">
-                        {new Date(createdAt).toLocaleDateString()}
-                      </span>
-                    </TableCell>
+          {recentTones.length === 0 ? (
+            <div className="text-muted-foreground py-8 text-center">
+              <p>No tones created yet. Start by creating your first tone!</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Tone</TableHead>
+                    <TableHead className="text-right">Created At</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {recentTones.map(({ name, artist, createdAt, id }, idx) => (
+                    <TableRow key={idx} className="hover:bg-accent/50 cursor-pointer">
+                      <TableCell>
+                        <Link href={`/dashboard/tones/${id}`} className="flex items-center gap-3">
+                          <div className="bg-background flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
+                            <ListMusic className="text-primary" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <h3 className="truncate font-medium">{name}</h3>
+                            <p className="text-muted-foreground truncate text-sm">{artist}</p>
+                          </div>
+                        </Link>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <span className="text-muted-foreground text-sm whitespace-nowrap">
+                          {new Date(createdAt).toLocaleDateString()}
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </CardContent>
       </Card>
     </section>

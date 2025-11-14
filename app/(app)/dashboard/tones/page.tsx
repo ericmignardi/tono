@@ -1,5 +1,5 @@
 import { auth } from '@clerk/nextjs/server';
-import { prisma } from '@/lib/database';
+import { prisma } from '@/lib/prisma/database';
 import ToneCard from '@/components/dashboard/tones/ToneCard';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
@@ -31,7 +31,9 @@ export default async function Tones() {
         </div>
         <div>
           <Link href="/dashboard/create-tone">
-            <Button>Create Tone</Button>
+            <Button variant={'outline'} className="cursor-pointer">
+              Create Tone
+            </Button>
           </Link>
         </div>
       </div>

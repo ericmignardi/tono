@@ -9,7 +9,7 @@
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](CONTRIBUTING.md)
 
-[Demo](https://tono.app) • [Documentation](https://docs.tono.app) • [Report Bug](https://github.com/yourusername/tono/issues) • [Request Feature](https://github.com/yourusername/tono/issues)
+[Demo](https://tono.app) • [Documentation](https://docs.tono.app) • [Report Bug](https://github.com/ericmignardi/tono/issues) • [Request Feature](https://github.com/ericmignardi/tono/issues)
 
 </div>
 
@@ -17,7 +17,7 @@
 
 ## 📖 Overview
 
-**Tono** is a full-stack AI-powered application that helps guitarists achieve their desired sound instantly. Simply input your guitar and amp setup along with a creative goal like _"early Van Halen lead tone"_ or _"warm jazz clean sound"_, and Tono delivers precise amp settings, effects recommendations, and detailed tone analysis.
+**Tono** is a full-stack AI-powered SaaS application that helps guitarists achieve their desired sound instantly. Simply input your guitar and amp setup along with a creative goal like _"early Van Halen lead tone"_ or _"warm jazz clean sound"_, and Tono delivers precise amp settings, effects recommendations, and detailed tone analysis.
 
 ### Why Tono?
 
@@ -32,7 +32,7 @@
 
 ### Core Functionality
 
-- **🤖 AI Tone Analysis** - Translates descriptive tone requests into actionable technical configurations (gain, EQ, effects chain)
+- **🤖 AI Tone Analysis** - Translates descriptive tone requests into actionable technical configurations (gain, EQ, effects)
 - **💾 Persistent Configurations** - Save and manage multiple custom amp and guitar setups
 - **🎛️ Personalized Recommendations** - Tone results tailored to your specific gear
 - **📊 Detailed Breakdowns** - Comprehensive explanations of why each setting works
@@ -94,7 +94,7 @@ Tono follows a modern, scalable serverless architecture built on the Next.js App
 ```
 ┌─────────────┐
 │   Client    │
-│ (React 18)  │
+│ (React 19)  │
 └──────┬──────┘
        │
        ▼
@@ -130,7 +130,7 @@ Tono follows a modern, scalable serverless architecture built on the Next.js App
 | Tier     | Price | Monthly Submissions | Features                                                |
 | -------- | ----- | ------------------- | ------------------------------------------------------- |
 | **Free** | $0    | 5                   | Basic tone generation, Save configurations              |
-| **Pro**  | $9.99 | Unlimited           | Everything in Free, Priority support, Advanced analysis |
+| **Pro**  | $9.99 | 50                  | Everything in Free, Priority support, Advanced analysis |
 
 ---
 
@@ -150,7 +150,7 @@ Tono follows a modern, scalable serverless architecture built on the Next.js App
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/yourusername/tono.git
+   git clone https://github.com/ericmignardi/tono.git
    cd tono
    ```
 
@@ -268,35 +268,25 @@ npm run test:e2e:ui
 
 ```
 tono/
-├── app/                    # Next.js App Router
-│   ├── (auth)/            # Authentication routes
-│   ├── (dashboard)/       # Protected dashboard routes
-│   ├── api/               # API routes
-│   └── layout.tsx         # Root layout
-├── components/            # React components
-│   ├── ui/               # Shadcn/UI components
-│   └── shared/           # Shared components
-├── lib/                  # Utility functions
-│   ├── db.ts            # Prisma client
-│   ├── openai.ts        # OpenAI configuration
-│   └── stripe.ts        # Stripe configuration
-├── prisma/              # Database schema & migrations
-├── public/              # Static assets
-├── styles/              # Global styles
-└── tests/               # Test files
+├── app/                # Next.js App Router
+│   ├── (app)/          # Protected dashboard & tone creation routes
+│   ├── (marketing)/    # Unprotected landing & pricing routes
+│   ├── api/            # API routes
+│   └── layout.tsx      # Root layout
+├── components/         # React components
+│   ├── ui/             # Shadcn/UI components
+│   ├── dashboard/      # Dashboard components
+│   ├── home/           # Home components
+│   └── layout.tsx      # Root layout
+├── lib/                # Utility functions
+│   ├── db.ts           # Prisma client
+│   ├── openai.ts       # OpenAI configuration
+│   └── stripe.ts       # Stripe configuration
+├── prisma/             # Database schema & migrations
+├── public/             # Static assets
+├── styles/             # Global styles
+└── tests/              # Test files
 ```
-
----
-
-## 🤝 Contributing
-
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
 
 ---
 

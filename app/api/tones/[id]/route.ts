@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/database';
+import { prisma } from '@/lib/prisma/database';
 import { currentUser } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
-import { regenerateToneSettings } from '@/lib/services/openai/toneAiService';
-import type { AmpSettings, AIToneResult } from '@/lib/services/openai/toneAiService';
+import { regenerateToneSettings } from '@/lib/openai/toneAiService';
+import type { AmpSettings, AIToneResult } from '@/lib/openai/toneAiService';
 import { toneRateLimit } from '@/lib/rateLimit';
 import { ToneUpdateSchema } from '@/utils/validation/toneValidation';
-import { ToneUpdateBody } from '@/types/toneValidationTypes';
+import { ToneUpdateBody } from '@/types/tone/toneValidationTypes';
 
-// ✅ Fixed for Next.js 16: params is now a Promise
 export async function GET(_req: NextRequest, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params;
 
@@ -22,7 +21,10 @@ export async function GET(_req: NextRequest, context: { params: Promise<{ id: st
   if (!dbUser) return NextResponse.json({ message: 'User not found' }, { status: 404 });
 
   try {
-    const tone = await prisma.tone.findFirst({ where: { id, userId: dbUser.id } });
+    const tone = await prisma.tone.findFirst({
+      where: { id, userId: dbUser.id },
+    });
+
     if (!tone) return NextResponse.json({ message: 'Tone not found' }, { status: 404 });
 
     return NextResponse.json({ message: 'Successfully fetched tone', tone }, { status: 200 });
@@ -46,27 +48,32 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ id: str
 
   const dbUser = await prisma.user.findUnique({
     where: { clerkId: user.id },
-    select: { id: true },
   });
+
   if (!dbUser) return NextResponse.json({ message: 'User not found' }, { status: 404 });
 
   const body: ToneUpdateBody = await req.json();
   const parsed = ToneUpdateSchema.safeParse(body);
-  if (!parsed.success)
+  if (!parsed.success) {
     return NextResponse.json(
       { message: 'Invalid input', errors: parsed.error.format() },
       { status: 400 }
     );
+  }
 
   const validatedBody = parsed.data;
 
   try {
-    const tone = await prisma.tone.findUnique({ where: { id } });
-    if (!tone || tone.userId !== dbUser.id)
-      return NextResponse.json({ message: 'Tone not found' }, { status: 404 });
+    const tone = await prisma.tone.findFirst({
+      where: { id, userId: dbUser.id },
+    });
+
+    if (!tone) return NextResponse.json({ message: 'Tone not found' }, { status: 404 });
 
     const { success } = await toneRateLimit.limit(user.id);
-    if (!success) return NextResponse.json({ message: 'Rate limit exceeded' }, { status: 429 });
+    if (!success) {
+      return NextResponse.json({ message: 'Rate limit exceeded' }, { status: 429 });
+    }
 
     const gearChanged =
       validatedBody.artist !== undefined ||
@@ -90,6 +97,10 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ id: str
     };
 
     if (gearChanged) {
+      if (dbUser.generationsUsed >= dbUser.generationsLimit) {
+        return NextResponse.json({ message: 'No remaining credits' }, { status: 403 });
+      }
+
       aiResult = await regenerateToneSettings(
         {
           artist: validatedBody.artist ?? tone.artist ?? '',
@@ -101,11 +112,23 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ id: str
         },
         aiResult
       );
+
+      // Increment usage after successful AI generation
+      await prisma.user.update({
+        where: { id: dbUser.id },
+        data: {
+          generationsUsed: { increment: 1 },
+        },
+      });
     }
 
     const updatedTone = await prisma.tone.update({
       where: { id },
-      data: { ...validatedBody, aiAmpSettings: aiResult.ampSettings, aiNotes: aiResult.notes },
+      data: {
+        ...validatedBody,
+        aiAmpSettings: aiResult.ampSettings,
+        aiNotes: aiResult.notes,
+      },
     });
 
     revalidatePath('/dashboard/tones');
