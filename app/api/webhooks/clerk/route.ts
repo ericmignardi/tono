@@ -8,7 +8,7 @@ export async function POST(req: Request) {
   const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
 
   if (!WEBHOOK_SECRET) {
-    console.error('❌ Missing CLERK_WEBHOOK_SECRET in .env');
+    console.error('Missing CLERK_WEBHOOK_SECRET in .env');
     return new NextResponse('Webhook secret missing', { status: 500 });
   }
 
@@ -28,13 +28,13 @@ export async function POST(req: Request) {
   try {
     event = webhook.verify(payload, svixHeaders) as WebhookEvent;
   } catch (err) {
-    console.error('❌ Webhook verification failed:', err);
+    console.error('Webhook verification failed:', err);
     return new NextResponse('Invalid signature', { status: 400 });
   }
 
   const { type, data } = event;
 
-  console.log(`🔔 Clerk webhook event: ${type}`);
+  console.log(`Clerk webhook event: ${type}`);
 
   switch (type) {
     case 'user.created': {
@@ -85,7 +85,7 @@ export async function POST(req: Request) {
     }
 
     default:
-      console.log(`⚠️ Unhandled event type: ${type}`);
+      console.log(`Unhandled event type: ${type}`);
   }
 
   return NextResponse.json({ success: true });
