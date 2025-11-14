@@ -5,7 +5,7 @@ import { CheckCircle } from 'lucide-react';
 import { useState } from 'react';
 
 export default function Tiers() {
-  const [loading, setLoading] = useState<string | null>(null);
+  const [premiumLoading, setPremiumLoading] = useState(false);
 
   const tiers = [
     {
@@ -35,7 +35,7 @@ export default function Tiers() {
   ];
 
   const handleSubscribe = async (priceId: string) => {
-    setLoading(priceId);
+    setPremiumLoading(true);
 
     try {
       const res = await fetch('/api/stripe', {
@@ -44,17 +44,12 @@ export default function Tiers() {
         body: JSON.stringify({ priceId }),
       });
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || 'Failed to create checkout session');
-      }
-
       const { url } = await res.json();
       window.location.href = url;
     } catch (err) {
       console.error(err);
       alert('Failed to start checkout. Please try again.');
-      setLoading(null);
+      setPremiumLoading(false);
     }
   };
 
@@ -69,7 +64,7 @@ export default function Tiers() {
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {tiers.map((tier) => {
-          const isLoading = loading === tier.priceId;
+          const isPremium = Boolean(tier.priceId);
 
           return (
             <div
@@ -86,18 +81,16 @@ export default function Tiers() {
 
               <Button
                 {...(tier.isFeatured ? {} : { variant: 'outline' })}
-                disabled={isLoading}
+                disabled={isPremium && premiumLoading}
                 onClick={() => {
-                  if (!tier.priceId) {
-                    // FREE TIER → go directly to dashboard
+                  if (!isPremium) {
                     window.location.href = '/dashboard';
                     return;
                   }
-
-                  handleSubscribe(tier.priceId);
+                  handleSubscribe(tier.priceId!);
                 }}
               >
-                {isLoading ? 'Loading...' : tier.cta}
+                {premiumLoading && isPremium ? 'Loading...' : tier.cta}
               </Button>
 
               <ul className="flex flex-col gap-1">
