@@ -18,7 +18,7 @@ export default function Tiers() {
         'Access to starter tones',
         'Limited personal profiles',
       ],
-      priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_BASIC,
+      priceId: null,
     },
     {
       name: 'Premium',
@@ -30,18 +30,13 @@ export default function Tiers() {
         'Full Artist Tone Profiles',
         'Unlimited Personal Profiles',
       ],
-      priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO,
+      priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO ?? '',
     },
   ];
 
-  const handleSubscribe = async (priceId: string | undefined) => {
-    if (!priceId) {
-      console.error('No price ID provided');
-      alert('Configuration error. Please contact support.');
-      return;
-    }
-
+  const handleSubscribe = async (priceId: string) => {
     setLoading(priceId);
+
     try {
       const res = await fetch('/api/stripe', {
         method: 'POST',
@@ -55,14 +50,9 @@ export default function Tiers() {
       }
 
       const { url } = await res.json();
-
-      if (url) {
-        window.location.href = url;
-      } else {
-        throw new Error('No checkout URL returned');
-      }
+      window.location.href = url;
     } catch (err) {
-      console.error('Failed to create checkout session:', err);
+      console.error(err);
       alert('Failed to start checkout. Please try again.');
       setLoading(null);
     }
@@ -76,38 +66,48 @@ export default function Tiers() {
           Choose the plan that fits your journey, from casual jamming to professional tone chasing.
         </p>
       </div>
+
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {tiers.map((tier) => {
-          const cardClass = tier.isFeatured
-            ? 'flex flex-col gap-4 rounded-2xl border border-primary p-4 shadow-md'
-            : 'flex flex-col gap-4 rounded-2xl border border-border p-4 shadow-md';
+          const isLoading = loading === tier.priceId;
 
           return (
-            <div key={tier.name} className={cardClass}>
+            <div
+              key={tier.name}
+              className={`flex flex-col gap-4 rounded-2xl border p-4 shadow-md ${tier.isFeatured ? 'border-primary' : 'border-border'} `}
+            >
               <div>
-                <p className="text-foreground text-lg font-semibold">{tier.name}</p>
-                <p className="text-foreground text-3xl font-bold">
+                <p className="text-lg font-semibold">{tier.name}</p>
+                <p className="text-3xl font-bold">
                   ${tier.price}
                   <span className="text-muted-foreground text-sm font-normal">/mo</span>
                 </p>
               </div>
+
               <Button
                 {...(tier.isFeatured ? {} : { variant: 'outline' })}
-                onClick={() => handleSubscribe(tier.priceId)}
-                disabled={loading !== null}
+                disabled={isLoading}
+                onClick={() => {
+                  if (!tier.priceId) {
+                    // FREE TIER → go directly to dashboard
+                    window.location.href = '/dashboard';
+                    return;
+                  }
+
+                  handleSubscribe(tier.priceId);
+                }}
               >
-                {loading === tier.priceId ? 'Loading...' : tier.cta}
+                {isLoading ? 'Loading...' : tier.cta}
               </Button>
-              <div>
-                <ul className="flex flex-col gap-1">
-                  {tier.features.map((feature) => (
-                    <li key={feature} className="text-foreground flex items-center gap-1 text-sm">
-                      <CheckCircle className="text-primary h-4 w-4" />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+
+              <ul className="flex flex-col gap-1">
+                {tier.features.map((feature) => (
+                  <li key={feature} className="flex items-center gap-1 text-sm">
+                    <CheckCircle className="text-primary h-4 w-4" />
+                    {feature}
+                  </li>
+                ))}
+              </ul>
             </div>
           );
         })}
