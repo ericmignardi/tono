@@ -7,11 +7,15 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 });
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 export async function POST(req: NextRequest) {
   const body = await req.text();
   const signature = req.headers.get('stripe-signature');
 
   if (!signature) {
+    console.error('Missing stripe-signature header');
     return new NextResponse('Missing stripe-signature header', { status: 400 });
   }
 
@@ -19,6 +23,7 @@ export async function POST(req: NextRequest) {
 
   try {
     event = stripe.webhooks.constructEvent(body, signature, endpointSecret);
+    console.log(`✅ Webhook verified: ${event.type}`);
   } catch (err) {
     console.error('❌ Stripe webhook signature verification failed:', err);
     return new NextResponse(
@@ -31,8 +36,12 @@ export async function POST(req: NextRequest) {
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
+        console.log(`💳 Checkout session completed: ${session.id}`);
+
         if (session.mode === 'subscription' && typeof session.subscription === 'string') {
-          const subscription = await stripe.subscriptions.retrieve(session.subscription);
+          const subscription = await stripe.subscriptions.retrieve(session.subscription, {
+            expand: ['items.data.price'],
+          });
           await handleSubscriptionChange(subscription);
         }
         break;
@@ -41,6 +50,7 @@ export async function POST(req: NextRequest) {
       case 'customer.subscription.created':
       case 'customer.subscription.updated': {
         const subscription = event.data.object as Stripe.Subscription;
+        console.log(`🔄 Subscription ${event.type}: ${subscription.id}`);
         await handleSubscriptionChange(subscription);
         break;
       }
@@ -57,7 +67,6 @@ export async function POST(req: NextRequest) {
       case 'invoice.payment_failed': {
         const invoice = event.data.object as Stripe.Invoice;
 
-        // Type assertion to access subscription property
         const invoiceWithSubscription = invoice as Stripe.Invoice & {
           subscription?: string | Stripe.Subscription;
         };
@@ -73,7 +82,7 @@ export async function POST(req: NextRequest) {
         }
 
         if (!subscriptionId) {
-          console.warn('Invoice has no subscription ID, skipping');
+          console.warn('⚠️ Invoice has no subscription ID, skipping');
           break;
         }
 
@@ -86,43 +95,65 @@ export async function POST(req: NextRequest) {
       }
 
       default:
-        console.log(`Unhandled event type: ${event.type}`);
+        console.log(`ℹ️ Unhandled event type: ${event.type}`);
     }
-  } catch (error) {
-    console.error('Error processing webhook:', error);
-    return new NextResponse('Webhook handler failed', { status: 500 });
-  }
 
-  return new NextResponse('OK', { status: 200 });
+    return new NextResponse(JSON.stringify({ received: true }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error) {
+    console.error('❌ Error processing webhook:', error);
+    return new NextResponse(JSON.stringify({ error: 'Webhook handler failed' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
 }
 
 async function handleSubscriptionChange(subscription: Stripe.Subscription) {
   const customerId = subscription.customer as string;
+
+  console.log(`🔍 Looking for user with Stripe ID: ${customerId}`);
 
   const user = await prisma.user.findFirst({
     where: { stripeId: customerId },
   });
 
   if (!user) {
-    console.warn(`⚠️ User not found for Stripe customer ${customerId}`);
+    console.error(`❌ User not found for Stripe customer ${customerId}`);
     return;
   }
 
-  // Type assertion to access current_period_end
-  const subscriptionWithPeriod = subscription as Stripe.Subscription & {
+  console.log(`👤 Found user: ${user.id} (${user.email})`);
+
+  // In API version 2025-03-31+, current_period_end moved to subscription items
+  const subscriptionItem = subscription.items.data[0];
+
+  if (!subscriptionItem) {
+    console.warn(`⚠️ Subscription ${subscription.id} has no items`);
+    return;
+  }
+
+  // Access current_period_end from the subscription item
+  const subscriptionItemWithPeriod = subscriptionItem as Stripe.SubscriptionItem & {
     current_period_end?: number;
   };
 
-  const currentPeriodEnd = subscriptionWithPeriod.current_period_end;
+  const currentPeriodEnd = subscriptionItemWithPeriod.current_period_end;
 
   if (!currentPeriodEnd) {
-    console.warn(`Subscription ${subscription.id} missing current_period_end`);
+    console.warn(`⚠️ Subscription item ${subscriptionItem.id} missing current_period_end`);
     return;
   }
 
-  const priceRaw = subscription.items.data[0]?.price;
+  const priceRaw = subscriptionItem.price;
   const priceId = typeof priceRaw === 'string' ? priceRaw : (priceRaw?.id ?? 'unknown');
   const periodEnd = new Date(currentPeriodEnd * 1000);
+
+  console.log(
+    `💾 Upserting subscription: ${subscription.id}, status: ${subscription.status}, period end: ${periodEnd}`
+  );
 
   await prisma.subscription.upsert({
     where: { stripeId: subscription.id },
@@ -140,5 +171,5 @@ async function handleSubscriptionChange(subscription: Stripe.Subscription) {
     },
   });
 
-  console.log(`✅ Subscription synced: ${subscription.id}`);
+  console.log(`✅ Subscription synced: ${subscription.id} for user ${user.email}`);
 }
