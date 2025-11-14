@@ -57,6 +57,7 @@ export async function POST(req: NextRequest) {
       case 'invoice.payment_failed': {
         const invoice = event.data.object as Stripe.Invoice;
 
+        // Type assertion to access subscription property
         const invoiceWithSubscription = invoice as Stripe.Invoice & {
           subscription?: string | Stripe.Subscription;
         };
@@ -107,7 +108,12 @@ async function handleSubscriptionChange(subscription: Stripe.Subscription) {
     return;
   }
 
-  const currentPeriodEnd = (subscription as any).current_period_end as number | undefined;
+  // Type assertion to access current_period_end
+  const subscriptionWithPeriod = subscription as Stripe.Subscription & {
+    current_period_end?: number;
+  };
+
+  const currentPeriodEnd = subscriptionWithPeriod.current_period_end;
 
   if (!currentPeriodEnd) {
     console.warn(`Subscription ${subscription.id} missing current_period_end`);
