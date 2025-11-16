@@ -24,10 +24,35 @@ export default function Sidebar() {
       {/* Logo */}
       <div className="border-border flex h-16 items-center justify-center px-4 lg:justify-start">
         <Link href="/" className="flex items-center">
-          <picture>
-            <source media="(min-width: 1024px)" srcSet={logo.src} />
-            <Image src={logoMobile} alt="Tonifier logo" className="h-8 w-auto" priority />
-          </picture>
+          {/* Light mode - Desktop logo */}
+          <Image
+            src={logo}
+            alt="Tonifier logo"
+            className="hidden h-8 w-auto lg:block dark:lg:hidden"
+            priority
+          />
+          {/* Light mode - Mobile logo */}
+          <Image
+            src={logoMobile}
+            alt="Tonifier logo"
+            className="block h-8 w-auto lg:hidden dark:hidden"
+            priority
+          />
+
+          {/* Dark mode - Desktop logo */}
+          <Image
+            src={logoDark}
+            alt="Tonifier logo"
+            className="hidden h-8 w-auto dark:lg:block"
+            priority
+          />
+          {/* Dark mode - Mobile logo */}
+          <Image
+            src={logoMobileDark}
+            alt="Tonifier logo"
+            className="hidden h-8 w-auto dark:block lg:dark:hidden"
+            priority
+          />
         </Link>
       </div>
 
