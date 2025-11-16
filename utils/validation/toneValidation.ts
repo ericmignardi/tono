@@ -37,6 +37,6 @@ export const ToneCreateSchema = z.object({
 export const ToneUpdateSchema = ToneCreateSchema.partial();
 
 export const ToneQuerySchema = z.object({
-  page: z.string().optional().default('1'),
-  limit: z.string().optional().default('20'),
+  page: z.coerce.number().int().positive().optional().default(1),
+  limit: z.coerce.number().int().positive().max(100).optional().default(20),
 });

@@ -9,8 +9,6 @@ import { ToneCreateBody } from '@/types/tone/toneValidationTypes';
 import { APIError, handleAPIError, logRequest } from '@/lib/api/errorHandler';
 import { randomUUID } from 'crypto';
 
-export const maxDuration = 60;
-
 export async function POST(req: NextRequest) {
   const requestId = randomUUID();
 
@@ -27,7 +25,6 @@ export async function POST(req: NextRequest) {
       userId: user.id,
     });
 
-    // Rate limiting for AI generation
     const { success } = await toneRateLimit.limit(user.id);
     if (!success) {
       throw new APIError(
@@ -43,24 +40,38 @@ export async function POST(req: NextRequest) {
     }
 
     const body: ToneCreateBody = await req.json();
-    const parsed = ToneCreateSchema.safeParse(body);
 
+    const parsed = ToneCreateSchema.safeParse(body);
     if (!parsed.success) {
-      throw new APIError('Invalid input data', 400, 'VALIDATION_ERROR');
+      throw new APIError('Invalid input data', 400, 'VALIDATION_ERROR', parsed.error.issues);
     }
 
     const { name, artist, description, guitar, pickups, strings, amp } = parsed.data;
 
-    // Check credit limit
-    if (dbUser.generationsUsed >= dbUser.generationsLimit) {
-      throw new APIError(
-        'No remaining credits. Please upgrade your plan.',
-        403,
-        'CREDITS_EXHAUSTED'
-      );
-    }
+    // Check and reserve credit inside a transaction to prevent race conditions
+    await prisma.$transaction(async (tx) => {
+      // Get fresh user data inside transaction
+      const freshUser = await tx.user.findUnique({
+        where: { id: dbUser.id },
+        select: { generationsUsed: true, generationsLimit: true },
+      });
 
-    // Generate AI settings
+      if (!freshUser || freshUser.generationsUsed >= freshUser.generationsLimit) {
+        throw new APIError(
+          'No remaining credits. Please upgrade your plan.',
+          403,
+          'CREDITS_EXHAUSTED'
+        );
+      }
+
+      // Reserve the credit immediately
+      await tx.user.update({
+        where: { id: dbUser.id },
+        data: { generationsUsed: { increment: 1 } },
+      });
+    });
+
+    // Generate AI settings after credit is reserved
     const aiResult = await generateToneSettings({
       artist,
       description,
@@ -70,27 +81,21 @@ export async function POST(req: NextRequest) {
       amp,
     });
 
-    // Create tone and increment usage in a transaction
-    const [tone] = await prisma.$transaction([
-      prisma.tone.create({
-        data: {
-          userId: dbUser.id,
-          name,
-          artist,
-          description,
-          guitar,
-          pickups,
-          strings,
-          amp,
-          aiAmpSettings: aiResult.ampSettings,
-          aiNotes: aiResult.notes,
-        },
-      }),
-      prisma.user.update({
-        where: { id: dbUser.id },
-        data: { generationsUsed: { increment: 1 } },
-      }),
-    ]);
+    // Create the tone with the AI results
+    const tone = await prisma.tone.create({
+      data: {
+        userId: dbUser.id,
+        name,
+        artist,
+        description,
+        guitar,
+        pickups,
+        strings,
+        amp,
+        aiAmpSettings: aiResult.ampSettings,
+        aiNotes: aiResult.notes,
+      },
+    });
 
     revalidatePath('/dashboard/tones');
 
@@ -135,18 +140,24 @@ export async function GET(req: NextRequest) {
       where: { clerkId: user.id },
       select: { id: true },
     });
-
     if (!dbUser) {
       throw new APIError('User not found', 404, 'USER_NOT_FOUND');
     }
 
-    const queryParsed = ToneQuerySchema.parse({
+    const queryParsed = ToneQuerySchema.safeParse({
       page: req.nextUrl.searchParams.get('page'),
       limit: req.nextUrl.searchParams.get('limit'),
     });
+    if (!queryParsed.success) {
+      throw new APIError(
+        'Invalid query parameters',
+        400,
+        'VALIDATION_ERROR',
+        queryParsed.error.issues
+      );
+    }
 
-    const page = Math.max(1, parseInt(queryParsed.page, 10));
-    const limit = Math.min(100, Math.max(1, parseInt(queryParsed.limit, 10)));
+    const { page, limit } = queryParsed.data;
 
     const [tones, total] = await Promise.all([
       prisma.tone.findMany({

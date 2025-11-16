@@ -9,16 +9,19 @@ import { ToneUpdateSchema } from '@/utils/validation/toneValidation';
 import { ToneUpdateBody } from '@/types/tone/toneValidationTypes';
 import { APIError, handleAPIError, logRequest } from '@/lib/api/errorHandler';
 import { randomUUID } from 'crypto';
-
-export const maxDuration = 60;
+import { z } from 'zod';
 
 export async function GET(_req: NextRequest, context: { params: Promise<{ id: string }> }) {
   const requestId = randomUUID();
 
   try {
     const { id } = await context.params;
-    const user = await currentUser();
+    const idParsed = z.string().cuid().safeParse(id);
+    if (!idParsed.success) {
+      throw new APIError('Invalid tone ID format', 400, 'INVALID_ID', idParsed.error.issues);
+    }
 
+    const user = await currentUser();
     if (!user) {
       throw new APIError('Unauthorized', 401, 'UNAUTHORIZED');
     }
@@ -26,7 +29,7 @@ export async function GET(_req: NextRequest, context: { params: Promise<{ id: st
     logRequest({
       requestId,
       method: 'GET',
-      path: `/api/tones/${id}`,
+      path: `/api/tones/${idParsed.data}`,
       userId: user.id,
     });
 
@@ -40,15 +43,13 @@ export async function GET(_req: NextRequest, context: { params: Promise<{ id: st
       where: { clerkId: user.id },
       select: { id: true },
     });
-
     if (!dbUser) {
       throw new APIError('User not found', 404, 'USER_NOT_FOUND');
     }
 
     const tone = await prisma.tone.findFirst({
-      where: { id, userId: dbUser.id },
+      where: { id: idParsed.data, userId: dbUser.id },
     });
-
     if (!tone) {
       throw new APIError('Tone not found', 404, 'TONE_NOT_FOUND');
     }
@@ -64,8 +65,12 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ id: str
 
   try {
     const { id } = await context.params;
-    const user = await currentUser();
+    const idParsed = z.string().cuid().safeParse(id);
+    if (!idParsed.success) {
+      throw new APIError('Invalid tone ID format', 400, 'INVALID_ID', idParsed.error.issues);
+    }
 
+    const user = await currentUser();
     if (!user) {
       throw new APIError('Unauthorized', 401, 'UNAUTHORIZED');
     }
@@ -73,36 +78,33 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ id: str
     logRequest({
       requestId,
       method: 'PUT',
-      path: `/api/tones/${id}`,
+      path: `/api/tones/${idParsed.data}`,
       userId: user.id,
     });
 
     const dbUser = await prisma.user.findUnique({
       where: { clerkId: user.id },
     });
-
     if (!dbUser) {
       throw new APIError('User not found', 404, 'USER_NOT_FOUND');
     }
 
     const body: ToneUpdateBody = await req.json();
-    const parsed = ToneUpdateSchema.safeParse(body);
 
+    const parsed = ToneUpdateSchema.safeParse(body);
     if (!parsed.success) {
-      throw new APIError('Invalid input data', 400, 'VALIDATION_ERROR');
+      throw new APIError('Invalid input data', 400, 'VALIDATION_ERROR', parsed.error.issues);
     }
 
     const validatedBody = parsed.data;
 
     const tone = await prisma.tone.findFirst({
-      where: { id, userId: dbUser.id },
+      where: { id: idParsed.data, userId: dbUser.id },
     });
-
     if (!tone) {
       throw new APIError('Tone not found', 404, 'TONE_NOT_FOUND');
     }
 
-    // Check if gear fields changed (requires AI regeneration)
     const gearChanged =
       validatedBody.artist !== undefined ||
       validatedBody.description !== undefined ||
@@ -125,7 +127,6 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ id: str
     };
 
     if (gearChanged) {
-      // Rate limit AI generation
       const { success } = await toneRateLimit.limit(user.id);
       if (!success) {
         throw new APIError(
@@ -135,16 +136,32 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ id: str
         );
       }
 
-      // Check credit limit
-      if (dbUser.generationsUsed >= dbUser.generationsLimit) {
-        throw new APIError(
-          'No remaining credits. Please upgrade your plan.',
-          403,
-          'CREDITS_EXHAUSTED'
-        );
-      }
+      // Use transaction to prevent race condition with credit checking
+      await prisma.$transaction(async (tx) => {
+        // Get fresh user data inside transaction
+        const freshUser = await tx.user.findUnique({
+          where: { id: dbUser.id },
+          select: { generationsUsed: true, generationsLimit: true },
+        });
 
-      // Regenerate AI settings
+        if (!freshUser || freshUser.generationsUsed >= freshUser.generationsLimit) {
+          throw new APIError(
+            'No remaining credits. Please upgrade your plan.',
+            403,
+            'CREDITS_EXHAUSTED'
+          );
+        }
+
+        // Reserve the credit immediately
+        await tx.user.update({
+          where: { id: dbUser.id },
+          data: {
+            generationsUsed: { increment: 1 },
+          },
+        });
+      });
+
+      // Generate AI settings after credit is reserved
       aiResult = await regenerateToneSettings(
         {
           artist: validatedBody.artist ?? tone.artist ?? '',
@@ -157,26 +174,18 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ id: str
         aiResult
       );
 
-      // Increment usage after successful AI generation
-      await prisma.user.update({
-        where: { id: dbUser.id },
-        data: {
-          generationsUsed: { increment: 1 },
-        },
-      });
-
       console.log(
         JSON.stringify({
           requestId,
           action: 'tone_regenerated',
-          toneId: id,
+          toneId: idParsed.data,
           userId: dbUser.id,
         })
       );
     }
 
     const updatedTone = await prisma.tone.update({
-      where: { id },
+      where: { id: idParsed.data },
       data: {
         ...validatedBody,
         aiAmpSettings: aiResult.ampSettings,
@@ -190,7 +199,7 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ id: str
       JSON.stringify({
         requestId,
         action: 'tone_updated',
-        toneId: id,
+        toneId: idParsed.data,
         userId: dbUser.id,
         gearChanged,
       })
@@ -210,8 +219,12 @@ export async function DELETE(_req: NextRequest, context: { params: Promise<{ id:
 
   try {
     const { id } = await context.params;
-    const user = await currentUser();
+    const idParsed = z.string().cuid().safeParse(id);
+    if (!idParsed.success) {
+      throw new APIError('Invalid tone ID format', 400, 'INVALID_ID', idParsed.error.issues);
+    }
 
+    const user = await currentUser();
     if (!user) {
       throw new APIError('Unauthorized', 401, 'UNAUTHORIZED');
     }
@@ -219,7 +232,7 @@ export async function DELETE(_req: NextRequest, context: { params: Promise<{ id:
     logRequest({
       requestId,
       method: 'DELETE',
-      path: `/api/tones/${id}`,
+      path: `/api/tones/${idParsed.data}`,
       userId: user.id,
     });
 
@@ -233,25 +246,24 @@ export async function DELETE(_req: NextRequest, context: { params: Promise<{ id:
       where: { clerkId: user.id },
       select: { id: true },
     });
-
     if (!dbUser) {
       throw new APIError('User not found', 404, 'USER_NOT_FOUND');
     }
 
-    const tone = await prisma.tone.findFirst({ where: { id, userId: dbUser.id } });
-
+    const tone = await prisma.tone.findFirst({ where: { id: idParsed.data, userId: dbUser.id } });
     if (!tone) {
       throw new APIError('Tone not found', 404, 'TONE_NOT_FOUND');
     }
 
-    await prisma.tone.delete({ where: { id } });
+    await prisma.tone.delete({ where: { id: idParsed.data } });
+
     revalidatePath('/dashboard/tones');
 
     console.log(
       JSON.stringify({
         requestId,
         action: 'tone_deleted',
-        toneId: id,
+        toneId: idParsed.data,
         userId: dbUser.id,
       })
     );
