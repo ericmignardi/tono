@@ -2,27 +2,63 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma/database';
+import { config, ALLOWED_PRICE_IDS } from '@/lib/config';
+import { checkoutRateLimit } from '@/lib/rateLimit';
+import { APIError, handleAPIError, logRequest } from '@/lib/api/errorHandler';
+import { randomUUID } from 'crypto';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+const stripe = new Stripe(config.STRIPE_SECRET_KEY, {
+  apiVersion: '2025-10-29.clover',
+});
+
+export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
+  const requestId = randomUUID();
+
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      throw new APIError('Unauthorized', 401, 'UNAUTHORIZED');
     }
 
-    const { priceId } = await req.json();
-    if (!priceId) {
-      return NextResponse.json({ error: 'Price ID required' }, { status: 400 });
+    logRequest({
+      requestId,
+      method: 'POST',
+      path: '/api/stripe/checkout',
+      userId,
+    });
+
+    // Rate limiting
+    const { success } = await checkoutRateLimit.limit(userId);
+    if (!success) {
+      throw new APIError(
+        'Too many checkout attempts. Please try again later.',
+        429,
+        'RATE_LIMIT_EXCEEDED'
+      );
     }
 
+    // Parse and validate request body
+    const body = await req.json();
+    const { priceId } = body;
+
+    if (!priceId || typeof priceId !== 'string') {
+      throw new APIError('Price ID is required', 400, 'INVALID_INPUT');
+    }
+
+    // Validate price ID against whitelist
+    if (!ALLOWED_PRICE_IDS.includes(priceId)) {
+      throw new APIError('Invalid price ID', 400, 'INVALID_PRICE_ID');
+    }
+
+    // Get user from database
     const user = await prisma.user.findUnique({
       where: { clerkId: userId },
     });
 
     if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+      throw new APIError('User not found', 404, 'USER_NOT_FOUND');
     }
 
     let customerId = user.stripeId;
@@ -30,18 +66,21 @@ export async function POST(req: NextRequest) {
     // Create Stripe customer if doesn't exist
     if (!customerId) {
       const customer = await stripe.customers.create({
-        email: user.email,
+        email: user.email ?? undefined,
         metadata: {
           clerkId: user.clerkId,
           userId: user.id,
         },
       });
+
       customerId = customer.id;
 
       await prisma.user.update({
         where: { clerkId: user.clerkId },
         data: { stripeId: customerId },
       });
+
+      console.log(`Created Stripe customer ${customerId} for user ${user.id}`);
     }
 
     // Create checkout session
@@ -55,18 +94,27 @@ export async function POST(req: NextRequest) {
           userId: user.id,
         },
       },
-      success_url: `${process.env.NEXT_PUBLIC_URL}/dashboard?success=true`,
-      cancel_url: `${process.env.NEXT_PUBLIC_URL}/pricing?canceled=true`,
+      success_url: `${config.NEXT_PUBLIC_URL}/dashboard?success=true`,
+      cancel_url: `${config.NEXT_PUBLIC_URL}/pricing?canceled=true`,
       allow_promotion_codes: true,
     });
 
+    console.log(
+      JSON.stringify({
+        requestId,
+        action: 'checkout_session_created',
+        sessionId: session.id,
+        userId: user.id,
+      })
+    );
+
     return NextResponse.json({ url: session.url });
   } catch (error) {
-    console.error('Error creating checkout session:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    return NextResponse.json(
-      { error: 'Failed to create checkout session', details: errorMessage },
-      { status: 500 }
-    );
+    return handleAPIError(error, requestId);
   }
+}
+
+// Reject other methods
+export async function GET() {
+  return NextResponse.json({ error: 'Method not allowed' }, { status: 405 });
 }

@@ -3,36 +3,64 @@ import { prisma } from '@/lib/prisma/database';
 import { currentUser } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
 import { generateToneSettings } from '@/lib/openai/toneAiService';
-import { toneRateLimit } from '@/lib/rateLimit';
+import { toneRateLimit, apiRateLimit } from '@/lib/rateLimit';
 import { ToneCreateSchema, ToneQuerySchema } from '@/utils/validation/toneValidation';
 import { ToneCreateBody } from '@/types/tone/toneValidationTypes';
+import { APIError, handleAPIError, logRequest } from '@/lib/api/errorHandler';
+import { randomUUID } from 'crypto';
+
+export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
-  const user = await currentUser();
-  if (!user) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-
-  const { success } = await toneRateLimit.limit(user.id);
-  if (!success) return NextResponse.json({ message: 'Rate limit exceeded' }, { status: 429 });
-
-  const dbUser = await prisma.user.findUnique({ where: { clerkId: user.id } });
-  if (!dbUser) return NextResponse.json({ message: 'User not found' }, { status: 404 });
+  const requestId = randomUUID();
 
   try {
+    const user = await currentUser();
+    if (!user) {
+      throw new APIError('Unauthorized', 401, 'UNAUTHORIZED');
+    }
+
+    logRequest({
+      requestId,
+      method: 'POST',
+      path: '/api/tones',
+      userId: user.id,
+    });
+
+    // Rate limiting for AI generation
+    const { success } = await toneRateLimit.limit(user.id);
+    if (!success) {
+      throw new APIError(
+        'Too many tone generation requests. Please slow down.',
+        429,
+        'RATE_LIMIT_EXCEEDED'
+      );
+    }
+
+    const dbUser = await prisma.user.findUnique({ where: { clerkId: user.id } });
+    if (!dbUser) {
+      throw new APIError('User not found', 404, 'USER_NOT_FOUND');
+    }
+
     const body: ToneCreateBody = await req.json();
     const parsed = ToneCreateSchema.safeParse(body);
+
     if (!parsed.success) {
-      return NextResponse.json(
-        { message: 'Invalid input', errors: parsed.error.format() },
-        { status: 400 }
-      );
+      throw new APIError('Invalid input data', 400, 'VALIDATION_ERROR');
     }
 
     const { name, artist, description, guitar, pickups, strings, amp } = parsed.data;
 
+    // Check credit limit
     if (dbUser.generationsUsed >= dbUser.generationsLimit) {
-      return NextResponse.json({ message: 'No remaining credits' }, { status: 403 });
+      throw new APIError(
+        'No remaining credits. Please upgrade your plan.',
+        403,
+        'CREDITS_EXHAUSTED'
+      );
     }
 
+    // Generate AI settings
     const aiResult = await generateToneSettings({
       artist,
       description,
@@ -42,6 +70,7 @@ export async function POST(req: NextRequest) {
       amp,
     });
 
+    // Create tone and increment usage in a transaction
     const [tone] = await prisma.$transaction([
       prisma.tone.create({
         data: {
@@ -65,34 +94,52 @@ export async function POST(req: NextRequest) {
 
     revalidatePath('/dashboard/tones');
 
+    console.log(
+      JSON.stringify({
+        requestId,
+        action: 'tone_created',
+        toneId: tone.id,
+        userId: dbUser.id,
+      })
+    );
+
     return NextResponse.json({ message: 'Successfully created tone', tone }, { status: 201 });
   } catch (error) {
-    console.error(`[Tones POST] Error for user ${user.id}:`, error);
-    return NextResponse.json(
-      {
-        message: 'Failed to create tone',
-        error: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    );
+    return handleAPIError(error, requestId);
   }
 }
 
 export async function GET(req: NextRequest) {
-  const user = await currentUser();
-  if (!user) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-
-  // ❗ Optional: consider removing rate limit here for UX reasons
-  const { success } = await toneRateLimit.limit(user.id);
-  if (!success) return NextResponse.json({ message: 'Rate limit exceeded' }, { status: 429 });
-
-  const dbUser = await prisma.user.findUnique({
-    where: { clerkId: user.id },
-    select: { id: true },
-  });
-  if (!dbUser) return NextResponse.json({ message: 'User not found' }, { status: 404 });
+  const requestId = randomUUID();
 
   try {
+    const user = await currentUser();
+    if (!user) {
+      throw new APIError('Unauthorized', 401, 'UNAUTHORIZED');
+    }
+
+    logRequest({
+      requestId,
+      method: 'GET',
+      path: '/api/tones',
+      userId: user.id,
+    });
+
+    // Lighter rate limit for read operations
+    const { success } = await apiRateLimit.limit(user.id);
+    if (!success) {
+      throw new APIError('Too many requests. Please slow down.', 429, 'RATE_LIMIT_EXCEEDED');
+    }
+
+    const dbUser = await prisma.user.findUnique({
+      where: { clerkId: user.id },
+      select: { id: true },
+    });
+
+    if (!dbUser) {
+      throw new APIError('User not found', 404, 'USER_NOT_FOUND');
+    }
+
     const queryParsed = ToneQuerySchema.parse({
       page: req.nextUrl.searchParams.get('page'),
       limit: req.nextUrl.searchParams.get('limit'),
@@ -129,13 +176,6 @@ export async function GET(req: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    console.error(`[Tones GET] Error for user ${user.id}:`, error);
-    return NextResponse.json(
-      {
-        message: 'Failed to fetch tones',
-        error: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    );
+    return handleAPIError(error, requestId);
   }
 }

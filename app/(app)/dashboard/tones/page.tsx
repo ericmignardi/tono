@@ -30,7 +30,7 @@ export default async function Tones() {
           <p className="text-muted-foreground">View your personal library of tones.</p>
         </div>
         <div>
-          <Link href="/dashboard/create-tone">
+          <Link href="/dashboard/create">
             <Button variant={'outline'} className="cursor-pointer">
               Create Tone
             </Button>

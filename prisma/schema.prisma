@@ -50,4 +50,18 @@ model Tone {
   aiNotes      String
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+  @@index([userId, createdAt])
+}
+
+model WebhookEvent {
+  id        String   @id @default(cuid())
+  eventId   String   @unique
+  type      String
+  processed Boolean  @default(false)
+  error     String?
+  createdAt DateTime @default(now())
+
+  @@index([eventId])
+  @@index([processed])
+  @@index([createdAt])
 }
