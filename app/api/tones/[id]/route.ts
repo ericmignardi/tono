@@ -11,6 +11,8 @@ import { APIError, handleAPIError, logRequest } from '@/lib/api/errorHandler';
 import { randomUUID } from 'crypto';
 import { z } from 'zod';
 
+export const maxDuration = 60;
+
 export async function GET(_req: NextRequest, context: { params: Promise<{ id: string }> }) {
   const requestId = randomUUID();
 

@@ -9,6 +9,8 @@ import { ToneCreateBody } from '@/types/tone/toneValidationTypes';
 import { APIError, handleAPIError, logRequest } from '@/lib/api/errorHandler';
 import { randomUUID } from 'crypto';
 
+export const maxDuration = 60;
+
 export async function POST(req: NextRequest) {
   const requestId = randomUUID();
 
