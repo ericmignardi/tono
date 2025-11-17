@@ -20,6 +20,7 @@ export default function GetStarted() {
         </div>
         <div>
           <Image
+            placeholder="blur"
             className="w-full rounded-2xl border shadow-2xl"
             src={getStarted}
             alt="Tone detail page screenshot"

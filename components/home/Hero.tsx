@@ -30,6 +30,7 @@ export default function Hero() {
         </div>
         <div>
           <Image
+            placeholder="blur"
             className="w-full rounded-2xl border shadow-2xl"
             src={hero}
             alt="Tone dashboard page screenshot"
