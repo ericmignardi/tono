@@ -1,4 +1,5 @@
 import Features from '@/components/home/Features';
+import GetStarted from '@/components/home/GetStarted';
 import Hero from '@/components/home/Hero';
 import Pricing from '@/components/home/Pricing';
 
@@ -8,6 +9,7 @@ export default function Home() {
       <Hero />
       <Features />
       <Pricing />
+      <GetStarted />
     </div>
   );
 }

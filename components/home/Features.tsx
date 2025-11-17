@@ -1,6 +1,6 @@
 import { Clock, Guitar, Library, RefreshCw, Sparkles, Zap } from 'lucide-react';
-import { Badge } from '../ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function Features() {
   const features = [
@@ -44,7 +44,7 @@ export default function Features() {
 
   return (
     <section id="features">
-      <div className="mx-auto flex max-w-7xl flex-col items-center justify-center gap-12 p-8 lg:p-32">
+      <div className="mx-auto flex max-w-7xl flex-col items-center justify-center gap-16 p-8 lg:p-32">
         <div className="flex flex-col items-center justify-center gap-4 text-center">
           <Badge variant={'outline'}>Our Features</Badge>
           <h2 className="text-4xl font-bold lg:text-5xl">

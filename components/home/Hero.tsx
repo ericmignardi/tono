@@ -23,16 +23,15 @@ export default function Hero() {
           <div className="flex items-center gap-3">
             <SignedOut>
               <SignUpButton>
-                <Button>Get started</Button>
+                <Button className="cursor-pointer">Get started</Button>
               </SignUpButton>
             </SignedOut>
           </div>
         </div>
         <div>
           <Image
-            className="rounded-2xl border shadow-2xl"
+            className="w-full rounded-2xl border shadow-2xl"
             src={hero}
-            width={720}
             alt="Tone dashboard page screenshot"
           />
         </div>

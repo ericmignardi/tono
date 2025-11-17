@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
-import { Vend_Sans } from 'next/font/google';
+import { Quicksand } from 'next/font/google';
 import './globals.css';
 import { ClerkProvider } from '@clerk/nextjs';
 import { Providers } from './providers';
 import { Toaster } from '@/components/ui/sonner';
 
-const vendSans = Vend_Sans({
-  variable: '--font-vend',
+const quicksandSans = Quicksand({
+  variable: '--font-quicksand',
   subsets: ['latin'],
   weight: ['300', '400', '500', '600', '700'],
 });
@@ -25,7 +25,9 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
-        <body className={`${vendSans.variable} ${vendSans.className} font-sans antialiased`}>
+        <body
+          className={`${quicksandSans.variable} ${quicksandSans.className} font-sans antialiased`}
+        >
           <Providers>{children}</Providers>
           <Toaster />
         </body>

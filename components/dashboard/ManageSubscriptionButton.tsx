@@ -29,7 +29,7 @@ export default function ManageSubscriptionButton() {
   };
 
   return (
-    <Button onClick={handleManage} disabled={loading} variant="outline">
+    <Button className="cursor-pointer" onClick={handleManage} disabled={loading} variant="outline">
       <Settings className="mr-2 h-4 w-4" />
       {loading ? 'Loading...' : 'Manage Subscription'}
     </Button>

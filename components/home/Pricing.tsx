@@ -92,8 +92,8 @@ export default function Pricing({ hasActiveSubscription = false }: PricingProps)
   };
 
   return (
-    <section id="pricing">
-      <div className="mx-auto flex max-w-7xl flex-col items-center justify-center gap-12 p-8 lg:p-32">
+    <section id="pricing" className="bg-primary/25">
+      <div className="mx-auto flex max-w-7xl flex-col items-center justify-center gap-16 p-8 lg:p-32">
         <div className="flex flex-col items-center justify-center gap-4 text-center">
           <h2 className="text-4xl font-bold lg:text-5xl">Simple, Transparent Pricing</h2>
           <p>
@@ -111,7 +111,7 @@ export default function Pricing({ hasActiveSubscription = false }: PricingProps)
             return (
               <Card
                 key={tier.name}
-                className="last:border-primary last:from-background last:via-background last:to-primary/50 flex flex-col shadow-md last:bg-linear-to-tr"
+                className="last:border-primary last:from-background last:via-background last:to-primary/50 flex flex-col shadow-md transition-transform last:bg-linear-to-tr hover:-translate-y-2"
               >
                 <CardHeader>
                   <div className="flex items-center justify-between">
@@ -137,7 +137,7 @@ export default function Pricing({ hasActiveSubscription = false }: PricingProps)
 
                 <CardFooter>
                   <Button
-                    className="w-full"
+                    className="w-full cursor-pointer"
                     variant={tier.priceId ? 'default' : 'outline'}
                     disabled={isLoading}
                     onClick={() => {
