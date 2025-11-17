@@ -8,7 +8,7 @@ export default function Hero() {
   return (
     <section
       id="hero"
-      className="from-background via-primary to-background min-h-screen place-content-center bg-linear-to-b"
+      className="from-background via-background to-primary/50 min-h-screen place-content-center bg-linear-to-tr"
     >
       <div className="flex flex-col items-center justify-center gap-16 p-8 lg:p-32">
         <div className="flex flex-col items-center justify-center gap-4 text-center">
