@@ -65,13 +65,13 @@ export default function Sidebar() {
               key={href}
               href={href}
               className={cn(
-                'flex w-full items-center gap-3 px-3 py-2 text-[13px] font-normal transition-colors',
+                'flex w-full items-center justify-center gap-3 px-3 py-2 text-[13px] font-normal transition-colors lg:justify-start',
                 isActive
                   ? 'bg-accent text-accent-foreground font-medium'
                   : 'text-muted-foreground hover:bg-primary hover:text-foreground'
               )}
             >
-              <Icon className="h-[18px] w-[18px] shrink-0" />
+              <Icon className="h-4 w-4 shrink-0" />
               <span className="hidden truncate lg:block">{label}</span>
             </Link>
           );

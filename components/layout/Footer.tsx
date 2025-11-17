@@ -1,15 +1,25 @@
-import { Github } from 'lucide-react';
+import { Facebook, Instagram, Twitter } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Footer() {
   const year = new Date().getFullYear();
+  const socialLinks = [
+    { href: '', Icon: Facebook },
+    { href: '', Icon: Instagram },
+    { href: '', Icon: Twitter },
+  ];
 
   return (
-    <footer className="bg-background fixed right-0 bottom-0 left-0 w-full border-t">
-      <div className="text-muted-foreground mx-auto flex max-w-7xl items-center justify-end p-4 text-sm">
-        <Link href="https://github.com/ericmignardi/tono">
-          <Github className="h-8 w-8" />
-        </Link>
+    <footer className="bg-background border-t">
+      <div className="flex items-center justify-between p-4 text-sm">
+        <div className="flex items-center">&copy; {year} tono. All rights reserved.</div>
+        <div className="flex items-center gap-4">
+          {socialLinks.map(({ href, Icon }, idx) => (
+            <Link key={idx} href={href}>
+              <Icon className="h-4 w-4" />
+            </Link>
+          ))}
+        </div>
       </div>
     </footer>
   );

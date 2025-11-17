@@ -1,18 +1,18 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Vend_Sans } from 'next/font/google';
 import './globals.css';
 import { ClerkProvider } from '@clerk/nextjs';
 import { Providers } from './providers';
 import { Toaster } from '@/components/ui/sonner';
 
-const interSans = Inter({
-  variable: '--font-inter',
+const vendSans = Vend_Sans({
+  variable: '--font-vend',
   subsets: ['latin'],
-  weight: ['200', '300', '400', '500', '600', '700', '800', '900'],
+  weight: ['300', '400', '500', '600', '700'],
 });
 
 export const metadata: Metadata = {
-  title: 'tonifier – Find Any Guitar Tone, Instantly.',
+  title: 'tono – Find Any Guitar Tone, Instantly.',
   description:
     'Use AI to recreate signature guitar tones or craft your own. Generate, tweak, and save tones in seconds.',
 };
@@ -25,7 +25,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
-        <body className={`${interSans.variable} ${interSans.className} antialiased`}>
+        <body className={`${vendSans.variable} ${vendSans.className} font-sans antialiased`}>
           <Providers>{children}</Providers>
           <Toaster />
         </body>

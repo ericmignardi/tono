@@ -7,18 +7,32 @@ import { Menu, X } from 'lucide-react';
 
 export default function Header() {
   const [mobileMenu, setMobileMenu] = useState<boolean>(false);
+  const navLinks = [
+    { href: '#features', title: 'Features' },
+    { href: '#pricing', title: 'Pricing' },
+  ];
 
   return (
-    <header className="bg-background fixed top-0 right-0 left-0 z-50 border-b shadow-sm">
-      <div className="relative mx-auto flex max-w-7xl items-center justify-between p-4">
+    <header className="bg-background fixed top-0 right-0 left-0 z-50 shadow-sm">
+      <div className="relative flex items-center justify-between p-4">
         <Link href="/">
           <h1 className="text-xl font-bold italic">tono</h1>
         </Link>
+
+        <div className="flex items-center gap-8">
+          {navLinks.map((link) => (
+            <Link
+              key={link.title}
+              href={link.href}
+              className="hover:text-primary text-sm font-medium"
+            >
+              {link.title}
+            </Link>
+          ))}
+        </div>
+
         <nav className="hidden items-center justify-between gap-4 lg:flex">
           <SignedOut>
-            <Link href="/pricing" className="hover:text-primary text-sm font-medium">
-              Pricing
-            </Link>
             <SignUpButton>
               <Button variant={'outline'}>Sign up</Button>
             </SignUpButton>
@@ -45,18 +59,20 @@ export default function Header() {
               onClick={() => setMobileMenu(false)}
             />
             {/* Mobile menu */}
-            <nav className="bg-background fixed top-0 right-0 z-60 flex h-screen w-[80%] flex-col gap-4 border border-red-500 p-6 pt-20 lg:hidden">
+            <nav className="bg-background fixed top-0 right-0 z-60 flex h-screen w-[80%] flex-col gap-4 p-8 pt-20 lg:hidden">
               <SignedOut>
-                <Link href="/pricing" className="hover:text-primary text-sm font-medium">
-                  Pricing
-                </Link>
+                {navLinks.map((link) => (
+                  <Link href={link.href} className="hover:text-primary text-sm font-medium">
+                    {link.title}
+                  </Link>
+                ))}
                 <SignUpButton>
                   <Button variant={'outline'} className="text-base">
                     Sign up
                   </Button>
                 </SignUpButton>
                 <SignInButton>
-                  <Button className="text-base">Sign in</Button>
+                  <Button>Sign in</Button>
                 </SignInButton>
               </SignedOut>
               <SignedIn>
