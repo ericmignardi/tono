@@ -319,7 +319,7 @@ describe('/api/tones/[id]', () => {
     it('should return 400 for invalid body', async () => {
       (currentUser as jest.Mock).mockResolvedValue(mockUser);
       (prisma.user.findUnique as jest.Mock).mockResolvedValue(mockDbUser);
-      const invalidBody = { guitar: null };
+      const invalidBody = { ...validUpdateBody, artist: null };
 
       const req = new NextRequest(`http://localhost/api/tones/${validId}`, {
         method: 'PUT',
