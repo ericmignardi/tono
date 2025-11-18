@@ -35,7 +35,7 @@ jest.mock('@/lib/rateLimit', () => ({
 
 jest.mock('@/lib/openai/toneAiService', () => ({
   generateToneSettings: jest.fn().mockResolvedValue({
-    ampSettings: { gain: 7 },
+    ampSettings: { gain: 7, mid: 5, bass: 5, reverb: 5, treble: 5, volume: 5, presence: 5 },
     notes: 'AI generated notes',
   }),
 }));
@@ -230,6 +230,162 @@ describe('/api/tones', () => {
       expect(generateToneSettings).not.toHaveBeenCalled();
       expect(prisma.tone.create).not.toHaveBeenCalled();
     });
+
+    it('should return 500 when AI generation fails', async () => {
+      (currentUser as jest.Mock).mockResolvedValue({
+        id: 'clerk_user_123',
+        email: 'test@example.com',
+      });
+      (toneRateLimit.limit as jest.Mock).mockResolvedValue({ success: true });
+      (prisma.user.findUnique as jest.Mock).mockResolvedValue({
+        id: 'db_user_1',
+        clerkId: 'clerk_user_123',
+      });
+      (prisma.$transaction as jest.Mock).mockImplementation(async (fn) =>
+        fn({
+          user: {
+            findUnique: jest.fn().mockResolvedValue({
+              generationsUsed: 0,
+              generationsLimit: 10,
+            }),
+            update: jest.fn().mockResolvedValue({}),
+          },
+        })
+      );
+      (generateToneSettings as jest.Mock).mockRejectedValueOnce(new Error('OpenAI API timeout'));
+
+      const req = new NextRequest('http://localhost/api/tones', {
+        method: 'POST',
+        body: JSON.stringify(validBody),
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      const res = await POST(req);
+      const json = await res.json();
+
+      expect(res.status).toBe(500);
+      expect(json.error).toBeDefined();
+      expect(prisma.tone.create).not.toHaveBeenCalled();
+    });
+
+    it('should return 500 when tone creation fails', async () => {
+      (currentUser as jest.Mock).mockResolvedValue({
+        id: 'clerk_user_123',
+        email: 'test@example.com',
+      });
+      (toneRateLimit.limit as jest.Mock).mockResolvedValue({ success: true });
+      (prisma.user.findUnique as jest.Mock).mockResolvedValue({
+        id: 'db_user_1',
+        clerkId: 'clerk_user_123',
+      });
+      (prisma.$transaction as jest.Mock).mockImplementation(async (fn) =>
+        fn({
+          user: {
+            findUnique: jest.fn().mockResolvedValue({
+              generationsUsed: 0,
+              generationsLimit: 10,
+            }),
+            update: jest.fn().mockResolvedValue({}),
+          },
+        })
+      );
+      (prisma.tone.create as jest.Mock).mockRejectedValueOnce(
+        new Error('Database constraint violation')
+      );
+
+      const req = new NextRequest('http://localhost/api/tones', {
+        method: 'POST',
+        body: JSON.stringify(validBody),
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      const res = await POST(req);
+      const json = await res.json();
+
+      expect(res.status).toBe(500);
+      expect(json.error).toBeDefined();
+    });
+
+    it('should return 400 when body is not valid JSON', async () => {
+      (currentUser as jest.Mock).mockResolvedValue({
+        id: 'clerk_user_123',
+        email: 'test@example.com',
+      });
+
+      const req = new NextRequest('http://localhost/api/tones', {
+        method: 'POST',
+        body: 'invalid json',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      const res = await POST(req);
+      const json = await res.json();
+
+      expect(res.status).toBe(500); // JSON parse error caught by handleAPIError
+      expect(json.error).toBeDefined();
+    });
+
+    it('should successfully create tone with all fields', async () => {
+      (currentUser as jest.Mock).mockResolvedValue({
+        id: 'clerk_user_123',
+        email: 'test@example.com',
+      });
+      (toneRateLimit.limit as jest.Mock).mockResolvedValue({ success: true });
+      (prisma.user.findUnique as jest.Mock).mockResolvedValue({
+        id: 'db_user_1',
+        clerkId: 'clerk_user_123',
+      });
+      (prisma.$transaction as jest.Mock).mockImplementation(async (fn) =>
+        fn({
+          user: {
+            findUnique: jest.fn().mockResolvedValue({
+              generationsUsed: 0,
+              generationsLimit: 10,
+            }),
+            update: jest.fn().mockResolvedValue({}),
+          },
+        })
+      );
+      (prisma.tone.create as jest.Mock).mockResolvedValue({
+        id: 'tone_1',
+        name: 'Complete Tone',
+        artist: 'Artist',
+        description: 'Test description',
+        guitar: 'Strat',
+        pickups: 'Single Coil',
+        strings: '10s',
+        amp: 'Marshall',
+      });
+
+      const completeBody = {
+        name: 'Complete Tone',
+        artist: 'Artist',
+        description: 'Test description',
+        guitar: 'Strat',
+        pickups: 'Single Coil',
+        strings: '10s',
+        amp: 'Marshall',
+      };
+
+      const req = new NextRequest('http://localhost/api/tones', {
+        method: 'POST',
+        body: JSON.stringify(completeBody),
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      const res = await POST(req);
+      const json = await res.json();
+
+      expect(res.status).toBe(201);
+      expect(json.message).toBe('Successfully created tone');
+      expect(json.tone).toMatchObject({
+        name: 'Complete Tone',
+        artist: 'Artist',
+        guitar: 'Strat',
+      });
+      expect(generateToneSettings).toHaveBeenCalled();
+      expect(prisma.tone.create).toHaveBeenCalled();
+    });
   });
 
   describe('GET /api/tones', () => {
@@ -319,6 +475,94 @@ describe('/api/tones', () => {
 
       expect(res.status).toBe(400);
       expect(json.error).toBe('Invalid query parameters');
+    });
+
+    it('should return empty array when user has no tones', async () => {
+      (currentUser as jest.Mock).mockResolvedValue({
+        id: 'clerk_user_123',
+        email: 'test@example.com',
+      });
+      (apiRateLimit.limit as jest.Mock).mockResolvedValue({ success: true });
+      (prisma.user.findUnique as jest.Mock).mockResolvedValue({ id: 'db_user_1' });
+      (prisma.tone.findMany as jest.Mock).mockResolvedValue([]);
+      (prisma.tone.count as jest.Mock).mockResolvedValue(0);
+
+      const req = new NextRequest(baseUrl, { method: 'GET' });
+
+      const res = await GET(req);
+      const json = await res.json();
+
+      expect(res.status).toBe(200);
+      expect(json.tones).toEqual([]);
+      expect(json.pagination.total).toBe(0);
+      expect(json.pagination.totalPages).toBe(0);
+    });
+
+    it('should work with explicit page and limit params', async () => {
+      (currentUser as jest.Mock).mockResolvedValue({
+        id: 'clerk_user_123',
+        email: 'test@example.com',
+      });
+      (apiRateLimit.limit as jest.Mock).mockResolvedValue({ success: true });
+      (prisma.user.findUnique as jest.Mock).mockResolvedValue({ id: 'db_user_1' });
+      (prisma.tone.findMany as jest.Mock).mockResolvedValue([]);
+      (prisma.tone.count as jest.Mock).mockResolvedValue(0);
+
+      // Explicit query params
+      const req = new NextRequest('http://localhost/api/tones?page=1&limit=10', {
+        method: 'GET',
+      });
+
+      const res = await GET(req);
+      const json = await res.json();
+
+      expect(res.status).toBe(200);
+      expect(json.pagination.page).toBe(1);
+      expect(json.pagination.limit).toBe(10);
+    });
+
+    it('should calculate pagination correctly for multiple pages', async () => {
+      (currentUser as jest.Mock).mockResolvedValue({
+        id: 'clerk_user_123',
+        email: 'test@example.com',
+      });
+      (apiRateLimit.limit as jest.Mock).mockResolvedValue({ success: true });
+      (prisma.user.findUnique as jest.Mock).mockResolvedValue({ id: 'db_user_1' });
+      (prisma.tone.findMany as jest.Mock).mockResolvedValue([]);
+      (prisma.tone.count as jest.Mock).mockResolvedValue(35);
+
+      const req = new NextRequest('http://localhost/api/tones?page=2&limit=10', {
+        method: 'GET',
+      });
+
+      const res = await GET(req);
+      const json = await res.json();
+
+      expect(res.status).toBe(200);
+      expect(json.pagination.total).toBe(35);
+      expect(json.pagination.totalPages).toBe(4);
+      expect(json.pagination.hasNextPage).toBe(true);
+      expect(json.pagination.hasPrevPage).toBe(true);
+    });
+
+    it('should handle database query failure', async () => {
+      (currentUser as jest.Mock).mockResolvedValue({
+        id: 'clerk_user_123',
+        email: 'test@example.com',
+      });
+      (apiRateLimit.limit as jest.Mock).mockResolvedValue({ success: true });
+      (prisma.user.findUnique as jest.Mock).mockResolvedValue({ id: 'db_user_1' });
+      (prisma.tone.findMany as jest.Mock).mockRejectedValueOnce(
+        new Error('Database connection lost')
+      );
+
+      const req = new NextRequest(baseUrl, { method: 'GET' });
+
+      const res = await GET(req);
+      const json = await res.json();
+
+      expect(res.status).toBe(500);
+      expect(json.error).toBeDefined();
     });
   });
 });
