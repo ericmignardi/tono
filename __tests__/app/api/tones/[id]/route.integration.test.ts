@@ -45,6 +45,8 @@ jest.mock('next/cache', () => ({
   revalidatePath: jest.fn(),
 }));
 
+const BASE_URL = 'http://localhost/api/tones';
+
 import { regenerateToneSettings } from '@/lib/openai/toneAiService';
 import { toneRateLimit } from '@/lib/rateLimit';
 
@@ -60,6 +62,12 @@ describe('Integration: /api/tones/[id]', () => {
   };
 
   beforeAll(async () => {
+    // Safety check: Ensure we are not running against a production database
+    const dbUrl = process.env.DATABASE_URL;
+    if (!dbUrl || (!dbUrl.includes('localhost') && !dbUrl.includes('test') && !dbUrl.includes('127.0.0.1'))) {
+      throw new Error('Integration tests must be run against a local or test database (DATABASE_URL must contain "localhost", "127.0.0.1" or "test").');
+    }
+
     // Create test user
     testUser = await prisma.user.create({
       data: {
@@ -156,7 +164,7 @@ describe('Integration: /api/tones/[id]', () => {
   describe('GET /api/tones/[id]', () => {
     it('should retrieve a specific tone by ID', async () => {
       const context = { params: Promise.resolve({ id: testTone.id }) };
-      const req = new NextRequest(`http://localhost/api/tones/${testTone.id}`, {
+      const req = new NextRequest(`${BASE_URL}/${testTone.id}`, {
         method: 'GET',
       });
 
@@ -174,7 +182,7 @@ describe('Integration: /api/tones/[id]', () => {
 
     it('should prevent accessing another users tone', async () => {
       const context = { params: Promise.resolve({ id: otherUserTone.id }) };
-      const req = new NextRequest(`http://localhost/api/tones/${otherUserTone.id}`, {
+      const req = new NextRequest(`${BASE_URL}/${otherUserTone.id}`, {
         method: 'GET',
       });
 
@@ -188,7 +196,7 @@ describe('Integration: /api/tones/[id]', () => {
     it('should return 404 for non-existent tone', async () => {
       const fakeId = 'clx1234567890123456789012';
       const context = { params: Promise.resolve({ id: fakeId }) };
-      const req = new NextRequest(`http://localhost/api/tones/${fakeId}`, {
+      const req = new NextRequest(`${BASE_URL}/${fakeId}`, {
         method: 'GET',
       });
 
@@ -203,7 +211,7 @@ describe('Integration: /api/tones/[id]', () => {
   describe('PUT /api/tones/[id] - Name-Only Updates', () => {
     it('should update only name without triggering AI regeneration', async () => {
       const context = { params: Promise.resolve({ id: testTone.id }) };
-      const req = new NextRequest(`http://localhost/api/tones/${testTone.id}`, {
+      const req = new NextRequest(`${BASE_URL}/${testTone.id}`, {
         method: 'PUT',
         body: JSON.stringify({ name: 'Updated Name' }),
         headers: { 'Content-Type': 'application/json' },
@@ -250,7 +258,7 @@ describe('Integration: /api/tones/[id]', () => {
   describe('PUT /api/tones/[id] - Gear Changes with AI Regeneration', () => {
     it('should regenerate AI when artist changes', async () => {
       const context = { params: Promise.resolve({ id: testTone.id }) };
-      const req = new NextRequest(`http://localhost/api/tones/${testTone.id}`, {
+      const req = new NextRequest(`${BASE_URL}/${testTone.id}`, {
         method: 'PUT',
         body: JSON.stringify({ artist: 'New Artist' }),
         headers: { 'Content-Type': 'application/json' },
@@ -273,7 +281,7 @@ describe('Integration: /api/tones/[id]', () => {
 
     it('should regenerate AI when guitar changes', async () => {
       const context = { params: Promise.resolve({ id: testTone.id }) };
-      const req = new NextRequest(`http://localhost/api/tones/${testTone.id}`, {
+      const req = new NextRequest(`${BASE_URL}/${testTone.id}`, {
         method: 'PUT',
         body: JSON.stringify({ guitar: 'Les Paul' }),
         headers: { 'Content-Type': 'application/json' },
@@ -287,7 +295,7 @@ describe('Integration: /api/tones/[id]', () => {
 
     it('should regenerate AI when amp changes', async () => {
       const context = { params: Promise.resolve({ id: testTone.id }) };
-      const req = new NextRequest(`http://localhost/api/tones/${testTone.id}`, {
+      const req = new NextRequest(`${BASE_URL}/${testTone.id}`, {
         method: 'PUT',
         body: JSON.stringify({ amp: 'Marshall' }),
         headers: { 'Content-Type': 'application/json' },
@@ -301,7 +309,7 @@ describe('Integration: /api/tones/[id]', () => {
 
     it('should regenerate AI when description changes', async () => {
       const context = { params: Promise.resolve({ id: testTone.id }) };
-      const req = new NextRequest(`http://localhost/api/tones/${testTone.id}`, {
+      const req = new NextRequest(`${BASE_URL}/${testTone.id}`, {
         method: 'PUT',
         body: JSON.stringify({ description: 'New jazzy description' }),
         headers: { 'Content-Type': 'application/json' },
@@ -315,7 +323,7 @@ describe('Integration: /api/tones/[id]', () => {
 
     it('should update multiple gear fields and regenerate AI once', async () => {
       const context = { params: Promise.resolve({ id: testTone.id }) };
-      const req = new NextRequest(`http://localhost/api/tones/${testTone.id}`, {
+      const req = new NextRequest(`${BASE_URL}/${testTone.id}`, {
         method: 'PUT',
         body: JSON.stringify({
           guitar: 'Les Paul',
@@ -393,7 +401,7 @@ describe('Integration: /api/tones/[id]', () => {
 
     it('should prevent updating another users tone', async () => {
       const context = { params: Promise.resolve({ id: otherUserTone.id }) };
-      const req = new NextRequest(`http://localhost/api/tones/${otherUserTone.id}`, {
+      const req = new NextRequest(`${BASE_URL}/${otherUserTone.id}`, {
         method: 'PUT',
         body: JSON.stringify({ name: 'Hacked Name' }),
         headers: { 'Content-Type': 'application/json' },
@@ -416,7 +424,7 @@ describe('Integration: /api/tones/[id]', () => {
   describe('DELETE /api/tones/[id]', () => {
     it('should delete a tone successfully', async () => {
       const context = { params: Promise.resolve({ id: testTone.id }) };
-      const req = new NextRequest(`http://localhost/api/tones/${testTone.id}`, {
+      const req = new NextRequest(`${BASE_URL}/${testTone.id}`, {
         method: 'DELETE',
       });
 
@@ -435,7 +443,7 @@ describe('Integration: /api/tones/[id]', () => {
 
     it('should prevent deleting another users tone', async () => {
       const context = { params: Promise.resolve({ id: otherUserTone.id }) };
-      const req = new NextRequest(`http://localhost/api/tones/${otherUserTone.id}`, {
+      const req = new NextRequest(`${BASE_URL}/${otherUserTone.id}`, {
         method: 'DELETE',
       });
 
@@ -455,7 +463,7 @@ describe('Integration: /api/tones/[id]', () => {
     it('should return 404 when deleting non-existent tone', async () => {
       const fakeId = 'clx1234567890123456789012';
       const context = { params: Promise.resolve({ id: fakeId }) };
-      const req = new NextRequest(`http://localhost/api/tones/${fakeId}`, {
+      const req = new NextRequest(`${BASE_URL}/${fakeId}`, {
         method: 'DELETE',
       });
 
@@ -474,7 +482,7 @@ describe('Integration: /api/tones/[id]', () => {
 
       // 2. READ
       const getContext = { params: Promise.resolve({ id: testTone.id }) };
-      const getReq = new NextRequest(`http://localhost/api/tones/${testTone.id}`, {
+      const getReq = new NextRequest(`${BASE_URL}/${testTone.id}`, {
         method: 'GET',
       });
       const getRes = await GET(getReq, getContext);
@@ -482,7 +490,7 @@ describe('Integration: /api/tones/[id]', () => {
 
       // 3. UPDATE (name only - no AI)
       const updateNameContext = { params: Promise.resolve({ id: testTone.id }) };
-      const updateNameReq = new NextRequest(`http://localhost/api/tones/${testTone.id}`, {
+      const updateNameReq = new NextRequest(`${BASE_URL}/${testTone.id}`, {
         method: 'PUT',
         body: JSON.stringify({ name: 'Updated via CRUD' }),
         headers: { 'Content-Type': 'application/json' },
@@ -493,7 +501,7 @@ describe('Integration: /api/tones/[id]', () => {
 
       // 4. UPDATE (gear - triggers AI)
       const updateGearContext = { params: Promise.resolve({ id: testTone.id }) };
-      const updateGearReq = new NextRequest(`http://localhost/api/tones/${testTone.id}`, {
+      const updateGearReq = new NextRequest(`${BASE_URL}/${testTone.id}`, {
         method: 'PUT',
         body: JSON.stringify({ amp: 'Marshall JCM800' }),
         headers: { 'Content-Type': 'application/json' },
@@ -504,7 +512,7 @@ describe('Integration: /api/tones/[id]', () => {
 
       // 5. DELETE
       const deleteContext = { params: Promise.resolve({ id: testTone.id }) };
-      const deleteReq = new NextRequest(`http://localhost/api/tones/${testTone.id}`, {
+      const deleteReq = new NextRequest(`${BASE_URL}/${testTone.id}`, {
         method: 'DELETE',
       });
       const deleteRes = await DELETE(deleteReq, deleteContext);

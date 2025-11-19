@@ -45,6 +45,8 @@ jest.mock('next/cache', () => ({
   revalidatePath: jest.fn(),
 }));
 
+const BASE_URL = 'http://localhost/api/tones';
+
 describe('Integration: /api/tones', () => {
   let testUser: any;
   const mockClerkUser = {
@@ -53,6 +55,16 @@ describe('Integration: /api/tones', () => {
   };
 
   beforeAll(async () => {
+    // Safety check: Ensure we are not running against a production database
+    const dbUrl = process.env.DATABASE_URL;
+    if (!dbUrl || (!dbUrl.includes('localhost') && !dbUrl.includes('test') && !dbUrl.includes('127.0.0.1'))) {
+      console.error('Skipping integration tests: DATABASE_URL is not set or looks like a production URL.');
+      // We can't easily "skip" the whole suite from inside beforeAll in Jest without throwing
+      // But throwing fails the test.
+      // Better to throw an error to force the user to configure it correctly if they explicitly ran integration tests.
+      throw new Error('Integration tests must be run against a local or test database (DATABASE_URL must contain "localhost", "127.0.0.1" or "test").');
+    }
+
     // Create a test user in the database
     testUser = await prisma.user.create({
       data: {
@@ -103,7 +115,7 @@ describe('Integration: /api/tones', () => {
     };
 
     it('should create a tone and persist it to the database', async () => {
-      const req = new NextRequest('http://localhost/api/tones', {
+      const req = new NextRequest(BASE_URL, {
         method: 'POST',
         body: JSON.stringify(validToneData),
         headers: { 'Content-Type': 'application/json' },
@@ -138,7 +150,7 @@ describe('Integration: /api/tones', () => {
         where: { id: testUser.id },
       });
 
-      const req = new NextRequest('http://localhost/api/tones', {
+      const req = new NextRequest(BASE_URL, {
         method: 'POST',
         body: JSON.stringify(validToneData),
         headers: { 'Content-Type': 'application/json' },
@@ -160,7 +172,7 @@ describe('Integration: /api/tones', () => {
 
       // Create three tones
       for (const data of [tone1Data, tone2Data, tone3Data]) {
-        const req = new NextRequest('http://localhost/api/tones', {
+        const req = new NextRequest(BASE_URL, {
           method: 'POST',
           body: JSON.stringify(data),
           headers: { 'Content-Type': 'application/json' },
@@ -187,7 +199,7 @@ describe('Integration: /api/tones', () => {
         data: { generationsUsed: 10, generationsLimit: 10 },
       });
 
-      const req = new NextRequest('http://localhost/api/tones', {
+      const req = new NextRequest(BASE_URL, {
         method: 'POST',
         body: JSON.stringify(validToneData),
         headers: { 'Content-Type': 'application/json' },
@@ -214,7 +226,7 @@ describe('Integration: /api/tones', () => {
         { ...validToneData, name: 'Concurrent 3' },
       ].map((data) =>
         POST(
-          new NextRequest('http://localhost/api/tones', {
+          new NextRequest(BASE_URL, {
             method: 'POST',
             body: JSON.stringify(data),
             headers: { 'Content-Type': 'application/json' },
@@ -251,7 +263,7 @@ describe('Integration: /api/tones', () => {
         amp: '',
       };
 
-      const req = new NextRequest('http://localhost/api/tones', {
+      const req = new NextRequest(BASE_URL, {
         method: 'POST',
         body: JSON.stringify(invalidData),
         headers: { 'Content-Type': 'application/json' },
@@ -299,7 +311,7 @@ describe('Integration: /api/tones', () => {
     });
 
     it('should retrieve paginated tones', async () => {
-      const req = new NextRequest('http://localhost/api/tones?page=1&limit=10', {
+      const req = new NextRequest(`${BASE_URL}?page=1&limit=10`, {
         method: 'GET',
       });
 
@@ -319,7 +331,7 @@ describe('Integration: /api/tones', () => {
     });
 
     it('should retrieve second page correctly', async () => {
-      const req = new NextRequest('http://localhost/api/tones?page=2&limit=10', {
+      const req = new NextRequest(`${BASE_URL}?page=2&limit=10`, {
         method: 'GET',
       });
 
@@ -339,7 +351,7 @@ describe('Integration: /api/tones', () => {
     });
 
     it('should return tones ordered by creation date (newest first)', async () => {
-      const req = new NextRequest('http://localhost/api/tones?page=1&limit=15', {
+      const req = new NextRequest(`${BASE_URL}?page=1&limit=15`, {
         method: 'GET',
       });
 
@@ -383,7 +395,7 @@ describe('Integration: /api/tones', () => {
         },
       });
 
-      const req = new NextRequest('http://localhost/api/tones?page=1&limit=20', {
+      const req = new NextRequest(`${BASE_URL}?page=1&limit=20`, {
         method: 'GET',
       });
 
@@ -405,7 +417,7 @@ describe('Integration: /api/tones', () => {
         where: { userId: testUser.id },
       });
 
-      const req = new NextRequest('http://localhost/api/tones?page=1&limit=10', {
+      const req = new NextRequest(`${BASE_URL}?page=1&limit=10`, {
         method: 'GET',
       });
 
@@ -422,7 +434,7 @@ describe('Integration: /api/tones', () => {
   describe('End-to-End Flow: Create, Read, Update, Delete', () => {
     it('should complete full CRUD lifecycle', async () => {
       // 1. CREATE
-      const createReq = new NextRequest('http://localhost/api/tones', {
+      const createReq = new NextRequest(BASE_URL, {
         method: 'POST',
         body: JSON.stringify({
           name: 'CRUD Test Tone',
@@ -443,7 +455,7 @@ describe('Integration: /api/tones', () => {
       expect(createRes.status).toBe(201);
 
       // 2. READ ALL
-      const listReq = new NextRequest('http://localhost/api/tones?page=1&limit=10', {
+      const listReq = new NextRequest(`${BASE_URL}?page=1&limit=10`, {
         method: 'GET',
       });
 
