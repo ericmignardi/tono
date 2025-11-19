@@ -61,7 +61,7 @@ describe('/api/stripe/portal', () => {
     };
 
     it('should return 401 when unauthorized', async () => {
-      (auth as jest.Mock).mockResolvedValue({ userId: null });
+      (auth as unknown as jest.Mock).mockResolvedValue({ userId: null });
 
       const req = new NextRequest('http://localhost/api/stripe/portal', {
         method: 'POST',
@@ -75,7 +75,7 @@ describe('/api/stripe/portal', () => {
     });
 
     it('should return 429 when rate limit exceeded', async () => {
-      (auth as jest.Mock).mockResolvedValue({ userId: 'clerk_user_123' });
+      (auth as unknown as jest.Mock).mockResolvedValue({ userId: 'clerk_user_123' });
       (portalRateLimit.limit as jest.Mock).mockResolvedValue({ success: false });
 
       const req = new NextRequest('http://localhost/api/stripe/portal', {
@@ -90,7 +90,7 @@ describe('/api/stripe/portal', () => {
     });
 
     it('should return 404 when user not found', async () => {
-      (auth as jest.Mock).mockResolvedValue({ userId: 'clerk_user_123' });
+      (auth as unknown as jest.Mock).mockResolvedValue({ userId: 'clerk_user_123' });
       (portalRateLimit.limit as jest.Mock).mockResolvedValue({ success: true });
       (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
 
@@ -106,7 +106,7 @@ describe('/api/stripe/portal', () => {
     });
 
     it('should return 404 when user has no stripeId', async () => {
-      (auth as jest.Mock).mockResolvedValue({ userId: 'clerk_user_123' });
+      (auth as unknown as jest.Mock).mockResolvedValue({ userId: 'clerk_user_123' });
       (portalRateLimit.limit as jest.Mock).mockResolvedValue({ success: true });
       (prisma.user.findUnique as jest.Mock).mockResolvedValue({
         ...mockUser,
@@ -125,7 +125,7 @@ describe('/api/stripe/portal', () => {
     });
 
     it('should create portal session successfully', async () => {
-      (auth as jest.Mock).mockResolvedValue({ userId: 'clerk_user_123' });
+      (auth as unknown as jest.Mock).mockResolvedValue({ userId: 'clerk_user_123' });
       (portalRateLimit.limit as jest.Mock).mockResolvedValue({ success: true });
       (prisma.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
       (mockStripeInstance.billingPortal.sessions.create as jest.Mock).mockResolvedValue({
@@ -149,7 +149,7 @@ describe('/api/stripe/portal', () => {
     });
 
     it('should handle Stripe API errors gracefully', async () => {
-      (auth as jest.Mock).mockResolvedValue({ userId: 'clerk_user_123' });
+      (auth as unknown as jest.Mock).mockResolvedValue({ userId: 'clerk_user_123' });
       (portalRateLimit.limit as jest.Mock).mockResolvedValue({ success: true });
       (prisma.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
       (mockStripeInstance.billingPortal.sessions.create as jest.Mock).mockRejectedValue(

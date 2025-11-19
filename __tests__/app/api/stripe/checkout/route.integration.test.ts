@@ -50,8 +50,13 @@ describe('Integration: /api/stripe/checkout', () => {
   beforeAll(async () => {
     // Safety check: Ensure we are not running against a production database
     const dbUrl = process.env.DATABASE_URL;
-    if (!dbUrl || (!dbUrl.includes('localhost') && !dbUrl.includes('test') && !dbUrl.includes('127.0.0.1'))) {
-      throw new Error('Integration tests must be run against a local or test database (DATABASE_URL must contain "localhost", "127.0.0.1" or "test").');
+    if (
+      !dbUrl ||
+      (!dbUrl.includes('localhost') && !dbUrl.includes('test') && !dbUrl.includes('127.0.0.1'))
+    ) {
+      throw new Error(
+        'Integration tests must be run against a local or test database (DATABASE_URL must contain "localhost", "127.0.0.1" or "test").'
+      );
     }
 
     // Create a test user in the database
@@ -76,7 +81,7 @@ describe('Integration: /api/stripe/checkout', () => {
   });
 
   beforeEach(() => {
-    (auth as jest.Mock).mockResolvedValue(mockClerkUser);
+    (auth as unknown as jest.Mock).mockResolvedValue(mockClerkUser);
     jest.clearAllMocks();
   });
 

@@ -4,8 +4,8 @@ import prettier from 'eslint-config-prettier';
 
 export default defineConfig([
   ...next,
+  prettier,
   {
-    extends: ['prettier'],
     rules: {
       '@next/next/no-html-link-for-pages': 'off',
       'react/react-in-jsx-scope': 'off',

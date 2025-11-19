@@ -10,7 +10,10 @@ export default function Header() {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
+  // Hydration-safe mounting check - only run on client
+  // This is a valid pattern for preventing hydration mismatches
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     setMounted(true);
   }, []);
 
