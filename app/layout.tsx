@@ -1,14 +1,13 @@
 import type { Metadata } from 'next';
-import { Quicksand } from 'next/font/google';
+import { Inter } from 'next/font/google';
 import './globals.css';
 import { ClerkProvider } from '@clerk/nextjs';
 import { Providers } from './providers';
 import { Toaster } from '@/components/ui/sonner';
 
-const quicksandSans = Quicksand({
-  variable: '--font-quicksand',
+const inter = Inter({
+  variable: '--font-inter',
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
 });
 
 export const metadata: Metadata = {
@@ -25,9 +24,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
-        <body
-          className={`${quicksandSans.variable} ${quicksandSans.className} font-sans antialiased`}
-        >
+        <body className={`${inter.variable} ${inter.className} font-sans antialiased`}>
           <Providers>{children}</Providers>
           <Toaster />
         </body>

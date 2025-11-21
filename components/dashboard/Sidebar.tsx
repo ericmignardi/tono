@@ -57,7 +57,7 @@ export default function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex flex-1 flex-col items-center gap-0.5 p-2 lg:items-start">
+      <nav className="flex flex-1 flex-col items-center gap-1 p-2 lg:items-start">
         {navItems.map(({ href, label, icon: Icon }) => {
           const isActive = pathname === href;
           return (
@@ -65,10 +65,10 @@ export default function Sidebar() {
               key={href}
               href={href}
               className={cn(
-                'flex w-full items-center justify-center gap-3 px-3 py-2 text-[13px] font-normal transition-colors lg:justify-start',
+                'flex w-full items-center justify-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all lg:justify-start',
                 isActive
-                  ? 'bg-accent text-accent-foreground font-medium'
-                  : 'text-muted-foreground hover:bg-primary hover:text-foreground'
+                  ? 'bg-primary/10 text-primary'
+                  : 'text-muted-foreground hover:bg-muted hover:text-foreground'
               )}
             >
               <Icon className="h-4 w-4 shrink-0" />
@@ -80,7 +80,7 @@ export default function Sidebar() {
 
       {/* Upgrade CTA */}
       <div className="p-3">
-        <Link href="/pricing">
+        <Link href="/#pricing">
           <Button
             variant={'outline'}
             className="flex w-full cursor-pointer items-center gap-2 text-sm font-medium"

@@ -13,6 +13,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { prisma } from '@/lib/prisma/database';
 import Link from 'next/link';
 import ManageSubscriptionButton from '@/components/dashboard/ManageSubscriptionButton';
+import { differenceInDays, formatDistanceToNow } from 'date-fns';
 
 export default async function Dashboard() {
   const user = await currentUser();
@@ -47,7 +48,6 @@ export default async function Dashboard() {
   const creditCount = (dbUser?.generationsLimit ?? 5) - (dbUser?.generationsUsed ?? 0);
   const hasActiveSubscription = dbUser?.subscriptions && dbUser.subscriptions.length > 0;
   const activeSubscription = hasActiveSubscription ? dbUser.subscriptions[0] : null;
-  const subscriptionTier = hasActiveSubscription ? 'Premium' : 'Basic';
 
   // Check if subscription is set to cancel
   const isCanceling =
@@ -59,12 +59,17 @@ export default async function Dashboard() {
         day: 'numeric',
       })
     : null;
+  const todaysDate = new Date();
+  const endingSoon = activeSubscription?.currentPeriodEnd
+    ? differenceInDays(activeSubscription.currentPeriodEnd, todaysDate)
+    : null;
+
+  console.log(endingSoon);
 
   const stats = [
     { label: 'Total Tones', value: toneCount },
     { label: 'Credits Remaining', value: creditCount },
     { label: 'Credit Limit', value: dbUser?.generationsLimit ?? 5 },
-    { label: 'Plan', value: subscriptionTier },
   ];
 
   const firstName = user?.firstName || user?.fullName?.split(' ')[0] || 'there';
@@ -83,14 +88,14 @@ export default async function Dashboard() {
       </div>
 
       {/* Cancellation Notice */}
-      {isCanceling && periodEndDate && (
+      {isCanceling && endingSoon !== null && endingSoon <= 7 && endingSoon >= 0 && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Subscription Ending</AlertTitle>
           <AlertDescription>
-            Your Premium subscription will end on <strong>{periodEndDate}</strong>. You'll still
-            have full access until then. Your credit limit will return to 5 credits after this date.{' '}
-            <Link href="/pricing" className="font-medium underline">
+            Your Premium subscription will end on <strong>{periodEndDate}</strong> You'll still have
+            full access until then. Your credit limit will return to 5 credits after this date.
+            <Link href="/#pricing" className="font-medium underline">
               Reactivate your subscription
             </Link>
           </AlertDescription>
@@ -105,7 +110,7 @@ export default async function Dashboard() {
               <CardDescription>{label}</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-primary text-2xl font-bold">{value}</div>
+              <div className="text-2xl font-bold">{value}</div>
             </CardContent>
           </Card>
         ))}
@@ -128,7 +133,7 @@ export default async function Dashboard() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Tone</TableHead>
-                    <TableHead className="text-right">Created At</TableHead>
+                    <TableHead className="text-right">Created</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -136,8 +141,8 @@ export default async function Dashboard() {
                     <TableRow key={idx} className="hover:bg-accent/50 cursor-pointer">
                       <TableCell>
                         <Link href={`/dashboard/tones/${id}`} className="flex items-center gap-3">
-                          <div className="bg-background flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
-                            <ListMusic className="text-primary" />
+                          <div className="bg-muted/50 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
+                            <ListMusic className="text-foreground h-5 w-5" />
                           </div>
                           <div className="min-w-0 flex-1">
                             <h3 className="truncate font-medium">{name}</h3>
@@ -147,7 +152,7 @@ export default async function Dashboard() {
                       </TableCell>
                       <TableCell className="text-right">
                         <span className="text-muted-foreground text-sm whitespace-nowrap">
-                          {new Date(createdAt).toLocaleDateString()}
+                          {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
                         </span>
                       </TableCell>
                     </TableRow>

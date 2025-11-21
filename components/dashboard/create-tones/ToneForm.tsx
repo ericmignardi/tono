@@ -2,14 +2,21 @@
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { useRouter } from 'next/navigation';
 import { Tone } from '@prisma/client';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { ToneCreateSchema } from '@/utils/validation/toneValidation';
-import { useState } from 'react';
+import { toast } from 'sonner';
 
 type ToneFormProps = {
   tone?: Tone | null;
@@ -20,15 +27,8 @@ type FormValues = z.infer<typeof ToneCreateSchema>;
 export default function ToneForm({ tone }: ToneFormProps) {
   const router = useRouter();
   const isEditing = !!tone;
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { isSubmitting, errors },
-    reset,
-  } = useForm<FormValues>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(ToneCreateSchema),
     defaultValues: {
       name: tone?.name ?? '',
@@ -41,10 +41,9 @@ export default function ToneForm({ tone }: ToneFormProps) {
     },
   });
 
-  const onSubmit = async (values: FormValues) => {
-    setError(null);
-    setSuccess(false);
+  const { isSubmitting } = form.formState;
 
+  const onSubmit = async (values: FormValues) => {
     const url = isEditing ? `/api/tones/${tone?.id}` : '/api/tones';
     const method = isEditing ? 'PUT' : 'POST';
 
@@ -59,13 +58,21 @@ export default function ToneForm({ tone }: ToneFormProps) {
 
       if (!res.ok) {
         if (res.status === 403 && data.code === 'CREDITS_EXHAUSTED') {
-          setError('No credits remaining. Please upgrade your plan.');
+          form.setError('root', {
+            message: 'No credits remaining. Please upgrade your plan.',
+          });
         } else if (res.status === 429) {
-          setError('Too many requests. Please slow down and try again.');
+          form.setError('root', {
+            message: 'Too many requests. Please slow down and try again.',
+          });
         } else if (data.validationErrors) {
-          setError('Please check your input and try again.');
+          form.setError('root', {
+            message: 'Please check your input and try again.',
+          });
         } else {
-          setError(data.error || 'Something went wrong. Please try again.');
+          form.setError('root', {
+            message: data.error || 'Something went wrong. Please try again.',
+          });
         }
         return;
       }
@@ -73,13 +80,15 @@ export default function ToneForm({ tone }: ToneFormProps) {
       if (isEditing) {
         router.push('/dashboard/tones');
         router.refresh();
+        toast.success('Tone updated successfully!');
       } else {
-        reset();
-        setSuccess(true);
-        setTimeout(() => setSuccess(false), 5000);
+        form.reset();
+        toast.success('Tone created successfully!');
       }
-    } catch (err) {
-      setError('Network error. Please check your connection and try again.');
+    } catch {
+      form.setError('root', {
+        message: 'Network error. Please check your connection and try again.',
+      });
     }
   };
 
@@ -94,43 +103,41 @@ export default function ToneForm({ tone }: ToneFormProps) {
   ];
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-      {error && (
-        <div className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-800">
-          {error}
-        </div>
-      )}
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
+        {form.formState.errors.root && (
+          <div className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+            {form.formState.errors.root.message}
+          </div>
+        )}
 
-      {success && (
-        <div className="rounded-md border border-green-200 bg-green-50 p-4 text-sm text-green-800">
-          Tone created successfully! Create another one below.
-        </div>
-      )}
-
-      {fields.map((field) => (
-        <div key={field.name} className="flex flex-col gap-2">
-          <Label htmlFor={field.name}>{field.label}</Label>
-          <Input
-            id={field.name}
-            {...register(field.name)}
-            aria-invalid={errors[field.name] ? 'true' : 'false'}
-            disabled={isSubmitting}
+        {fields.map((field) => (
+          <FormField
+            key={field.name}
+            control={form.control}
+            name={field.name}
+            render={({ field: fieldProps }) => (
+              <FormItem>
+                <FormLabel>{field.label}</FormLabel>
+                <FormControl>
+                  <Input {...fieldProps} disabled={isSubmitting} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-          {errors[field.name] && (
-            <p className="text-sm text-red-500">{errors[field.name]?.message}</p>
-          )}
-        </div>
-      ))}
+        ))}
 
-      <Button type="submit" disabled={isSubmitting} variant="outline">
-        {isSubmitting
-          ? isEditing
-            ? 'Updating...'
-            : 'Creating...'
-          : isEditing
-            ? 'Update Tone'
-            : 'Create Tone'}
-      </Button>
-    </form>
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting
+            ? isEditing
+              ? 'Updating...'
+              : 'Creating...'
+            : isEditing
+              ? 'Update Tone'
+              : 'Create Tone'}
+        </Button>
+      </form>
+    </Form>
   );
 }

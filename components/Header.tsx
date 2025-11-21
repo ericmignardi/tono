@@ -63,6 +63,11 @@ export default function Header() {
               {link.title}
             </Link>
           ))}
+          <SignedIn>
+            <Link className="hover:text-primary text-sm font-medium" href="/dashboard">
+              Dashboard
+            </Link>
+          </SignedIn>
         </div>
 
         <nav className="hidden items-center justify-between gap-4 lg:flex">

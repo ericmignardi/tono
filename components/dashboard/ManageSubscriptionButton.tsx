@@ -3,6 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Settings } from 'lucide-react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 export default function ManageSubscriptionButton() {
   const [loading, setLoading] = useState<boolean>(false);
@@ -23,7 +24,7 @@ export default function ManageSubscriptionButton() {
       window.location.href = url;
     } catch (err) {
       console.error(err);
-      alert('Failed to open subscription portal. Please try again.');
+      toast.error('Failed to open subscription portal. Please try again.');
       setLoading(false);
     }
   };

@@ -2,22 +2,12 @@
 
 import { SignedIn, UserButton } from '@clerk/nextjs';
 import { Button } from '@/components/ui/button';
-import { useEffect, useState } from 'react';
 import { Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
 
 export default function Header() {
   const { resolvedTheme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  // Hydration-safe mounting check - only run on client
-  // This is a valid pattern for preventing hydration mismatches
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    setMounted(true);
-  }, []);
-
-  const isDark = mounted ? resolvedTheme === 'dark' : false;
+  const isDark = resolvedTheme === 'dark';
 
   const toggleTheme = () => {
     setTheme(isDark ? 'light' : 'dark');
@@ -32,19 +22,13 @@ export default function Header() {
       <nav className="flex items-center gap-2">
         <Button
           className="cursor-pointer"
-          variant="ghost"
+          variant="outline"
+          size="icon"
           onClick={toggleTheme}
           aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+          suppressHydrationWarning
         >
-          {mounted ? (
-            isDark ? (
-              <Sun className="h-4 w-4" />
-            ) : (
-              <Moon className="h-4 w-4" />
-            )
-          ) : (
-            <div className="h-4 w-4" /> // Placeholder to prevent layout shift
-          )}
+          {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </Button>
 
         <SignedIn>
