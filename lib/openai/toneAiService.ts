@@ -1,4 +1,5 @@
 import { client } from '@/lib/openai/openai';
+import { getCachedTone, setCachedTone, invalidateCachedTone } from '@/lib/openai/toneCache';
 
 export interface AmpSettings {
   mid: number;
@@ -35,63 +36,73 @@ const DEFAULT_AMP_SETTINGS: AmpSettings = {
   presence: 5,
 };
 
-const SYSTEM_PROMPT = `You are a professional guitar tone engineer with deep knowledge of classic and modern guitar tones. Your job is to provide SPECIFIC, ACTIONABLE settings that can be directly applied to the equipment.
-Output ONLY valid JSON with this exact structure:
+const SYSTEM_PROMPT = `You are a guitar tone engineer. Provide SPECIFIC amp settings for the given gear.
+
+Output ONLY valid JSON:
 {
   "ampSettings": {
-    "gain": number (0-10, in 0.5 increments),
-    "treble": number (0-10, in 0.5 increments),
-    "mid": number (0-10, in 0.5 increments),
-    "bass": number (0-10, in 0.5 increments),
-    "volume": number (0-10, in 0.5 increments),
-    "presence": number (0-10, in 0.5 increments, if applicable),
-    "reverb": number (0-10, in 0.5 increments, if built-in)
+    "gain": number (0-10, 0.5 increments),
+    "treble": number (0-10, 0.5 increments),
+    "mid": number (0-10, 0.5 increments),
+    "bass": number (0-10, 0.5 increments),
+    "volume": number (0-10, 0.5 increments),
+    "presence": number (0-10, 0.5 increments),
+    "reverb": number (0-10, 0.5 increments)
   },
-  "notes": string (2-3 sentences explaining WHY these settings work for this tone)
+  "notes": string (2-3 sentences on WHY these settings work)
 }
 
-CRITICAL REQUIREMENTS:
-1. Analyze the ENTIRE gear setup: guitar model, pickup type (single-coil vs humbucker affects gain/EQ), string gauge, and amp characteristics
-2. Consider the tone description carefully - match the sonic characteristics (bright/dark, compressed/dynamic, clean/overdriven)
-3. For amp settings: Be specific with numbers. Consider how the amp model's characteristics (British vs American, tube vs solid-state) affect the settings
-4. Match pickup characteristics: humbuckers need less gain, single-coils may need more mid boost
-5. Base recommendations on documented settings from the artist when possible, but adapt to the specific gear provided
+REQUIREMENTS:
+1. Analyze full gear: guitar, pickups (single-coil vs humbucker), strings, amp type
+2. Match tone description: bright/dark, compressed/dynamic, clean/overdriven
+3. Adjust for amp characteristics (British/American, tube/solid-state)
+4. Humbuckers need less gain; single-coils may need mid boost
+5. Base on artist's documented settings when possible, adapt to provided gear
 
-Keep notes technical but concise - explain the key tonal decisions made.`;
+Keep notes concise and technical.`;
 
 function buildUserPrompt(config: ToneGearConfig): string {
-  return `Create a tone preset to match this sonic goal:
+  return `TARGET TONE:
+Artist/Reference: ${config.artist}
+Description: ${config.description}
 
-TARGET TONE:
-Artist/Song Reference: ${config.artist}
-Tone Description: ${config.description}
-
-AVAILABLE GEAR:
+GEAR:
 Guitar: ${config.guitar}
 Pickups: ${config.pickups}
 Strings: ${config.strings}
 Amp: ${config.amp}
 
-INSTRUCTIONS:
-- Provide EXACT numeric settings for every amp knob
-- Account for how THIS specific guitar and pickup combination will interact with the amp
-- If the available gear can't achieve the exact tone, get as close as possible and explain the compromise in notes`;
+Provide exact settings for this gear. If gear can't achieve exact tone, get close and note compromise.`;
 }
 
 /**
  * Generates AI-powered amp settings and recommendations for a guitar tone
+ * Checks cache first to avoid unnecessary API calls
  * @param config - The gear configuration and tone description
+ * @param bypassCache - If true, skip cache and force new generation
  * @returns AI-generated amp settings and explanatory notes
  */
-export async function generateToneSettings(config: ToneGearConfig): Promise<AIToneResult> {
+export async function generateToneSettings(
+  config: ToneGearConfig,
+  bypassCache = false
+): Promise<AIToneResult> {
   const defaultResult: AIToneResult = {
     ampSettings: DEFAULT_AMP_SETTINGS,
     notes: 'Default settings applied',
   };
 
+  // Check cache first (unless bypassed)
+  if (!bypassCache) {
+    const cachedResult = await getCachedTone(config);
+    if (cachedResult) {
+      return cachedResult;
+    }
+  }
+
+  // Cache miss or bypassed - call OpenAI
   try {
     const openAIResponse = await client.chat.completions.create({
-      model: 'gpt-4o',
+      model: 'gpt-4o-mini',
       temperature: 0.3,
       response_format: { type: 'json_object' },
       messages: [
@@ -116,10 +127,15 @@ export async function generateToneSettings(config: ToneGearConfig): Promise<AITo
     try {
       const parsed = JSON.parse(aiResponse);
 
-      return {
+      const result: AIToneResult = {
         ampSettings: parsed.ampSettings || defaultResult.ampSettings,
         notes: parsed.notes || defaultResult.notes,
       };
+
+      // Store in cache for future requests
+      await setCachedTone(config, result);
+
+      return result;
     } catch (parseErr) {
       console.warn('Failed to parse AI response as JSON:', parseErr);
       console.warn('AI Response:', aiResponse);
@@ -141,6 +157,7 @@ export async function generateToneSettings(config: ToneGearConfig): Promise<AITo
 
 /**
  * Safely attempts to generate tone settings, falling back to existing settings on failure
+ * Invalidates cache to ensure fresh generation
  * @param config - The gear configuration and tone description
  * @param fallbackSettings - Existing settings to use if generation fails
  * @returns AI-generated settings or fallback settings
@@ -150,7 +167,11 @@ export async function regenerateToneSettings(
   fallbackSettings: AIToneResult
 ): Promise<AIToneResult> {
   try {
-    return await generateToneSettings(config);
+    // Invalidate cache to force fresh generation
+    await invalidateCachedTone(config);
+
+    // Generate new settings (bypass cache)
+    return await generateToneSettings(config, true);
   } catch (error) {
     console.error('Failed to regenerate tone settings, using fallback:', error);
     return fallbackSettings;
