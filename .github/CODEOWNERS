@@ -1,0 +1,19 @@
+# This file defines who owns which parts of the codebase.
+# The owners will be automatically requested for review when a PR touches their files.
+
+# Default owner for everything
+* @ericmignardi
+
+# Backend / API
+/app/api/ @ericmignardi
+/prisma/ @ericmignardi
+/lib/ @ericmignardi
+
+# Frontend
+/app/ @ericmignardi
+/components/ @ericmignardi
+
+# DevOps / Config
+/.github/ @ericmignardi
+/next.config.ts @ericmignardi
+/package.json @ericmignardi
