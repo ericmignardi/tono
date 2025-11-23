@@ -248,3 +248,13 @@ npm run test:e2e:ui
    - Stripe webhook: `https://yourdomain.com/api/webhooks/stripe`
 
 2. **Update environment variables** with production URLs
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to get started.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
