@@ -25,14 +25,14 @@ export default function Header() {
           {/* Light mode - Desktop logo */}
           <Image
             src={logo}
-            alt="Tonifier logo"
+            alt="tono logo"
             className="hidden h-8 w-auto lg:block dark:lg:hidden"
             priority
           />
           {/* Light mode - Mobile logo */}
           <Image
             src={logoMobile}
-            alt="Tonifier logo"
+            alt="tono logo"
             className="block h-8 w-auto lg:hidden dark:hidden"
             priority
           />
@@ -40,14 +40,14 @@ export default function Header() {
           {/* Dark mode - Desktop logo */}
           <Image
             src={logoDark}
-            alt="Tonifier logo"
+            alt="tono logo"
             className="hidden h-8 w-auto dark:lg:block"
             priority
           />
           {/* Dark mode - Mobile logo */}
           <Image
             src={logoMobileDark}
-            alt="Tonifier logo"
+            alt="tono logo"
             className="hidden h-8 w-auto dark:block lg:dark:hidden"
             priority
           />
