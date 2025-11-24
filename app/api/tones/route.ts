@@ -147,8 +147,8 @@ export async function GET(req: NextRequest) {
     }
 
     const queryParsed = ToneQuerySchema.safeParse({
-      page: req.nextUrl.searchParams.get('page'),
-      limit: req.nextUrl.searchParams.get('limit'),
+      page: req.nextUrl.searchParams.get('page') || undefined,
+      limit: req.nextUrl.searchParams.get('limit') || undefined,
     });
     if (!queryParsed.success) {
       throw new APIError(

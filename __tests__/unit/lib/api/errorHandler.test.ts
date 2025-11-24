@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 import { APIError, handleAPIError } from '@/lib/api/errorHandler';
 
 describe('APIError', () => {
@@ -60,11 +63,7 @@ describe('handleAPIError', () => {
 
   it('should hide error details in production', async () => {
     const originalEnv = process.env.NODE_ENV;
-    Object.defineProperty(process.env, 'NODE_ENV', {
-      value: 'production',
-      writable: true,
-      configurable: true,
-    });
+    (process.env as any).NODE_ENV = 'production';
 
     const error = new Error('Database connection failed');
     const response = handleAPIError(error);
@@ -72,20 +71,12 @@ describe('handleAPIError', () => {
     const body = await response.json();
     expect(body.details).toBeUndefined();
 
-    Object.defineProperty(process.env, 'NODE_ENV', {
-      value: originalEnv,
-      writable: true,
-      configurable: true,
-    });
+    (process.env as any).NODE_ENV = originalEnv;
   });
 
   it('should show error details in development', async () => {
     const originalEnv = process.env.NODE_ENV;
-    Object.defineProperty(process.env, 'NODE_ENV', {
-      value: 'development',
-      writable: true,
-      configurable: true,
-    });
+    (process.env as any).NODE_ENV = 'development';
 
     const error = new Error('Database connection failed');
     const response = handleAPIError(error);
@@ -93,10 +84,6 @@ describe('handleAPIError', () => {
     const body = await response.json();
     expect(body.details).toBe('Database connection failed');
 
-    Object.defineProperty(process.env, 'NODE_ENV', {
-      value: originalEnv,
-      writable: true,
-      configurable: true,
-    });
+    (process.env as any).NODE_ENV = originalEnv;
   });
 });

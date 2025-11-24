@@ -1,0 +1,178 @@
+
+> tono@0.1.0 test
+> jest __tests__/unit/validation/toneValidation.test.ts __tests__/unit/lib/config.test.ts __tests__/unit/lib/api/errorHandler.test.ts __tests__/unit/lib/openai/toneAiService.test.ts
+
+FAIL __tests__/unit/lib/api/errorHandler.test.ts
+  ● Console
+
+    console.error
+      API Error: {"timestamp":"2025-11-24T17:57:18.324Z","error":"Invalid request","stack":"APIError: Invalid request\n    at Object.<anonymous> (C:\\Users\\migna\\Documents\\tono\\__tests__\\unit\\lib\\api\\errorHandler.test.ts:26:19)\n    at Promise.finally.completed (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1557:28)\n    at new Promise (<anonymous>)\n    at callAsyncCircusFn (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1497:10)\n    at _callCircusTest (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1007:40)\n    at _runTest (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:947:3)\n    at C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:849:7\n    at _runTestsForDescribeBlock (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:862:11)\n    at _runTestsForDescribeBlock (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:857:11)\n    at run (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:761:3)\n    at runAndTransformResultsToJestFormat (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1918:21)\n    at jestAdapter (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\runner.js:101:19)\n    at runTestInternal (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-runner\\build\\index.js:275:16)\n    at runTest (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-runner\\build\\index.js:343:7)"}
+
+    [0m [90m 23 |[39m
+     [90m 24 |[39m   [36mif[39m (error [36minstanceof[39m [33mAPIError[39m) {
+    [31m[1m>[22m[39m[90m 25 |[39m     console[33m.[39merror([32m'API Error:'[39m[33m,[39m [33mJSON[39m[33m.[39mstringify(logData))[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 26 |[39m     [36mreturn[39m [33mNextResponse[39m[33m.[39mjson(
+     [90m 27 |[39m       {
+     [90m 28 |[39m         error[33m:[39m error[33m.[39mmessage[33m,[39m[0m
+
+      at error (lib/api/errorHandler.ts:25:13)
+      at Object.<anonymous> (__tests__/unit/lib/api/errorHandler.test.ts:27:36)
+
+    console.error
+      API Error: {"requestId":"req-123","timestamp":"2025-11-24T17:57:18.341Z","error":"Invalid request","stack":"APIError: Invalid request\n    at Object.<anonymous> (C:\\Users\\migna\\Documents\\tono\\__tests__\\unit\\lib\\api\\errorHandler.test.ts:37:19)\n    at Promise.finally.completed (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1557:28)\n    at new Promise (<anonymous>)\n    at callAsyncCircusFn (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1497:10)\n    at _callCircusTest (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1007:40)\n    at _runTest (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:947:3)\n    at C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:849:7\n    at _runTestsForDescribeBlock (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:862:11)\n    at _runTestsForDescribeBlock (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:857:11)\n    at run (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:761:3)\n    at runAndTransformResultsToJestFormat (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1918:21)\n    at jestAdapter (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\runner.js:101:19)\n    at runTestInternal (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-runner\\build\\index.js:275:16)\n    at runTest (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-runner\\build\\index.js:343:7)"}
+
+    [0m [90m 23 |[39m
+     [90m 24 |[39m   [36mif[39m (error [36minstanceof[39m [33mAPIError[39m) {
+    [31m[1m>[22m[39m[90m 25 |[39m     console[33m.[39merror([32m'API Error:'[39m[33m,[39m [33mJSON[39m[33m.[39mstringify(logData))[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 26 |[39m     [36mreturn[39m [33mNextResponse[39m[33m.[39mjson(
+     [90m 27 |[39m       {
+     [90m 28 |[39m         error[33m:[39m error[33m.[39mmessage[33m,[39m[0m
+
+      at error (lib/api/errorHandler.ts:25:13)
+      at Object.<anonymous> (__tests__/unit/lib/api/errorHandler.test.ts:38:36)
+
+    console.error
+      API Error: {"timestamp":"2025-11-24T17:57:18.343Z","error":"Validation failed","stack":"APIError: Validation failed\n    at Object.<anonymous> (C:\\Users\\migna\\Documents\\tono\\__tests__\\unit\\lib\\api\\errorHandler.test.ts:46:19)\n    at Promise.finally.completed (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1557:28)\n    at new Promise (<anonymous>)\n    at callAsyncCircusFn (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1497:10)\n    at _callCircusTest (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1007:40)\n    at _runTest (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:947:3)\n    at C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:849:7\n    at _runTestsForDescribeBlock (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:862:11)\n    at _runTestsForDescribeBlock (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:857:11)\n    at run (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:761:3)\n    at runAndTransformResultsToJestFormat (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1918:21)\n    at jestAdapter (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\runner.js:101:19)\n    at runTestInternal (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-runner\\build\\index.js:275:16)\n    at runTest (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-runner\\build\\index.js:343:7)"}
+
+    [0m [90m 23 |[39m
+     [90m 24 |[39m   [36mif[39m (error [36minstanceof[39m [33mAPIError[39m) {
+    [31m[1m>[22m[39m[90m 25 |[39m     console[33m.[39merror([32m'API Error:'[39m[33m,[39m [33mJSON[39m[33m.[39mstringify(logData))[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 26 |[39m     [36mreturn[39m [33mNextResponse[39m[33m.[39mjson(
+     [90m 27 |[39m       {
+     [90m 28 |[39m         error[33m:[39m error[33m.[39mmessage[33m,[39m[0m
+
+      at error (lib/api/errorHandler.ts:25:13)
+      at Object.<anonymous> (__tests__/unit/lib/api/errorHandler.test.ts:47:36)
+
+    console.error
+      Unexpected error: {"timestamp":"2025-11-24T17:57:18.344Z","error":"Something went wrong","stack":"Error: Something went wrong\n    at Object.<anonymous> (C:\\Users\\migna\\Documents\\tono\\__tests__\\unit\\lib\\api\\errorHandler.test.ts:54:19)\n    at Promise.finally.completed (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1557:28)\n    at new Promise (<anonymous>)\n    at callAsyncCircusFn (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1497:10)\n    at _callCircusTest (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1007:40)\n    at _runTest (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:947:3)\n    at C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:849:7\n    at _runTestsForDescribeBlock (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:862:11)\n    at _runTestsForDescribeBlock (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:857:11)\n    at run (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:761:3)\n    at runAndTransformResultsToJestFormat (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1918:21)\n    at jestAdapter (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\runner.js:101:19)\n    at runTestInternal (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-runner\\build\\index.js:275:16)\n    at runTest (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-runner\\build\\index.js:343:7)"}
+
+    [0m [90m 36 |[39m
+     [90m 37 |[39m   [90m// Unexpected error - log full details but don't expose to client[39m
+    [31m[1m>[22m[39m[90m 38 |[39m   console[33m.[39merror([32m'Unexpected error:'[39m[33m,[39m [33mJSON[39m[33m.[39mstringify(logData))[33m;[39m
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 39 |[39m   [36mreturn[39m [33mNextResponse[39m[33m.[39mjson(
+     [90m 40 |[39m     {
+     [90m 41 |[39m       error[33m:[39m [32m'Internal server error'[39m[33m,[39m[0m
+
+      at error (lib/api/errorHandler.ts:38:11)
+      at Object.<anonymous> (__tests__/unit/lib/api/errorHandler.test.ts:55:36)
+
+    console.error
+      Unexpected error: {"timestamp":"2025-11-24T17:57:18.345Z","error":"Database connection failed","stack":"Error: Database connection failed\n    at Object.<anonymous> (C:\\Users\\migna\\Documents\\tono\\__tests__\\unit\\lib\\api\\errorHandler.test.ts:72:19)\n    at Promise.finally.completed (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1557:28)\n    at new Promise (<anonymous>)\n    at callAsyncCircusFn (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1497:10)\n    at _callCircusTest (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1007:40)\n    at _runTest (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:947:3)\n    at C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:849:7\n    at _runTestsForDescribeBlock (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:862:11)\n    at _runTestsForDescribeBlock (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:857:11)\n    at run (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:761:3)\n    at runAndTransformResultsToJestFormat (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1918:21)\n    at jestAdapter (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\runner.js:101:19)\n    at runTestInternal (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-runner\\build\\index.js:275:16)\n    at runTest (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-runner\\build\\index.js:343:7)"}
+
+    [0m [90m 36 |[39m
+     [90m 37 |[39m   [90m// Unexpected error - log full details but don't expose to client[39m
+    [31m[1m>[22m[39m[90m 38 |[39m   console[33m.[39merror([32m'Unexpected error:'[39m[33m,[39m [33mJSON[39m[33m.[39mstringify(logData))[33m;[39m
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 39 |[39m   [36mreturn[39m [33mNextResponse[39m[33m.[39mjson(
+     [90m 40 |[39m     {
+     [90m 41 |[39m       error[33m:[39m [32m'Internal server error'[39m[33m,[39m[0m
+
+      at error (lib/api/errorHandler.ts:38:11)
+      at Object.<anonymous> (__tests__/unit/lib/api/errorHandler.test.ts:73:36)
+
+    console.error
+      Unexpected error: {"timestamp":"2025-11-24T17:57:18.347Z","error":"Database connection failed","stack":"Error: Database connection failed\n    at Object.<anonymous> (C:\\Users\\migna\\Documents\\tono\\__tests__\\unit\\lib\\api\\errorHandler.test.ts:93:19)\n    at Promise.finally.completed (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1557:28)\n    at new Promise (<anonymous>)\n    at callAsyncCircusFn (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1497:10)\n    at _callCircusTest (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1007:40)\n    at _runTest (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:947:3)\n    at C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:849:7\n    at _runTestsForDescribeBlock (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:862:11)\n    at _runTestsForDescribeBlock (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:857:11)\n    at run (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:761:3)\n    at runAndTransformResultsToJestFormat (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\jestAdapterInit.js:1918:21)\n    at jestAdapter (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-circus\\build\\runner.js:101:19)\n    at runTestInternal (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-runner\\build\\index.js:275:16)\n    at runTest (C:\\Users\\migna\\Documents\\tono\\node_modules\\jest-runner\\build\\index.js:343:7)"}
+
+    [0m [90m 36 |[39m
+     [90m 37 |[39m   [90m// Unexpected error - log full details but don't expose to client[39m
+    [31m[1m>[22m[39m[90m 38 |[39m   console[33m.[39merror([32m'Unexpected error:'[39m[33m,[39m [33mJSON[39m[33m.[39mstringify(logData))[33m;[39m
+     [90m    |[39m           [31m[1m^[22m[39m
+     [90m 39 |[39m   [36mreturn[39m [33mNextResponse[39m[33m.[39mjson(
+     [90m 40 |[39m     {
+     [90m 41 |[39m       error[33m:[39m [32m'Internal server error'[39m[33m,[39m[0m
+
+      at error (lib/api/errorHandler.ts:38:11)
+      at Object.<anonymous> (__tests__/unit/lib/api/errorHandler.test.ts:94:36)
+
+  ● handleAPIError › should show error details in development
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "Database connection failed"
+    Received: undefined
+
+    [0m [90m  95 |[39m
+     [90m  96 |[39m     [36mconst[39m body [33m=[39m [36mawait[39m response[33m.[39mjson()[33m;[39m
+    [31m[1m>[22m[39m[90m  97 |[39m     expect(body[33m.[39mdetails)[33m.[39mtoBe([32m'Database connection failed'[39m)[33m;[39m
+     [90m     |[39m                          [31m[1m^[22m[39m
+     [90m  98 |[39m
+     [90m  99 |[39m     [33mObject[39m[33m.[39mdefineProperty(process[33m.[39menv[33m,[39m [32m'NODE_ENV'[39m[33m,[39m {
+     [90m 100 |[39m       value[33m:[39m originalEnv[33m,[39m[0m
+
+      at Object.toBe (__tests__/unit/lib/api/errorHandler.test.ts:97:26)
+
+PASS __tests__/unit/validation/toneValidation.test.ts
+PASS __tests__/unit/lib/openai/toneAiService.test.ts
+  ● Console
+
+    console.error
+      OpenAI API error: Error: API error
+          at Object.<anonymous> (C:\Users\migna\Documents\tono\__tests__\unit\lib\openai\toneAiService.test.ts:77:69)
+          at Promise.finally.completed (C:\Users\migna\Documents\tono\node_modules\jest-circus\build\jestAdapterInit.js:1557:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (C:\Users\migna\Documents\tono\node_modules\jest-circus\build\jestAdapterInit.js:1497:10)
+          at _callCircusTest (C:\Users\migna\Documents\tono\node_modules\jest-circus\build\jestAdapterInit.js:1007:40)
+          at _runTest (C:\Users\migna\Documents\tono\node_modules\jest-circus\build\jestAdapterInit.js:947:3)
+          at C:\Users\migna\Documents\tono\node_modules\jest-circus\build\jestAdapterInit.js:849:7
+          at _runTestsForDescribeBlock (C:\Users\migna\Documents\tono\node_modules\jest-circus\build\jestAdapterInit.js:862:11)
+          at _runTestsForDescribeBlock (C:\Users\migna\Documents\tono\node_modules\jest-circus\build\jestAdapterInit.js:857:11)
+          at run (C:\Users\migna\Documents\tono\node_modules\jest-circus\build\jestAdapterInit.js:761:3)
+          at runAndTransformResultsToJestFormat (C:\Users\migna\Documents\tono\node_modules\jest-circus\build\jestAdapterInit.js:1918:21)
+          at jestAdapter (C:\Users\migna\Documents\tono\node_modules\jest-circus\build\runner.js:101:19)
+          at runTestInternal (C:\Users\migna\Documents\tono\node_modules\jest-runner\build\index.js:275:16)
+          at runTest (C:\Users\migna\Documents\tono\node_modules\jest-runner\build\index.js:343:7)
+
+    [0m [90m 147 |[39m     }
+     [90m 148 |[39m   } [36mcatch[39m (aiError) {
+    [31m[1m>[22m[39m[90m 149 |[39m     console[33m.[39merror([32m'OpenAI API error:'[39m[33m,[39m aiError)[33m;[39m
+     [90m     |[39m             [31m[1m^[22m[39m
+     [90m 150 |[39m
+     [90m 151 |[39m     [36mreturn[39m {
+     [90m 152 |[39m       ampSettings[33m:[39m defaultResult[33m.[39mampSettings[33m,[39m[0m
+
+      at error (lib/openai/toneAiService.ts:149:13)
+      at Object.<anonymous> (__tests__/unit/lib/openai/toneAiService.test.ts:79:20)
+
+    console.warn
+      Failed to parse AI response as JSON: SyntaxError: Unexpected token 'N', "Not JSON" is not valid JSON
+          at JSON.parse (<anonymous>)
+          at parse (C:\Users\migna\Documents\tono\lib\openai\toneAiService.ts:128:27)
+          at Object.<anonymous> (C:\Users\migna\Documents\tono\__tests__\unit\lib\openai\toneAiService.test.ts:98:20)
+
+    [0m [90m 138 |[39m       [36mreturn[39m result[33m;[39m
+     [90m 139 |[39m     } [36mcatch[39m (parseErr) {
+    [31m[1m>[22m[39m[90m 140 |[39m       console[33m.[39mwarn([32m'Failed to parse AI response as JSON:'[39m[33m,[39m parseErr)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 141 |[39m       console[33m.[39mwarn([32m'AI Response:'[39m[33m,[39m aiResponse)[33m;[39m
+     [90m 142 |[39m
+     [90m 143 |[39m       [36mreturn[39m {[0m
+
+      at warn (lib/openai/toneAiService.ts:140:15)
+      at Object.<anonymous> (__tests__/unit/lib/openai/toneAiService.test.ts:98:20)
+
+    console.warn
+      AI Response: Not JSON
+
+    [0m [90m 139 |[39m     } [36mcatch[39m (parseErr) {
+     [90m 140 |[39m       console[33m.[39mwarn([32m'Failed to parse AI response as JSON:'[39m[33m,[39m parseErr)[33m;[39m
+    [31m[1m>[22m[39m[90m 141 |[39m       console[33m.[39mwarn([32m'AI Response:'[39m[33m,[39m aiResponse)[33m;[39m
+     [90m     |[39m               [31m[1m^[22m[39m
+     [90m 142 |[39m
+     [90m 143 |[39m       [36mreturn[39m {
+     [90m 144 |[39m         ampSettings[33m:[39m defaultResult[33m.[39mampSettings[33m,[39m[0m
+
+      at warn (lib/openai/toneAiService.ts:141:15)
+      at Object.<anonymous> (__tests__/unit/lib/openai/toneAiService.test.ts:98:20)
+
+PASS __tests__/unit/lib/config.test.ts
+
+Test Suites: 1 failed, 3 passed, 4 total
+Tests:       1 failed, 32 passed, 33 total
+Snapshots:   0 total
+Time:        1.429 s
+Ran all test suites matching __tests__/unit/validation/toneValidation.test.ts|__tests__/unit/lib/config.test.ts|__tests__/unit/lib/api/errorHandler.test.ts|__tests__/unit/lib/openai/toneAiService.test.ts.
