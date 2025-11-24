@@ -26,7 +26,7 @@ export interface ToneGearConfig {
   amp: string;
 }
 
-const DEFAULT_AMP_SETTINGS: AmpSettings = {
+export const DEFAULT_AMP_SETTINGS: AmpSettings = {
   mid: 5,
   bass: 5,
   gain: 5,
