@@ -64,8 +64,6 @@ export default async function Dashboard() {
     ? differenceInDays(activeSubscription.currentPeriodEnd, todaysDate)
     : null;
 
-  console.log(endingSoon);
-
   const stats = [
     { label: 'Total Tones', value: toneCount },
     { label: 'Credits Remaining', value: creditCount },

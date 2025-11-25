@@ -41,11 +41,9 @@ export async function getCachedTone(config: ToneGearConfig): Promise<AIToneResul
     const cached = await redis.get<AIToneResult>(cacheKey);
 
     if (cached) {
-      console.log('Cache hit for tone request:', cacheKey);
       return cached;
     }
 
-    console.log('Cache miss for tone request:', cacheKey);
     return null;
   } catch (error) {
     console.error('Error retrieving from cache:', error);
@@ -63,7 +61,6 @@ export async function setCachedTone(config: ToneGearConfig, result: AIToneResult
   try {
     const cacheKey = generateCacheKey(config);
     await redis.set(cacheKey, result, { ex: CACHE_TTL });
-    console.log('Cached tone result:', cacheKey);
   } catch (error) {
     console.error('Error storing in cache:', error);
     // Fail gracefully - don't throw error if caching fails
@@ -79,7 +76,6 @@ export async function invalidateCachedTone(config: ToneGearConfig): Promise<void
   try {
     const cacheKey = generateCacheKey(config);
     await redis.del(cacheKey);
-    console.log('Invalidated cached tone:', cacheKey);
   } catch (error) {
     console.error('Error invalidating cache:', error);
   }

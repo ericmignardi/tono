@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 import { NextRequest } from 'next/server';
-import { cleanDatabase, createTestUser, createTestTone } from '../../helpers/testDb';
+import { cleanDatabase, createTestUser, createTestTone } from '../../../test-helpers/testDb';
 import { currentUser } from '@clerk/nextjs/server';
 import { generateToneSettings } from '@/lib/openai/toneAiService';
 import { prisma } from '@/lib/prisma/database';

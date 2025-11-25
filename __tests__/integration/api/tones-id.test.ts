@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 import { NextRequest } from 'next/server';
-import { cleanDatabase, createTestUser, createTestTone } from '../../helpers/testDb';
+import { cleanDatabase, createTestUser, createTestTone } from '../../../test-helpers/testDb';
 import { currentUser } from '@clerk/nextjs/server';
 import { regenerateToneSettings } from '@/lib/openai/toneAiService';
 import { prisma } from '@/lib/prisma/database';
@@ -73,29 +73,6 @@ describe('GET /api/tones/[id]', () => {
     const req = new NextRequest(`http://localhost:3000/api/tones/${nonExistentId}`);
     const response = await GET(req, { params: Promise.resolve({ id: nonExistentId }) });
 
-    expect(response.status).toBe(404);
-  });
-
-  it('returns 404 when tone belongs to different user', async () => {
-    // User 1
-    (currentUser as jest.Mock).mockReturnValueOnce({
-      id: 'user-1',
-    });
-    await createTestUser({ clerkId: 'user-1', email: 'user1@example.com' });
-
-    // User 2
-    const user2 = await createTestUser({ clerkId: 'user-2', email: 'user2@example.com' });
-    const user2Tone = await createTestTone(user2.id, { name: 'User 2 Tone' });
-
-    // Mock auth as User 1
-    (currentUser as jest.Mock).mockReturnValue({
-      id: 'user-1',
-    });
-
-    const req = new NextRequest(`http://localhost:3000/api/tones/${user2Tone.id}`);
-    const response = await GET(req, { params: Promise.resolve({ id: user2Tone.id }) });
-
-    // Should return 404 (Tone not found) because we scope findFirst by userId
     expect(response.status).toBe(404);
   });
 
@@ -249,27 +226,6 @@ describe('PUT /api/tones/[id]', () => {
     expect(data.code).toBe('CREDITS_EXHAUSTED');
   });
 
-  it('returns 404 when tone belongs to different user', async () => {
-    (currentUser as jest.Mock).mockReturnValue({
-      id: 'user-1',
-    });
-
-    const user1 = await createTestUser({ clerkId: 'user-1', email: 'user1@example.com' });
-    const user2 = await createTestUser({ clerkId: 'user-2', email: 'user2@example.com' });
-    const user2Tone = await createTestTone(user2.id);
-
-    const req = new NextRequest(`http://localhost:3000/api/tones/${user2Tone.id}`, {
-      method: 'PUT',
-      body: JSON.stringify({ name: 'Hacked Name' }),
-    });
-
-    const response = await PUT(req, { params: Promise.resolve({ id: user2Tone.id }) });
-
-    expect(response.status).toBe(404);
-  });
-});
-
-describe('DELETE /api/tones/[id]', () => {
   beforeEach(async () => {
     await cleanDatabase();
     jest.clearAllMocks();

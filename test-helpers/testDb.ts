@@ -2,17 +2,21 @@ import { prisma } from '@/lib/prisma/database';
 import { Prisma } from '@prisma/client';
 
 export async function cleanDatabase() {
-  await prisma.tone.deleteMany();
-  await prisma.subscription.deleteMany();
-  await prisma.user.deleteMany();
-  await prisma.webhookEvent.deleteMany();
+  // Delete in order of dependencies (child tables first)
+  await prisma.$transaction([
+    prisma.tone.deleteMany(),
+    prisma.subscription.deleteMany(),
+    prisma.webhookEvent.deleteMany(),
+    prisma.user.deleteMany(),
+  ]);
 }
 
 export async function createTestUser(overrides?: Partial<Prisma.UserCreateInput>) {
+  const uniqueId = `${Date.now()}_${Math.floor(Math.random() * 10000)}`;
   return prisma.user.create({
     data: {
-      clerkId: `test_clerk_${Date.now()}`,
-      email: `test${Date.now()}@example.com`,
+      clerkId: `test_clerk_${uniqueId}`,
+      email: `test${uniqueId}@example.com`,
       generationsUsed: 0,
       generationsLimit: 5,
       ...overrides,

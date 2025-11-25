@@ -1,10 +1,10 @@
-# 🎸 Tono - AI-Powered Guitar Tone Assistant
+# 🎸 tono - AI-Powered Guitar Tone Assistant
 
 ## 📖 Overview
 
-**Tono** is a full-stack AI-powered SaaS application that helps guitarists achieve their desired sound instantly. Simply input your guitar and amp setup along with a creative goal like _"early Van Halen lead tone"_ or _"warm jazz clean sound"_, and Tono delivers precise amp settings, effects recommendations, and detailed tone analysis.
+**tono** is a full-stack AI-powered SaaS application that helps guitarists achieve their desired sound instantly. Simply input your guitar and amp setup along with a creative goal like _"early Van Halen lead tone"_ or _"warm jazz clean sound"_, and tono delivers precise amp settings, effects recommendations, and detailed tone analysis.
 
-### Why Tono?
+### Why tono?
 
 - 🎯 **Instant Results** - Get professional tone recommendations in seconds
 - 🔧 **Gear-Specific** - Tailored settings for your exact equipment
@@ -68,7 +68,7 @@
 
 ## 🏗️ Architecture
 
-Tono follows a modern, scalable serverless architecture built on the Next.js App Router paradigm.
+tono follows a modern, scalable serverless architecture built on the Next.js App Router paradigm.
 
 ```
 ┌─────────────┐
@@ -210,6 +210,11 @@ Tono follows a modern, scalable serverless architecture built on the Next.js App
 ---
 
 ## 🧪 Testing
+
+### Prerequisites for Testing
+
+- Docker (for running the test database)
+- Run `docker-compose -f docker-compose.test.yml up -d` before running integration tests.
 
 ```bash
 # Run all unit tests
