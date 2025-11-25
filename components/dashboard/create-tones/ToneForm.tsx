@@ -83,6 +83,8 @@ export default function ToneForm({ tone }: ToneFormProps) {
         toast.success('Tone updated successfully!');
       } else {
         form.reset();
+        router.push('/dashboard/tones');
+        router.refresh();
         toast.success('Tone created successfully!');
       }
     } catch {
