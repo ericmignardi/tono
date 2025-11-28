@@ -1,90 +1,77 @@
 'use client';
+
 import Link from 'next/link';
 import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from '@clerk/nextjs';
-import { Button } from '@/components/ui/button';
+import { ArrowUpRight, Music2, Menu, X } from 'lucide-react';
 import { useState } from 'react';
-import { Menu, X } from 'lucide-react';
-import Image from 'next/image';
-import logo from '@/public/logo.svg';
-import logoDark from '@/public/logoDark.svg';
-import logoMobile from '@/public/logoMobile.svg';
-import logoMobileDark from '@/public/logoMobileDark.svg';
 
 export default function Header() {
   const [mobileMenu, setMobileMenu] = useState<boolean>(false);
-  const navLinks = [
-    { href: '#features', title: 'Features' },
-    { href: '#pricing', title: 'Pricing' },
-    { href: '#get-started', title: 'Get started' },
-  ];
 
   return (
-    <header className="bg-background fixed top-0 right-0 left-0 z-50 border-b shadow-sm">
-      <div className="relative flex items-center justify-between p-4">
-        <Link href="/" className="flex items-center">
-          {/* Light mode - Desktop logo */}
-          <Image
-            src={logo}
-            alt="tono logo"
-            className="hidden h-8 w-auto lg:block dark:lg:hidden"
-            priority
-          />
-          {/* Light mode - Mobile logo */}
-          <Image
-            src={logoMobile}
-            alt="tono logo"
-            className="block h-8 w-auto lg:hidden dark:hidden"
-            priority
-          />
-
-          {/* Dark mode - Desktop logo */}
-          <Image
-            src={logoDark}
-            alt="tono logo"
-            className="hidden h-8 w-auto dark:lg:block"
-            priority
-          />
-          {/* Dark mode - Mobile logo */}
-          <Image
-            src={logoMobileDark}
-            alt="tono logo"
-            className="hidden h-8 w-auto dark:block lg:dark:hidden"
-            priority
-          />
+    <nav className="bg-secondary/90 fixed top-0 z-50 w-full px-6 py-6 backdrop-blur-md transition-all">
+      <div className="mx-auto flex max-w-7xl items-center justify-between">
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-2">
+          <div className="bg-primary shadow-primary/20 flex h-10 w-10 rotate-3 items-center justify-center rounded-xl shadow-lg">
+            <Music2 className="h-6 w-6 text-white" />
+          </div>
+          <span className="text-2xl font-bold tracking-tight text-slate-900">tono</span>
         </Link>
 
-        <div className="flex items-center gap-8">
-          {navLinks.map((link) => (
-            <Link
-              key={link.title}
-              href={link.href}
-              className="hover:text-primary text-sm font-medium"
-            >
-              {link.title}
-            </Link>
-          ))}
+        {/* Nav Links (Pill Shape) */}
+        <div className="hidden items-center gap-1 rounded-full border border-slate-100 bg-white px-2 py-1.5 shadow-sm md:flex">
+          <Link
+            href="#features"
+            className="hover:bg-secondary hover:text-primary rounded-full px-5 py-2 text-sm font-semibold text-slate-600 transition-colors"
+          >
+            Features
+          </Link>
+          <Link
+            href="#pricing"
+            className="hover:bg-secondary hover:text-primary rounded-full px-5 py-2 text-sm font-semibold text-slate-600 transition-colors"
+          >
+            Pricing
+          </Link>
+          <Link
+            href="#get-started"
+            className="hover:bg-secondary hover:text-primary rounded-full px-5 py-2 text-sm font-semibold text-slate-600 transition-colors"
+          >
+            Get Started
+          </Link>
           <SignedIn>
-            <Link className="hover:text-primary text-sm font-medium" href="/dashboard">
+            <Link
+              href="/dashboard"
+              className="hover:bg-secondary hover:text-primary rounded-full px-5 py-2 text-sm font-semibold text-slate-600 transition-colors"
+            >
               Dashboard
             </Link>
           </SignedIn>
         </div>
 
-        <nav className="hidden items-center justify-between gap-4 lg:flex">
+        {/* CTA */}
+        <div className="hidden items-center gap-4 lg:flex">
           <SignedOut>
-            <SignUpButton>
-              <Button variant={'outline'} className="cursor-pointer">
-                Sign up
-              </Button>
-            </SignUpButton>
             <SignInButton>
-              <Button className="cursor-pointer">Sign in</Button>
+              <button className="hover:text-primary text-sm font-semibold text-slate-600">
+                Sign In
+              </button>
             </SignInButton>
+            <SignUpButton>
+              <button className="group bg-primary shadow-primary/20 hover:bg-primary/90 hover:shadow-primary/30 flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5">
+                Start Playing
+                <div className="rounded-full bg-white/20 p-1 transition-transform group-hover:translate-x-1">
+                  <ArrowUpRight className="h-3 w-3" />
+                </div>
+              </button>
+            </SignUpButton>
           </SignedOut>
           <SignedIn>
             <UserButton />
           </SignedIn>
-        </nav>
+        </div>
+
+        {/* Mobile Menu Toggle */}
         <button
           onClick={() => setMobileMenu(!mobileMenu)}
           className="z-20 h-6 w-6 cursor-pointer lg:hidden"
@@ -92,39 +79,57 @@ export default function Header() {
         >
           {mobileMenu ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
+
+        {/* Mobile Menu */}
         {mobileMenu && (
           <>
-            {/* Backdrop */}
             <div
               className="fixed inset-0 z-50 bg-black/50 lg:hidden"
               onClick={() => setMobileMenu(false)}
             />
-            {/* Mobile menu */}
-            <nav className="bg-background fixed top-0 right-0 z-60 flex h-screen w-[80%] flex-col gap-4 p-8 pt-20 lg:hidden">
+            <nav className="fixed top-0 right-0 z-60 flex h-screen w-[80%] flex-col gap-4 bg-white p-8 pt-20 lg:hidden">
+              <Link
+                href="#features"
+                className="hover:bg-secondary hover:text-primary rounded-lg px-4 py-2 text-sm font-medium"
+                onClick={() => setMobileMenu(false)}
+              >
+                Features
+              </Link>
+              <Link
+                href="#pricing"
+                className="hover:bg-secondary hover:text-primary rounded-lg px-4 py-2 text-sm font-medium"
+                onClick={() => setMobileMenu(false)}
+              >
+                Pricing
+              </Link>
               <SignedOut>
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.title}
-                    href={link.href}
-                    className="hover:text-primary text-sm font-medium"
-                  >
-                    {link.title}
-                  </Link>
-                ))}
-                <SignUpButton>
-                  <Button variant={'outline'}>Sign up</Button>
-                </SignUpButton>
                 <SignInButton>
-                  <Button>Sign in</Button>
+                  <button className="w-full rounded-full border border-slate-200 py-2 text-sm font-semibold text-slate-600">
+                    Sign In
+                  </button>
                 </SignInButton>
+                <SignUpButton>
+                  <button className="bg-primary w-full rounded-full py-2 text-sm font-semibold text-white">
+                    Start Playing
+                  </button>
+                </SignUpButton>
               </SignedOut>
               <SignedIn>
-                <UserButton />
+                <Link
+                  href="/dashboard"
+                  className="hover:bg-secondary hover:text-primary rounded-lg px-4 py-2 text-sm font-medium"
+                  onClick={() => setMobileMenu(false)}
+                >
+                  Dashboard
+                </Link>
+                <div className="mt-4">
+                  <UserButton />
+                </div>
               </SignedIn>
             </nav>
           </>
         )}
       </div>
-    </header>
+    </nav>
   );
 }

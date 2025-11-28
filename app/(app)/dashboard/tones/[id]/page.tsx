@@ -4,7 +4,7 @@ import { auth } from '@clerk/nextjs/server';
 import { notFound, redirect } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { Guitar, Settings, Brain } from 'lucide-react';
+import { Guitar, Settings, Brain, ArrowLeft, Pencil, Trash2 } from 'lucide-react';
 
 // Server action
 async function deleteTone(formData: FormData) {
@@ -41,69 +41,78 @@ export default async function Tone({ params }: { params: Promise<{ id: string }>
   }
 
   return (
-    <section className="flex flex-col gap-6">
+    <div className="mx-auto max-w-7xl space-y-8 p-8">
       {/* Header */}
       <div className="flex flex-col gap-4">
-        <div className="flex justify-between lg:items-start">
-          <div className="flex flex-col gap-2">
-            <h1 className="text-3xl font-bold tracking-tight lg:text-4xl">Tones</h1>
-            <p className="text-muted-foreground">View your personal library of tones.</p>
+        <Link
+          href="/dashboard/tones"
+          className="flex w-fit items-center gap-2 text-sm text-slate-500 hover:text-slate-900"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Tones
+        </Link>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="space-y-1">
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900">{tone.name}</h1>
+            <p className="text-slate-500">{tone.artist}</p>
           </div>
-          <div className="flex flex-col items-center gap-2 lg:flex-row">
+          <div className="flex gap-2">
             <Link href={`/dashboard/tones/${id}/edit`}>
-              <Button variant={'outline'}>Edit Tone</Button>
+              <Button variant="outline" size="sm">
+                <Pencil className="h-4 w-4" />
+                Edit
+              </Button>
             </Link>
             <form action={deleteTone}>
               <input type="hidden" name="toneId" value={id} />
-              <Button variant={'destructive'} type="submit">
-                Delete Tone
+              <Button variant="destructive" size="sm" type="submit">
+                <Trash2 className="h-4 w-4" />
+                Delete
               </Button>
             </form>
           </div>
         </div>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        {/* Left Column */}
-        <div className="flex flex-col gap-4 lg:col-span-2">
-          {/* Gear Setup Card */}
+      {/* Description */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Description</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-slate-600">{tone.description}</p>
+        </CardContent>
+      </Card>
+
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Left Column - Gear Setup */}
+        <div className="space-y-6 lg:col-span-2">
+          {/* Gear Card */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Guitar className="text-primary" />
-                Gear
+              <CardTitle className="flex items-center gap-2">
+                <Guitar className="text-primary h-5 w-5" />
+                Gear Setup
               </CardTitle>
               <CardDescription>The equipment used for this tone</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-                <div>
-                  <div>
-                    <label className="text-muted-foreground text-xs font-medium uppercase">
-                      Guitar
-                    </label>
-                    <p className="text-sm font-medium">{tone.guitar}</p>
-                  </div>
-                  <div>
-                    <label className="text-muted-foreground text-xs font-medium uppercase">
-                      Pickups
-                    </label>
-                    <p className="text-sm font-medium">{tone.pickups}</p>
-                  </div>
+              <div className="grid gap-6 sm:grid-cols-2">
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-slate-500 uppercase">Guitar</label>
+                  <p className="font-medium text-slate-900">{tone.guitar}</p>
                 </div>
-                <div>
-                  <div>
-                    <label className="text-muted-foreground text-xs font-medium uppercase">
-                      Strings
-                    </label>
-                    <p className="text-sm font-medium">{tone.strings || 'Not specified'}</p>
-                  </div>
-                  <div>
-                    <label className="text-muted-foreground text-xs font-medium uppercase">
-                      Amp
-                    </label>
-                    <p className="text-sm font-medium">{tone.amp}</p>
-                  </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-slate-500 uppercase">Pickups</label>
+                  <p className="font-medium text-slate-900">{tone.pickups}</p>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-slate-500 uppercase">Strings</label>
+                  <p className="font-medium text-slate-900">{tone.strings || 'Not specified'}</p>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-medium text-slate-500 uppercase">Amp</label>
+                  <p className="font-medium text-slate-900">{tone.amp}</p>
                 </div>
               </div>
             </CardContent>
@@ -112,20 +121,18 @@ export default async function Tone({ params }: { params: Promise<{ id: string }>
           {/* AI Amp Settings */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Settings className="text-primary" />
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="text-primary h-5 w-5" />
                 AI Amp Settings
               </CardTitle>
               <CardDescription>AI-recommended amplifier configuration</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+              <div className="grid gap-6 sm:grid-cols-3">
                 {Object.entries(tone.aiAmpSettings as Record<string, any>).map(([key, value]) => (
-                  <div key={key}>
-                    <label className="text-muted-foreground text-xs font-medium uppercase">
-                      {key}
-                    </label>
-                    <p className="text-2xl font-bold">{value}</p>
+                  <div key={key} className="space-y-1">
+                    <label className="text-xs font-medium text-slate-500 uppercase">{key}</label>
+                    <p className="text-3xl font-bold text-slate-900">{value}</p>
                   </div>
                 ))}
               </div>
@@ -133,22 +140,22 @@ export default async function Tone({ params }: { params: Promise<{ id: string }>
           </Card>
         </div>
 
-        {/* Right Column */}
+        {/* Right Column - AI Notes */}
         <div>
-          {/* AI Notes Card */}
-          <Card>
+          <Card className="sticky top-24">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Brain className="text-primary" />
+              <CardTitle className="flex items-center gap-2">
+                <Brain className="text-primary h-5 w-5" />
                 AI Notes
               </CardTitle>
+              <CardDescription>AI-generated insights and recommendations</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground text-sm">{tone.aiNotes}</p>
+              <p className="text-sm leading-relaxed text-slate-600">{tone.aiNotes}</p>
             </CardContent>
           </Card>
         </div>
       </div>
-    </section>
+    </div>
   );
 }
