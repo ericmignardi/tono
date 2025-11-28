@@ -12,20 +12,15 @@ export default async function DashboardLayout({ children }: { children: React.Re
   }
 
   return (
-    <div className="relative h-screen overflow-hidden">
-      {/* Sidebar - Fixed positioning */}
+    <div className="flex h-screen overflow-hidden bg-[#f8fafc]">
+      {/* Sidebar */}
       <Sidebar />
 
-      {/* Main content area - Uses margin to account for sidebar */}
-      <div className="ml-16 flex h-full flex-col lg:ml-64">
-        {/* Header - Sticky within the scrollable container */}
+      {/* Main Content */}
+      <main className="relative flex h-full flex-1 flex-col overflow-hidden">
         <Header />
-
-        {/* Main content - Scrollable */}
-        <main className="flex-1 overflow-y-auto">
-          <div className="container mx-auto p-6 lg:p-8">{children}</div>
-        </main>
-      </div>
+        <div className="flex-1 overflow-y-auto bg-slate-50/50">{children}</div>
+      </main>
     </div>
   );
 }

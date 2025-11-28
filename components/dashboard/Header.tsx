@@ -1,40 +1,69 @@
 'use client';
 
 import { SignedIn, UserButton } from '@clerk/nextjs';
+import { Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Moon, Sun } from 'lucide-react';
-import { useTheme } from 'next-themes';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+
+const routeNames: Record<string, string> = {
+  dashboard: 'Dashboard',
+  create: 'Create Tone',
+  tones: 'Tones',
+};
 
 export default function Header() {
-  const { resolvedTheme, setTheme } = useTheme();
-  const isDark = resolvedTheme === 'dark';
+  const pathname = usePathname();
 
-  const toggleTheme = () => {
-    setTheme(isDark ? 'light' : 'dark');
-  };
+  // Generate breadcrumbs from pathname
+  const pathSegments = pathname.split('/').filter(Boolean);
+  const breadcrumbs = pathSegments.map((segment, index) => {
+    const href = '/' + pathSegments.slice(0, index + 1).join('/');
+    const label = routeNames[segment] || segment.charAt(0).toUpperCase() + segment.slice(1);
+    return { href, label, isLast: index === pathSegments.length - 1 };
+  });
 
   return (
-    <header className="bg-background sticky top-0 z-40 flex h-16 items-center justify-between border-b p-4">
-      {/* Left side - Can add breadcrumbs or page title here */}
-      <div className="flex items-center gap-4">{/* Reserved for breadcrumbs or search */}</div>
+    <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b border-slate-200 bg-white/80 px-8 backdrop-blur-md">
+      <Breadcrumb>
+        <BreadcrumbList>
+          {breadcrumbs.map((crumb, index) => (
+            <div key={crumb.href} className="flex items-center gap-2">
+              {index > 0 && <BreadcrumbSeparator />}
+              <BreadcrumbItem>
+                {crumb.isLast ? (
+                  <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
+                ) : (
+                  <BreadcrumbLink asChild>
+                    <Link href={crumb.href}>{crumb.label}</Link>
+                  </BreadcrumbLink>
+                )}
+              </BreadcrumbItem>
+            </div>
+          ))}
+        </BreadcrumbList>
+      </Breadcrumb>
 
-      {/* Right side - Actions */}
-      <nav className="flex items-center gap-2">
-        <Button
-          className="cursor-pointer"
-          variant="outline"
-          size="icon"
-          onClick={toggleTheme}
-          aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-          suppressHydrationWarning
-        >
-          {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-        </Button>
-
+      <div className="flex items-center gap-3">
+        <Link href="/dashboard/create">
+          <Button className="bg-primary shadow-primary/20 hover:bg-primary/90 flex items-center gap-2 rounded-md px-3 py-1.5 text-xs font-semibold text-white shadow-sm">
+            <Zap className="h-3.5 w-3.5 text-white" />
+            Create Tone
+          </Button>
+        </Link>
+        <div className="h-6 w-px bg-slate-200"></div>
         <SignedIn>
           <UserButton />
         </SignedIn>
-      </nav>
+      </div>
     </header>
   );
 }
