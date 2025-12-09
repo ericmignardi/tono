@@ -1,5 +1,26 @@
 # 🎸 tono - AI-Powered Guitar Tone Assistant
 
+> **📌 Portfolio Demo Project** - This is a demonstration of full-stack development skills. The app uses Stripe test mode and Clerk development mode. Feel free to explore all features!
+
+[![Live Demo](https://img.shields.io/badge/demo-live-success?style=for-the-badge)](https://tono-ruby.vercel.app)
+[![GitHub](https://img.shields.io/badge/github-source-blue?style=for-the-badge&logo=github)](https://github.com/ericmignardi/tono)
+
+## 🧪 Try It Out
+
+**Test Stripe Subscription:**
+
+- Card Number: `4242 4242 4242 4242`
+- Expiry: Any future date
+- CVC: Any 3 digits
+- ZIP: Any 5 digits
+
+**Authentication:**
+
+- Create a free account (takes 30 seconds)
+- Or just explore the landing page and features
+
+---
+
 ## 📖 Overview
 
 **tono** is a full-stack AI-powered SaaS application that helps guitarists achieve their desired sound instantly. Simply input your guitar and amp setup along with a creative goal like _"early Van Halen lead tone"_ or _"warm jazz clean sound"_, and tono delivers precise amp settings, effects recommendations, and detailed tone analysis.
