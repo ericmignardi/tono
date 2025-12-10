@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 export default function Footer() {
   return (
-    <footer className="relative border-t border-slate-100 bg-slate-50 px-6 pt-20 pb-10">
+    <footer className="border-border bg-muted/30 relative border-t px-6 pt-20 pb-10">
       <div className="mx-auto max-w-7xl">
         <div className="mb-16 flex flex-col items-center justify-between md:flex-row">
           <div className="mb-8 text-center md:mb-0 md:text-left">
@@ -11,9 +11,9 @@ export default function Footer() {
               <div className="bg-primary flex h-8 w-8 rotate-3 items-center justify-center rounded-lg">
                 <Music2 className="h-5 w-5 text-white" />
               </div>
-              <span className="text-2xl font-bold tracking-tight text-slate-900">tono</span>
+              <span className="text-foreground text-2xl font-bold tracking-tight">tono</span>
             </div>
-            <p className="max-w-sm text-slate-500">
+            <p className="text-muted-foreground max-w-sm">
               Instantly recreate your favorite guitar tones with the power of AI.
             </p>
           </div>
@@ -21,56 +21,59 @@ export default function Footer() {
           <div className="flex gap-4">
             <Link
               href="#"
-              className="hover:border-primary/30 hover:text-primary flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-colors"
+              className="hover:border-primary/30 hover:text-primary border-border bg-card text-muted-foreground flex h-10 w-10 items-center justify-center rounded-full border transition-colors"
             >
               <Twitter className="h-5 w-5" />
             </Link>
             <Link
               href="#"
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-colors hover:border-pink-200 hover:text-pink-600"
+              className="border-border bg-card text-muted-foreground flex h-10 w-10 items-center justify-center rounded-full border transition-colors hover:border-pink-200 hover:text-pink-600"
             >
               <Instagram className="h-5 w-5" />
             </Link>
             <Link
               href="#"
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-colors hover:border-blue-200 hover:text-blue-600"
+              className="border-border bg-card text-muted-foreground flex h-10 w-10 items-center justify-center rounded-full border transition-colors hover:border-blue-200 hover:text-blue-600"
             >
               <Facebook className="h-5 w-5" />
             </Link>
           </div>
         </div>
 
-        <div className="flex flex-wrap justify-center gap-8 border-t border-slate-200 py-8 md:justify-between">
+        <div className="border-border flex flex-wrap justify-center gap-8 border-t py-8 md:justify-between">
           <div className="flex gap-6">
-            <Link href="/" className="hover:text-primary text-sm font-semibold text-slate-600">
+            <Link
+              href="/"
+              className="hover:text-primary text-muted-foreground text-sm font-semibold"
+            >
               Home
             </Link>
             <Link
               href="#features"
-              className="hover:text-primary text-sm font-semibold text-slate-600"
+              className="hover:text-primary text-muted-foreground text-sm font-semibold"
             >
               Features
             </Link>
             <Link
               href="#pricing"
-              className="hover:text-primary text-sm font-semibold text-slate-600"
+              className="hover:text-primary text-muted-foreground text-sm font-semibold"
             >
               Pricing
             </Link>
             <Link
               href="#get-started"
-              className="hover:text-primary text-sm font-semibold text-slate-600"
+              className="hover:text-primary text-muted-foreground text-sm font-semibold"
             >
               Get Started
             </Link>
             <Link
               href="/dashboard"
-              className="hover:text-primary text-sm font-semibold text-slate-600"
+              className="hover:text-primary text-muted-foreground text-sm font-semibold"
             >
               Dashboard
             </Link>
           </div>
-          <p className="text-sm text-slate-400">
+          <p className="text-muted-foreground text-sm">
             © {new Date().getFullYear()} tono. All rights reserved.
           </p>
         </div>

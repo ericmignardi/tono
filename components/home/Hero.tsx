@@ -11,14 +11,14 @@ export default function Hero() {
 
       <div className="relative z-10 mx-auto max-w-6xl text-center">
         {/* Hero Badge */}
-        <div className="animate-fade-in-up border-primary/20 mb-8 inline-flex items-center gap-2 rounded-full border bg-white px-4 py-2 shadow-sm">
+        <div className="animate-fade-in-up border-primary/20 bg-card mb-8 inline-flex items-center gap-2 rounded-full border px-4 py-2 shadow-sm">
           <span className="bg-accent h-2 w-2 rounded-full"></span>
-          <span className="text-xs font-semibold tracking-wide text-slate-500 uppercase">
+          <span className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
             Powered by AI
           </span>
         </div>
 
-        <h1 className="mb-8 text-5xl leading-[1.1] font-bold tracking-tight text-slate-900 md:text-7xl lg:text-8xl">
+        <h1 className="text-foreground mb-8 text-5xl leading-[1.1] font-bold tracking-tight md:text-7xl lg:text-8xl">
           The best place to <br className="hidden md:block" />
           <span className="font-script text-primary relative inline-block rotate-2 transform px-2">
             recreate
@@ -40,7 +40,7 @@ export default function Hero() {
           <br /> the perfect tones.
         </h1>
 
-        <p className="mx-auto mb-12 max-w-2xl text-lg leading-relaxed text-slate-500 md:text-xl">
+        <p className="text-muted-foreground mx-auto mb-12 max-w-2xl text-lg leading-relaxed md:text-xl">
           tono uses advanced AI to analyze your desired sound and gear to recreate the guitar tone
           instantly on your amp.
         </p>
@@ -48,7 +48,7 @@ export default function Hero() {
         <div className="relative flex flex-col items-center justify-center gap-4 sm:flex-row">
           {/* Arrow Doodle pointing to button */}
           <svg
-            className="absolute top-0 -left-16 hidden h-16 w-16 -rotate-12 transform text-slate-300 md:block"
+            className="text-muted-foreground/50 absolute top-0 -left-16 hidden h-16 w-16 -rotate-12 transform md:block"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -78,13 +78,13 @@ export default function Hero() {
 
         {/* Floating Hero Images/Icons */}
         <div
-          className="absolute top-1/2 -left-4 hidden h-20 w-20 rotate-12 animate-bounce items-center justify-center rounded-2xl border border-slate-100 bg-white shadow-xl md:flex lg:left-0"
+          className="border-border bg-card absolute top-1/2 -left-4 hidden h-20 w-20 rotate-12 animate-bounce items-center justify-center rounded-2xl border shadow-xl md:flex lg:left-0"
           style={{ animationDuration: '3s' }}
         >
           <Mic2 className="text-accent h-8 w-8" />
         </div>
         <div
-          className="absolute top-1/3 right-0 hidden h-24 w-24 -rotate-6 animate-bounce items-center justify-center rounded-full border border-slate-100 bg-white shadow-xl md:flex lg:right-10"
+          className="border-border bg-card absolute top-1/3 right-0 hidden h-24 w-24 -rotate-6 animate-bounce items-center justify-center rounded-full border shadow-xl md:flex lg:right-10"
           style={{ animationDuration: '4s' }}
         >
           <Music4 className="text-primary h-10 w-10" />

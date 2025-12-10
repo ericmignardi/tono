@@ -59,12 +59,12 @@ export default function Pricing({ hasActiveSubscription = false }: PricingProps)
   return (
     <section
       id="pricing"
-      className="rounded-t-[3rem] bg-white px-6 py-24 shadow-[0_-20px_40px_-15px_rgba(0,0,0,0.05)]"
+      className="bg-card rounded-t-[3rem] px-6 py-24 shadow-[0_-20px_40px_-15px_rgba(0,0,0,0.05)]"
     >
       <div className="mx-auto max-w-7xl">
         <div className="mb-12 flex flex-col items-end justify-between md:flex-row">
           <div>
-            <h2 className="text-4xl font-bold tracking-tight text-slate-900 md:text-5xl">
+            <h2 className="text-foreground text-4xl font-bold tracking-tight md:text-5xl">
               Choose your <span className="font-script text-primary">stage</span>
             </h2>
             <p className="mt-4 max-w-md text-slate-500">
@@ -74,7 +74,7 @@ export default function Pricing({ hasActiveSubscription = false }: PricingProps)
           {/* Doodle Arrow */}
           <div className="hidden pb-4 md:block">
             <svg
-              className="h-12 w-24 text-slate-300"
+              className="text-muted-foreground/50 h-12 w-24"
               viewBox="0 0 100 50"
               fill="none"
               stroke="currentColor"
@@ -91,20 +91,20 @@ export default function Pricing({ hasActiveSubscription = false }: PricingProps)
 
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
           {/* Free Tier */}
-          <div className="group rounded-4xl bg-slate-50 p-4 pb-8 transition-all hover:shadow-xl hover:shadow-slate-200/50">
-            <div className="relative mb-6 flex h-48 items-center justify-center overflow-hidden rounded-3xl border border-slate-100 bg-white">
-              <Mic className="h-16 w-16 text-slate-300 transition-transform duration-500 group-hover:scale-110" />
-              <div className="absolute bottom-4 left-6 rounded-full bg-slate-900 px-3 py-1 text-xs font-bold text-white">
+          <div className="group bg-muted/50 hover:shadow-muted/50 rounded-4xl p-4 pb-8 transition-all hover:shadow-xl">
+            <div className="border-border bg-card relative mb-6 flex h-48 items-center justify-center overflow-hidden rounded-3xl border">
+              <Mic className="text-muted-foreground/50 h-16 w-16 transition-transform duration-500 group-hover:scale-110" />
+              <div className="bg-foreground text-background absolute bottom-4 left-6 rounded-full px-3 py-1 text-xs font-bold">
                 FREE
               </div>
             </div>
             <div className="px-4">
-              <h3 className="mb-2 text-xl font-bold text-slate-900">Bedroom Rocker</h3>
-              <p className="mb-6 text-sm text-slate-500">
+              <h3 className="text-foreground mb-2 text-xl font-bold">Bedroom Rocker</h3>
+              <p className="text-muted-foreground mb-6 text-sm">
                 Perfect for learning and practicing at home.
               </p>
               <ul className="mb-8 space-y-3">
-                <li className="flex items-center gap-2 text-sm text-slate-700">
+                <li className="text-foreground flex items-center gap-2 text-sm">
                   <div className="flex h-5 w-5 items-center justify-center rounded-full bg-green-100 text-green-600">
                     <Check className="h-3 w-3" />
                   </div>{' '}
@@ -113,7 +113,7 @@ export default function Pricing({ hasActiveSubscription = false }: PricingProps)
               </ul>
               <button
                 onClick={() => (window.location.href = '/dashboard')}
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 py-3 font-semibold text-slate-900 transition-colors hover:bg-slate-200"
+                className="border-border text-foreground hover:bg-muted flex w-full items-center justify-center gap-2 rounded-xl border py-3 font-semibold transition-colors"
               >
                 Get Started <ArrowUpRight className="h-4 w-4" />
               </button>
@@ -132,12 +132,12 @@ export default function Pricing({ hasActiveSubscription = false }: PricingProps)
               </div>
             </div>
             <div className="px-4">
-              <h3 className="mb-2 text-xl font-bold text-slate-900">Touring Pro</h3>
-              <p className="mb-6 text-sm text-slate-500">
+              <h3 className="text-foreground mb-2 text-xl font-bold">Touring Pro</h3>
+              <p className="text-muted-foreground mb-6 text-sm">
                 Increased tone generations and exclusive features.
               </p>
               <ul className="mb-8 space-y-3">
-                <li className="flex items-center gap-2 text-sm text-slate-700">
+                <li className="text-foreground flex items-center gap-2 text-sm">
                   <div className="bg-secondary text-primary flex h-5 w-5 items-center justify-center rounded-full">
                     <Check className="h-3 w-3" />
                   </div>{' '}

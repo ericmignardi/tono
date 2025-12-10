@@ -16,33 +16,33 @@ export default function Header() {
           <div className="bg-primary shadow-primary/20 flex h-10 w-10 rotate-3 items-center justify-center rounded-xl shadow-lg">
             <Music2 className="h-6 w-6 text-white" />
           </div>
-          <span className="text-2xl font-bold tracking-tight text-slate-900">tono</span>
+          <span className="text-foreground text-2xl font-bold tracking-tight">tono</span>
         </Link>
 
         {/* Nav Links (Pill Shape) */}
-        <div className="hidden items-center gap-1 rounded-full border border-slate-100 bg-white px-2 py-1.5 shadow-sm md:flex">
+        <div className="border-border bg-background/80 hidden items-center gap-1 rounded-full border px-2 py-1.5 shadow-sm md:flex">
           <Link
             href="#features"
-            className="hover:bg-secondary hover:text-primary rounded-full px-5 py-2 text-sm font-semibold text-slate-600 transition-colors"
+            className="hover:bg-secondary hover:text-primary text-muted-foreground rounded-full px-5 py-2 text-sm font-semibold transition-colors"
           >
             Features
           </Link>
           <Link
             href="#pricing"
-            className="hover:bg-secondary hover:text-primary rounded-full px-5 py-2 text-sm font-semibold text-slate-600 transition-colors"
+            className="hover:bg-secondary hover:text-primary text-muted-foreground rounded-full px-5 py-2 text-sm font-semibold transition-colors"
           >
             Pricing
           </Link>
           <Link
             href="#get-started"
-            className="hover:bg-secondary hover:text-primary rounded-full px-5 py-2 text-sm font-semibold text-slate-600 transition-colors"
+            className="hover:bg-secondary hover:text-primary text-muted-foreground rounded-full px-5 py-2 text-sm font-semibold transition-colors"
           >
             Get Started
           </Link>
           <SignedIn>
             <Link
               href="/dashboard"
-              className="hover:bg-secondary hover:text-primary rounded-full px-5 py-2 text-sm font-semibold text-slate-600 transition-colors"
+              className="hover:bg-secondary hover:text-primary text-muted-foreground rounded-full px-5 py-2 text-sm font-semibold transition-colors"
             >
               Dashboard
             </Link>
@@ -53,7 +53,7 @@ export default function Header() {
         <div className="hidden items-center gap-4 lg:flex">
           <SignedOut>
             <SignInButton>
-              <button className="hover:text-primary text-sm font-semibold text-slate-600">
+              <button className="hover:text-primary text-muted-foreground text-sm font-semibold">
                 Sign In
               </button>
             </SignInButton>
@@ -87,7 +87,7 @@ export default function Header() {
               className="fixed inset-0 z-50 bg-black/50 lg:hidden"
               onClick={() => setMobileMenu(false)}
             />
-            <nav className="fixed top-0 right-0 z-60 flex h-screen w-[80%] flex-col gap-4 bg-white p-8 pt-20 lg:hidden">
+            <nav className="bg-background fixed top-0 right-0 z-60 flex h-screen w-[80%] flex-col gap-4 p-8 pt-20 lg:hidden">
               <Link
                 href="#features"
                 className="hover:bg-secondary hover:text-primary rounded-lg px-4 py-2 text-sm font-medium"
@@ -104,7 +104,7 @@ export default function Header() {
               </Link>
               <SignedOut>
                 <SignInButton>
-                  <button className="w-full rounded-full border border-slate-200 py-2 text-sm font-semibold text-slate-600">
+                  <button className="border-border text-muted-foreground w-full rounded-full border py-2 text-sm font-semibold">
                     Sign In
                   </button>
                 </SignInButton>

@@ -5,7 +5,7 @@ export default function Features() {
   return (
     <section id="features" className="mx-auto max-w-7xl px-6 py-24">
       <div className="mb-16">
-        <h2 className="mb-4 text-4xl font-bold tracking-tight text-slate-900 md:text-5xl">
+        <h2 className="text-foreground mb-4 text-4xl font-bold tracking-tight md:text-5xl">
           Your Personal <br />
           <span className="font-script text-primary">Tone Engineer.</span>
         </h2>
@@ -16,7 +16,7 @@ export default function Features() {
           <span className="bg-accent/20 text-accent-foreground rotate-1 transform rounded-full px-6 py-2 text-sm font-semibold">
             #gear_match
           </span>
-          <span className="-rotate-1 transform rounded-full bg-slate-100 px-6 py-2 text-sm font-semibold text-slate-700">
+          <span className="bg-muted text-muted-foreground -rotate-1 transform rounded-full px-6 py-2 text-sm font-semibold">
             #instant_tone
           </span>
         </div>
@@ -37,14 +37,14 @@ export default function Features() {
             </div>
           </div>
 
-          <div className="mb-8 flex h-16 w-16 rotate-3 items-center justify-center rounded-2xl bg-white shadow-sm transition-transform group-hover:rotate-6">
+          <div className="bg-card mb-8 flex h-16 w-16 rotate-3 items-center justify-center rounded-2xl shadow-sm transition-transform group-hover:rotate-6">
             <Wand2 className="text-primary h-8 w-8" />
           </div>
 
-          <h3 className="font-script mb-2 text-3xl font-bold text-slate-900">
+          <h3 className="font-script text-foreground mb-2 text-3xl font-bold">
             AI-Powered <br /> Analysis
           </h3>
-          <p className="mb-6 text-sm leading-relaxed text-slate-600">
+          <p className="text-muted-foreground mb-6 text-sm leading-relaxed">
             Describe any tone in plain English—"warm jazz", "80s metal", or "John Mayer lead". Our
             AI understands musical context.
           </p>
@@ -72,18 +72,18 @@ export default function Features() {
         {/* Card 3: Library */}
         <div className="group bg-accent/30 relative rounded-[2.5rem] p-8 transition-transform duration-300 hover:-translate-y-2 md:p-10">
           <div className="absolute top-8 right-8 flex gap-1">
-            <div className="h-2 w-2 rounded-full bg-slate-900/10"></div>
-            <div className="h-2 w-2 rounded-full bg-slate-900/10"></div>
+            <div className="bg-foreground/10 h-2 w-2 rounded-full"></div>
+            <div className="bg-foreground/10 h-2 w-2 rounded-full"></div>
           </div>
 
-          <div className="mb-8 flex h-16 w-16 -rotate-3 items-center justify-center rounded-2xl bg-white shadow-sm transition-transform group-hover:-rotate-6">
+          <div className="bg-card mb-8 flex h-16 w-16 -rotate-3 items-center justify-center rounded-2xl shadow-sm transition-transform group-hover:-rotate-6">
             <Library className="text-accent-foreground h-8 w-8" />
           </div>
 
-          <h3 className="font-script mb-2 text-3xl font-bold text-slate-900">
+          <h3 className="font-script text-foreground mb-2 text-3xl font-bold">
             Persistent <br /> Library
           </h3>
-          <p className="mb-6 text-sm leading-relaxed text-slate-800/80">
+          <p className="text-muted-foreground mb-6 text-sm leading-relaxed">
             Save your favorite configurations. Build a personal library of tones for every gig and
             practice session.
           </p>
