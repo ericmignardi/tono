@@ -1,5 +1,5 @@
-import { Wand2, Mic2, Music4 } from 'lucide-react';
-import Link from 'next/link';
+import { AppWindow } from '@/components/ui/app-window';
+import GuestToneForm from './GuestToneForm';
 
 export default function Hero() {
   return (
@@ -45,49 +45,20 @@ export default function Hero() {
           instantly on your amp.
         </p>
 
-        <div className="relative flex flex-col items-center justify-center gap-4 sm:flex-row">
-          {/* Arrow Doodle pointing to button */}
-          <svg
-            className="text-muted-foreground/50 absolute top-0 -left-16 hidden h-16 w-16 -rotate-12 transform md:block"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="1.5"
-              d="M10 3s-4 4-2 9c2 5 7 3 9-1m-9-8c0 0-4 4-2 9"
-            ></path>
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="1.5"
-              d="M16 11l5 2-3 4"
-            ></path>
-          </svg>
+        <div className="animate-fade-in-up mt-12 w-full">
+          <div className="relative mx-auto flex max-w-4xl flex-col items-center">
+            {/* Label telling user to try it */}
+            <div className="mb-4 flex items-center gap-2 text-sm font-medium text-slate-500">
+              <span className="animate-pulse text-green-500">●</span>
+              <span>Live Demo - No account required</span>
+            </div>
 
-          <Link
-            href="/dashboard/create"
-            className="bg-primary text-primary-foreground shadow-primary/20 hover:bg-primary/90 hover:shadow-primary/30 flex items-center gap-2 rounded-full px-8 py-4 text-lg font-semibold shadow-xl transition-all hover:-translate-y-1"
-          >
-            Generate Tone
-            <Wand2 className="h-5 w-5" />
-          </Link>
-        </div>
-
-        {/* Floating Hero Images/Icons */}
-        <div
-          className="border-border bg-card absolute top-1/2 -left-4 hidden h-20 w-20 rotate-12 animate-bounce items-center justify-center rounded-2xl border shadow-xl md:flex lg:left-0"
-          style={{ animationDuration: '3s' }}
-        >
-          <Mic2 className="text-accent h-8 w-8" />
-        </div>
-        <div
-          className="border-border bg-card absolute top-1/3 right-0 hidden h-24 w-24 -rotate-6 animate-bounce items-center justify-center rounded-full border shadow-xl md:flex lg:right-10"
-          style={{ animationDuration: '4s' }}
-        >
-          <Music4 className="text-primary h-10 w-10" />
+            <div className="w-full">
+              <AppWindow>
+                <GuestToneForm />
+              </AppWindow>
+            </div>
+          </div>
         </div>
       </div>
     </header>
