@@ -33,7 +33,7 @@ jest.mock('@/lib/rateLimit', () => ({
   },
 }));
 
-jest.mock('@/lib/openai/toneAiService', () => ({
+jest.mock('@/lib/gemini/toneAiService', () => ({
   generateToneSettings: jest.fn().mockResolvedValue({
     ampSettings: { gain: 7, mid: 5, bass: 5, reverb: 5, treble: 5, volume: 5, presence: 5 },
     notes: 'AI generated notes',
@@ -47,7 +47,7 @@ jest.mock('next/cache', () => ({
 import { currentUser } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma/database';
 import { toneRateLimit, apiRateLimit } from '@/lib/rateLimit';
-import { generateToneSettings } from '@/lib/openai/toneAiService';
+import { generateToneSettings } from '@/lib/gemini/toneAiService';
 
 describe('/api/tones', () => {
   beforeEach(() => {
@@ -252,7 +252,7 @@ describe('/api/tones', () => {
           },
         })
       );
-      (generateToneSettings as jest.Mock).mockRejectedValueOnce(new Error('OpenAI API timeout'));
+      (generateToneSettings as jest.Mock).mockRejectedValueOnce(new Error('Gemini API timeout'));
 
       const req = new NextRequest('http://localhost/api/tones', {
         method: 'POST',

@@ -30,7 +30,7 @@
 - 🎯 **Instant Results** - Get professional tone recommendations in seconds
 - 🔧 **Gear-Specific** - Tailored settings for your exact equipment
 - 💾 **Save Configurations** - Build your personal library of tone presets
-- 🚀 **AI-Powered** - Leverages OpenAI to understand musical context and translate it into technical specs
+- 🚀 **AI-Powered** - Leverages Google Gemini AI to understand musical context and translate it into technical specs
 
 ## ✨ Features
 
@@ -71,7 +71,7 @@
 - **Database:** PostgreSQL (Neon)
 - **ORM:** Prisma
 - **Authentication:** Clerk
-- **AI/ML:** OpenAI SDK
+- **AI/ML:** Google Gemini API
 - **Payments:** Stripe
 - **Caching:** Vercel KV
 - **Rate Limiting:** Upstash
@@ -82,39 +82,10 @@
 
 ### Testing & Deployment
 
-- **Unit/Integration:** Jest + React Testing Library
+- **Unit Testing:** Jest + React Testing Library
 - **E2E Testing:** Playwright
 - **Hosting:** Vercel (Serverless)
 - **CI/CD:** GitHub Actions
-
-## 🏗️ Architecture
-
-tono follows a modern, scalable serverless architecture built on the Next.js App Router paradigm.
-
-```
-┌─────────────┐
-│   Client    │
-│ (React 19)  │
-└──────┬──────┘
-       │
-       ▼
-┌─────────────────────────────────┐
-│     Next.js App Router          │
-│  (Server + Client Components)   │
-└──────┬──────────────────┬───────┘
-       │                  │
-       ▼                  ▼
-┌─────────────┐    ┌─────────────┐
-│  API Routes │    │   Prisma    │
-│             │    │     ORM     │
-└──────┬──────┘    └──────┬──────┘
-       │                  │
-       ▼                  ▼
-┌─────────────┐    ┌─────────────┐
-│   OpenAI    │    │ PostgreSQL  │
-│     API     │    │   (Neon)    │
-└─────────────┘    └─────────────┘
-```
 
 ### Key Design Principles
 
@@ -138,7 +109,7 @@ tono follows a modern, scalable serverless architecture built on the Next.js App
 - PostgreSQL database (we recommend [Neon](https://neon.tech))
 - API keys for:
   - [Clerk](https://clerk.com)
-  - [OpenAI](https://platform.openai.com)
+  - [Google AI Studio](https://aistudio.google.com/app/apikey) (Gemini API)
   - [Stripe](https://stripe.com)
 
 ### Installation
@@ -177,8 +148,8 @@ tono follows a modern, scalable serverless architecture built on the Next.js App
    # Database
    DATABASE_URL=postgresql://...
 
-   # OpenAI
-   OPENAI_API_KEY=sk-...
+   # Google Gemini AI
+   GEMINI_API_KEY=...
 
    # Stripe
    STRIPE_SECRET_KEY=sk_test_...
@@ -215,36 +186,29 @@ tono follows a modern, scalable serverless architecture built on the Next.js App
 
 ## 📜 Available Scripts
 
-| Command                    | Description                    |
-| -------------------------- | ------------------------------ |
-| `npm run dev`              | Start development server       |
-| `npm run build`            | Build for production           |
-| `npm run start`            | Start production server        |
-| `npm run lint`             | Lint code with ESLint          |
-| `npm run format`           | Format code with Prettier      |
-| `npm run check-types`      | Run TypeScript type checking   |
-| `npm run test`             | Run unit and integration tests |
-| `npm run test:unit`        | Run unit tests                 |
-| `npm run test:integration` | Run integration tests          |
-| `npm run test:e2e`         | Run end-to-end tests           |
+| Command               | Description                  |
+| --------------------- | ---------------------------- |
+| `npm run dev`         | Start development server     |
+| `npm run build`       | Build for production         |
+| `npm run start`       | Start production server      |
+| `npm run lint`        | Lint code with ESLint        |
+| `npm run format`      | Format code with Prettier    |
+| `npm run check-types` | Run TypeScript type checking |
+| `npm run test`        | Run unit tests               |
+| `npm run test:unit`   | Run unit tests               |
+| `npm run test:e2e`    | Run end-to-end tests         |
 
 ---
 
 ## 🧪 Testing
 
-### Prerequisites for Testing
-
-- Docker (for running the test database)
-- Run `docker-compose -f docker-compose.test.yml up -d` before running integration tests.
+tono uses a simplified testing strategy focused on unit tests and end-to-end tests:
 
 ```bash
 # Run all unit tests
-npm run test:unit
+npm run test
 
-# Run all integration tests
-npm run test:integration
-
-# Run tests in watch mode
+# Run unit tests in watch mode
 npm run test:watch
 
 # Run E2E tests
@@ -253,6 +217,12 @@ npm run test:e2e
 # Run E2E tests with UI
 npm run test:e2e:ui
 ```
+
+### Testing Strategy
+
+- **Unit Tests**: Test individual functions and components in isolation
+- **E2E Tests**: Test critical user flows (authentication, tone generation, subscription)
+- **No Integration Tests**: Simplified setup - removed database integration tests for easier maintenance
 
 ---
 

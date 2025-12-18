@@ -233,14 +233,18 @@ async function handleSubscriptionChange(
   if (eventType === 'created' && isActiveSubscription) {
     await prisma.user.update({
       where: { id: user.id },
-      data: { generationsLimit: PRO_CREDIT_LIMIT },
+      data: {
+        generationsLimit: PRO_CREDIT_LIMIT,
+      },
     });
     console.log(`User ${user.email} upgraded to PRO (${PRO_CREDIT_LIMIT} credits)`);
   } else if (eventType === 'updated') {
     if (isActiveSubscription) {
       await prisma.user.update({
         where: { id: user.id },
-        data: { generationsLimit: PRO_CREDIT_LIMIT },
+        data: {
+          generationsLimit: PRO_CREDIT_LIMIT,
+        },
       });
       console.log(`User ${user.email} subscription active - PRO limits maintained`);
     } else if (['canceled', 'unpaid', 'past_due'].includes(subscription.status)) {

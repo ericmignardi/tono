@@ -1,19 +1,13 @@
-import { generateToneSettings, ToneGearConfig } from '@/lib/openai/toneAiService';
-import { client } from '@/lib/openai/openai';
-import { getCachedTone, setCachedTone } from '@/lib/openai/toneCache';
-import { DEFAULT_AMP_SETTINGS } from '@/lib/openai/toneAiService';
+import { generateToneSettings, ToneGearConfig } from '@/lib/gemini/toneAiService';
+import { getModel } from '@/lib/gemini/gemini';
+import { getCachedTone, setCachedTone } from '@/lib/gemini/toneCache';
+import { DEFAULT_AMP_SETTINGS } from '@/lib/gemini/toneAiService';
 
-jest.mock('@/lib/openai/openai', () => ({
-  client: {
-    chat: {
-      completions: {
-        create: jest.fn(),
-      },
-    },
-  },
+jest.mock('@/lib/gemini/gemini', () => ({
+  getModel: jest.fn(),
 }));
 
-jest.mock('@/lib/openai/toneCache', () => ({
+jest.mock('@/lib/gemini/toneCache', () => ({
   getCachedTone: jest.fn(),
   setCachedTone: jest.fn(),
   invalidateCachedTone: jest.fn(),
@@ -42,8 +36,13 @@ describe('generateToneSettings', () => {
     notes: 'Test notes',
   };
 
+  const mockGenerateContent = jest.fn();
+
   beforeEach(() => {
     jest.clearAllMocks();
+    (getModel as jest.Mock).mockReturnValue({
+      generateContent: mockGenerateContent,
+    });
   });
 
   it('should return cached result if available', async () => {
@@ -52,19 +51,15 @@ describe('generateToneSettings', () => {
     const result = await generateToneSettings(mockConfig);
     expect(result).toEqual(mockAiResponse);
     expect(getCachedTone).toHaveBeenCalledWith(mockConfig);
-    expect(client.chat.completions.create).not.toHaveBeenCalled();
+    expect(mockGenerateContent).not.toHaveBeenCalled();
   });
 
-  it('should call OpenAI and cache result on cache miss', async () => {
+  it('should call Gemini API and cache result on cache miss', async () => {
     (getCachedTone as jest.Mock).mockResolvedValue(null);
-    (client.chat.completions.create as jest.Mock).mockResolvedValue({
-      choices: [
-        {
-          message: {
-            content: JSON.stringify(mockAiResponse),
-          },
-        },
-      ],
+    mockGenerateContent.mockResolvedValue({
+      response: {
+        text: () => JSON.stringify(mockAiResponse),
+      },
     });
 
     const result = await generateToneSettings(mockConfig);
@@ -72,9 +67,9 @@ describe('generateToneSettings', () => {
     expect(setCachedTone).toHaveBeenCalledWith(mockConfig, mockAiResponse);
   });
 
-  it('should handle OpenAI API errors gracefully', async () => {
+  it('should handle Gemini API errors gracefully', async () => {
     (getCachedTone as jest.Mock).mockResolvedValue(null);
-    (client.chat.completions.create as jest.Mock).mockRejectedValue(new Error('API error'));
+    mockGenerateContent.mockRejectedValue(new Error('API error'));
 
     const result = await generateToneSettings(mockConfig);
     expect(result).toEqual({
@@ -83,16 +78,12 @@ describe('generateToneSettings', () => {
     });
   });
 
-  it('should handle invalid JSON from OpenAI', async () => {
+  it('should handle invalid JSON from Gemini', async () => {
     (getCachedTone as jest.Mock).mockResolvedValue(null);
-    (client.chat.completions.create as jest.Mock).mockResolvedValue({
-      choices: [
-        {
-          message: {
-            content: 'Not JSON',
-          },
-        },
-      ],
+    mockGenerateContent.mockResolvedValue({
+      response: {
+        text: () => 'Not JSON',
+      },
     });
 
     const result = await generateToneSettings(mockConfig);

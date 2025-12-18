@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateToneSettings } from '@/lib/openai/toneAiService';
+import { generateToneSettings } from '@/lib/gemini/toneAiService';
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
 import { ToneCreateSchema } from '@/utils/validation/toneValidation';

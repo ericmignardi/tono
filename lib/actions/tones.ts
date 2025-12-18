@@ -2,6 +2,7 @@
 
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma/database';
+import { unstable_cache } from 'next/cache';
 
 export async function getToneCount(): Promise<number> {
   const { userId } = await auth();
@@ -19,9 +20,19 @@ export async function getToneCount(): Promise<number> {
     return 0;
   }
 
-  const count = await prisma.tone.count({
-    where: { userId: dbUser.id },
-  });
+  // Use Next.js cache with a tag so we can revalidate it
+  const getCachedCount = unstable_cache(
+    async (userId: string) => {
+      return await prisma.tone.count({
+        where: { userId },
+      });
+    },
+    ['tone-count', dbUser.id],
+    {
+      revalidate: 10, // Revalidate every 10 seconds
+      tags: [`user-${dbUser.id}-tones`],
+    }
+  );
 
-  return count;
+  return getCachedCount(dbUser.id);
 }

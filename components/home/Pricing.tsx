@@ -143,6 +143,17 @@ export default function Pricing({ hasActiveSubscription = false }: PricingProps)
                   </div>{' '}
                   50 Tone Generations
                 </li>
+                <li className="text-foreground flex items-center gap-2 text-sm">
+                  <div className="bg-secondary text-primary flex h-5 w-5 items-center justify-center rounded-full">
+                    <Check className="h-3 w-3" />
+                  </div>{' '}
+                  <span className="flex items-center gap-1">
+                    Audio Upload Analysis
+                    <span className="ml-1 rounded bg-blue-100 px-1.5 py-0.5 text-xs font-semibold text-blue-700">
+                      NEW
+                    </span>
+                  </span>
+                </li>
               </ul>
               <Button
                 disabled={premiumLoading || portalLoading}

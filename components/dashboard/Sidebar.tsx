@@ -25,8 +25,9 @@ export default function Sidebar() {
   const [toneCount, setToneCount] = useState<number | null>(null);
 
   useEffect(() => {
+    // Refetch tone count whenever the route changes
     getToneCount().then(setToneCount);
-  }, []);
+  }, [pathname]); // Re-run when pathname changes
 
   const navItems: NavItem[] = baseNavItems.map((item) => {
     if (item.href === '/dashboard/tones' && toneCount !== null) {

@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma/database';
 import { currentUser } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
-import { generateToneSettings } from '@/lib/openai/toneAiService';
+import { generateEnhancedToneSettings } from '@/lib/gemini/toneAiService';
+import { analyzeAudioTone, validateAudioFile } from '@/lib/gemini/audioAnalysisService';
+import { getUserTier, canUseAudioAnalysis } from '@/lib/config/subscriptionTiers';
 import { toneRateLimit, apiRateLimit } from '@/lib/rateLimit';
-import { ToneCreateSchema, ToneQuerySchema } from '@/utils/validation/toneValidation';
-import { ToneCreateBody } from '@/types/tone/toneValidationTypes';
+import { ToneQuerySchema } from '@/utils/validation/toneValidation';
 import { APIError, handleAPIError, logRequest } from '@/lib/api/errorHandler';
 import { randomUUID } from 'crypto';
 
@@ -36,23 +37,70 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const dbUser = await prisma.user.findUnique({ where: { clerkId: user.id } });
+    const dbUser = await prisma.user.findUnique({
+      where: { clerkId: user.id },
+      include: { subscriptions: true },
+    });
+
     if (!dbUser) {
       throw new APIError('User not found', 404, 'USER_NOT_FOUND');
     }
 
-    const body: ToneCreateBody = await req.json();
+    // Parse multipart form data
+    const formData = await req.formData();
 
-    const parsed = ToneCreateSchema.safeParse(body);
-    if (!parsed.success) {
-      throw new APIError('Invalid input data', 400, 'VALIDATION_ERROR', parsed.error.issues);
+    // Extract form fields
+    const name = formData.get('name') as string;
+    const artist = formData.get('artist') as string;
+    const description = formData.get('description') as string;
+    const guitar = formData.get('guitar') as string;
+    const pickups = formData.get('pickups') as string;
+    const strings = formData.get('strings') as string;
+    const amp = formData.get('amp') as string;
+    const audioFile = formData.get('audioFile') as File | null;
+
+    // Validate required fields
+    if (!name || !artist || !description || !guitar || !pickups || !amp) {
+      throw new APIError('Missing required fields', 400, 'VALIDATION_ERROR');
     }
 
-    const { name, artist, description, guitar, pickups, strings, amp } = parsed.data;
+    // Check if user is trying to use audio analysis
+    let audioAnalysis = null;
+    if (audioFile) {
+      // Check subscription status
+      const hasActiveSubscription = dbUser.subscriptions.some((sub) => sub.status === 'active');
+      const userTier = getUserTier(hasActiveSubscription);
 
-    // Check and reserve credit inside a transaction to prevent race conditions
+      if (!canUseAudioAnalysis(userTier)) {
+        throw new APIError(
+          'Audio analysis is only available for Pro subscribers',
+          403,
+          'FEATURE_NOT_AVAILABLE'
+        );
+      }
+
+      // Validate audio file
+      const validation = validateAudioFile(audioFile);
+      if (!validation.valid) {
+        throw new APIError(validation.error!, 400, 'INVALID_AUDIO_FILE');
+      }
+
+      // Process audio file
+      const arrayBuffer = await audioFile.arrayBuffer();
+      const audioBuffer = Buffer.from(arrayBuffer);
+
+      // Try to analyze audio with Gemini (but don't fail if it doesn't work)
+      try {
+        audioAnalysis = await analyzeAudioTone(audioBuffer, audioFile.type);
+        console.log('Audio analysis successful');
+      } catch (audioError) {
+        console.warn('Audio analysis failed, continuing without it:', audioError);
+        // Continue without audio analysis - will use text-only generation
+      }
+    }
+
+    // Check and reserve credit inside a transaction
     await prisma.$transaction(async (tx) => {
-      // Get fresh user data inside transaction
       const freshUser = await tx.user.findUnique({
         where: { id: dbUser.id },
         select: { generationsUsed: true, generationsLimit: true },
@@ -66,24 +114,27 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      // Reserve the credit immediately
+      // Reserve the credit
       await tx.user.update({
         where: { id: dbUser.id },
         data: { generationsUsed: { increment: 1 } },
       });
     });
 
-    // Generate AI settings after credit is reserved
-    const aiResult = await generateToneSettings({
-      artist,
-      description,
-      guitar,
-      pickups,
-      strings,
-      amp,
-    });
+    // Generate AI settings (enhanced with audio analysis if provided)
+    const aiResult = await generateEnhancedToneSettings(
+      {
+        artist,
+        description,
+        guitar,
+        pickups,
+        strings,
+        amp,
+      },
+      audioAnalysis || undefined
+    );
 
-    // Create the tone with the AI results
+    // Create the tone with AI results and audio analysis
     const tone = await prisma.tone.create({
       data: {
         userId: dbUser.id,
@@ -96,6 +147,7 @@ export async function POST(req: NextRequest) {
         amp,
         aiAmpSettings: aiResult.ampSettings,
         aiNotes: aiResult.notes,
+        audioAnalysis: audioAnalysis ? (audioAnalysis as any) : null,
       },
     });
 
@@ -107,6 +159,7 @@ export async function POST(req: NextRequest) {
         action: 'tone_created',
         toneId: tone.id,
         userId: dbUser.id,
+        hasAudioAnalysis: !!audioAnalysis,
       })
     );
 

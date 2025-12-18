@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url = env("DATABASE_URL")
 }
 
 model User {
@@ -16,7 +16,7 @@ model User {
   stripeId      String?         @unique
   generationsUsed  Int          @default(0)
   generationsLimit Int          @default(5)
-  lastResetDate    DateTime?    @default(now())  
+  lastResetDate    DateTime?    @default(now())
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
   tones         Tone[]
@@ -48,6 +48,7 @@ model Tone {
   amp          String
   aiAmpSettings Json
   aiNotes      String
+  audioAnalysis Json?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   @@index([userId, createdAt])
