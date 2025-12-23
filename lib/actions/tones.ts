@@ -3,6 +3,19 @@
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma/database';
 import { unstable_cache } from 'next/cache';
+import { redirect } from 'next/navigation';
+
+export async function deleteTone(formData: FormData) {
+  'use server';
+
+  const id = formData.get('toneId') as string;
+
+  await prisma.tone.delete({
+    where: { id },
+  });
+
+  redirect('/dashboard/tones');
+}
 
 export async function getToneCount(): Promise<number> {
   const { userId } = await auth();

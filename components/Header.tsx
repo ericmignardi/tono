@@ -102,6 +102,13 @@ export default function Header() {
               >
                 Pricing
               </Link>
+              <Link
+                href="#get-started"
+                className="hover:bg-secondary hover:text-primary rounded-lg px-4 py-2 text-sm font-medium"
+                onClick={() => setMobileMenu(false)}
+              >
+                Get Started
+              </Link>
               <SignedOut>
                 <SignInButton>
                   <button className="border-border text-muted-foreground w-full rounded-full border py-2 text-sm font-semibold">

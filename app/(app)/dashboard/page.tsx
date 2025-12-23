@@ -1,26 +1,30 @@
-import { ListMusic, AlertCircle, Plus } from 'lucide-react';
+import { AlertCircle, Plus } from 'lucide-react';
 import { currentUser } from '@clerk/nextjs/server';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { prisma } from '@/lib/prisma/database';
 import Link from 'next/link';
 import ManageSubscriptionButton from '@/components/dashboard/ManageSubscriptionButton';
-import { differenceInDays, formatDistanceToNow } from 'date-fns';
+import { differenceInDays } from 'date-fns';
+import Stats from '@/components/dashboard/Stats';
+import { Suspense } from 'react';
+import RecentTones from '@/components/dashboard/RecentTones';
+import StatsSkeleton from '@/components/dashboard/StatsSkeleton';
+import RecentTonesSkeleton from '@/components/dashboard/RecentTonesSkeleton';
+
+// ISR: Revalidate this page every 60 seconds
+export const revalidate = 60;
 
 export default async function Dashboard() {
   const user = await currentUser();
 
+  if (!user) {
+    return null;
+  }
+
   const dbUser = await prisma.user.findUnique({
-    where: { clerkId: user?.id },
+    where: { clerkId: user.id },
     include: {
       subscriptions: {
         where: {
@@ -36,17 +40,6 @@ export default async function Dashboard() {
     },
   });
 
-  const recentTones = await prisma.tone.findMany({
-    where: { userId: dbUser?.id },
-    orderBy: { createdAt: 'desc' },
-    take: 5,
-  });
-
-  const toneCount = await prisma.tone.count({
-    where: { userId: dbUser?.id },
-  });
-
-  const creditCount = (dbUser?.generationsLimit ?? 5) - (dbUser?.generationsUsed ?? 0);
   const hasActiveSubscription = dbUser?.subscriptions && dbUser.subscriptions.length > 0;
   const activeSubscription = hasActiveSubscription ? dbUser.subscriptions[0] : null;
 
@@ -65,13 +58,7 @@ export default async function Dashboard() {
     ? differenceInDays(activeSubscription.currentPeriodEnd, todaysDate)
     : null;
 
-  const stats = [
-    { label: 'Total Tones', value: toneCount },
-    { label: 'Credits Remaining', value: creditCount },
-    { label: 'Credit Limit', value: dbUser?.generationsLimit ?? 5 },
-  ];
-
-  const firstName = user?.firstName || user?.fullName?.split(' ')[0] || 'there';
+  const firstName = user.firstName || user.fullName?.split(' ')[0] || 'there';
 
   return (
     <div className="mx-auto max-w-7xl space-y-8 p-8">
@@ -101,21 +88,12 @@ export default async function Dashboard() {
         </Alert>
       )}
 
-      {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-3">
-        {stats.map(({ label, value }) => (
-          <Card key={label}>
-            <CardHeader className="pb-3">
-              <CardDescription className="text-sm">{label}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-slate-900">{value}</div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {/* Stats - Streamed via Suspense */}
+      <Suspense fallback={<StatsSkeleton />}>
+        <Stats userId={user.id} />
+      </Suspense>
 
-      {/* Recent Tones */}
+      {/* Recent Tones - Streamed via Suspense */}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -131,56 +109,9 @@ export default async function Dashboard() {
             </Link>
           </div>
         </CardHeader>
-        <CardContent>
-          {recentTones.length === 0 ? (
-            <div className="flex flex-col items-center justify-center gap-4 py-12 text-center">
-              <div className="bg-secondary rounded-full p-4">
-                <ListMusic className="text-primary h-8 w-8" />
-              </div>
-              <div>
-                <p className="font-medium text-slate-900">No tones yet</p>
-                <p className="text-sm text-slate-500">Create your first tone to get started</p>
-              </div>
-              <Link href="/dashboard/create">
-                <Button>
-                  <Plus className="h-4 w-4" />
-                  Create Tone
-                </Button>
-              </Link>
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Tone</TableHead>
-                  <TableHead className="text-right">Created</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {recentTones.map(({ name, artist, createdAt, id }) => (
-                  <TableRow key={id} className="cursor-pointer">
-                    <TableCell>
-                      <Link href={`/dashboard/tones/${id}`} className="flex items-center gap-3">
-                        <div className="bg-secondary flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
-                          <ListMusic className="text-primary h-5 w-5" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <h3 className="truncate font-medium text-slate-900">{name}</h3>
-                          <p className="truncate text-sm text-slate-500">{artist}</p>
-                        </div>
-                      </Link>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <span className="text-sm whitespace-nowrap text-slate-500">
-                        {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
-                      </span>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
+        <Suspense fallback={<RecentTonesSkeleton />}>
+          <RecentTones userId={user.id} />
+        </Suspense>
       </Card>
     </div>
   );

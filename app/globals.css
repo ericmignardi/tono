@@ -6,8 +6,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-dm-sans);
-  --font-script: var(--font-permanent-marker), cursive;
+  --font-sans: var(--font-montserrat);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -45,7 +44,7 @@
 }
 
 body {
-  font-family: var(--font-dm-sans), sans-serif;
+  font-family: var(--font-montserrat), sans-serif;
 }
 
 .blob-shape {

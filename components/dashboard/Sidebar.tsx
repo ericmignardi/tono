@@ -4,17 +4,14 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Sliders, Library, Music2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useEffect, useState } from 'react';
-import { getToneCount } from '@/lib/actions/tones';
 
 interface NavItem {
   href: string;
   label: string;
   icon: React.ElementType;
-  badge?: string;
 }
 
-const baseNavItems: NavItem[] = [
+const navItems: NavItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/dashboard/create', label: 'Create', icon: Sliders },
   { href: '/dashboard/tones', label: 'Tones', icon: Library },
@@ -22,19 +19,6 @@ const baseNavItems: NavItem[] = [
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const [toneCount, setToneCount] = useState<number | null>(null);
-
-  useEffect(() => {
-    // Refetch tone count whenever the route changes
-    getToneCount().then(setToneCount);
-  }, [pathname]); // Re-run when pathname changes
-
-  const navItems: NavItem[] = baseNavItems.map((item) => {
-    if (item.href === '/dashboard/tones' && toneCount !== null) {
-      return { ...item, badge: toneCount.toString() };
-    }
-    return item;
-  });
 
   return (
     <aside className="z-20 flex h-full w-[280px] shrink-0 flex-col border-r border-slate-200 bg-white">
@@ -50,7 +34,7 @@ export default function Sidebar() {
 
       {/* Main Nav */}
       <div className="space-y-1 p-4">
-        {navItems.map(({ href, label, icon: Icon, badge }) => {
+        {navItems.map(({ href, label, icon: Icon }) => {
           const isActive = pathname === href;
           return (
             <Link
@@ -70,11 +54,6 @@ export default function Sidebar() {
                 )}
               />
               {label}
-              {badge && (
-                <span className="ml-auto rounded bg-slate-100 px-1.5 text-xs text-slate-500">
-                  {badge}
-                </span>
-              )}
             </Link>
           );
         })}

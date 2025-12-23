@@ -1,19 +1,14 @@
 import type { Metadata } from 'next';
-import { DM_Sans, Permanent_Marker } from 'next/font/google';
+import { Montserrat } from 'next/font/google';
 import './globals.css';
 import { ClerkProvider } from '@clerk/nextjs';
 import { Providers } from './providers';
 import { Toaster } from '@/components/ui/sonner';
 
-const dmSans = DM_Sans({
+const montserrat = Montserrat({
+  weight: ['400', '500', '600', '700'],
   subsets: ['latin'],
-  variable: '--font-dm-sans',
-});
-
-const permanentMarker = Permanent_Marker({
-  weight: '400',
-  subsets: ['latin'],
-  variable: '--font-permanent-marker',
+  variable: '--font-montserrat',
 });
 
 export const metadata: Metadata = {
@@ -30,7 +25,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
-        <body className={`${dmSans.variable} ${permanentMarker.variable} font-sans antialiased`}>
+        <body className={`${montserrat.variable} antialiased`}>
           <Providers>{children}</Providers>
           <Toaster />
         </body>

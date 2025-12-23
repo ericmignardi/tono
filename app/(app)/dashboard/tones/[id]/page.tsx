@@ -5,18 +5,28 @@ import { notFound, redirect } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Guitar, Settings, Brain, ArrowLeft, Pencil, Trash2 } from 'lucide-react';
+import { deleteTone } from '@/lib/actions/tones';
+import { Metadata } from 'next';
 
-// Server action
-async function deleteTone(formData: FormData) {
-  'use server';
+type Props = {
+  params: Promise<{ id: string }>;
+};
 
-  const id = formData.get('toneId') as string;
-
-  await prisma.tone.delete({
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  const tone = await prisma.tone.findUnique({
     where: { id },
+    select: { name: true, artist: true },
   });
 
-  redirect('/dashboard/tones');
+  if (!tone) {
+    return { title: 'Tone Not Found - tono' };
+  }
+
+  return {
+    title: `${tone.name} by ${tone.artist} - tono`,
+    description: `View guitar tone settings for ${tone.name} by ${tone.artist}`,
+  };
 }
 
 export default async function Tone({ params }: { params: Promise<{ id: string }> }) {
