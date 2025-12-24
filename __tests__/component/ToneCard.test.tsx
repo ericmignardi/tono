@@ -23,6 +23,7 @@ describe('ToneCard', () => {
       reverb: 3,
     },
     aiNotes: 'Classic rock tone with high gain and presence',
+    audioAnalysis: null,
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-01'),
   };
