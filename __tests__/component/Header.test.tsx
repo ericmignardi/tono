@@ -1,3 +1,4 @@
+'use client';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Header from '@/components/Header';
@@ -25,35 +26,31 @@ jest.mock('next/link', () => ({
   ),
 }));
 
-// Mock Next.js Image
-jest.mock('next/image', () => ({
-  __esModule: true,
-  default: (props: any) => {
-    // eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text
-    return <img {...props} />;
-  },
-}));
-
 describe('Header', () => {
-  it('renders the logo', () => {
+  it('renders the logo text', () => {
     render(<Header />);
-    const logos = screen.getAllByAltText('tono logo');
-    expect(logos.length).toBeGreaterThan(0);
+    expect(screen.getByText('tono')).toBeInTheDocument();
   });
 
   it('renders navigation links', () => {
     render(<Header />);
     expect(screen.getAllByText('Features').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Pricing').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('Get started').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Get Started').length).toBeGreaterThan(0);
   });
 
-  it('renders sign in and sign up buttons', () => {
+  it('renders sign in button', () => {
     render(<Header />);
-    const signInButtons = screen.getAllByText('Sign in');
-    const signUpButtons = screen.getAllByText('Sign up');
+    // Note: Button text is "Sign In" with capital I
+    const signInButtons = screen.getAllByText('Sign In');
     expect(signInButtons.length).toBeGreaterThan(0);
-    expect(signUpButtons.length).toBeGreaterThan(0);
+  });
+
+  it('renders start playing button (sign up)', () => {
+    render(<Header />);
+    // Note: Sign up button text is "Start Playing"
+    const startPlayingButtons = screen.getAllByText('Start Playing');
+    expect(startPlayingButtons.length).toBeGreaterThan(0);
   });
 
   it('renders user button and dashboard link', () => {

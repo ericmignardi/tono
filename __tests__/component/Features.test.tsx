@@ -4,59 +4,43 @@ import Features from '@/components/home/Features';
 describe('Features', () => {
   it('renders the section heading', () => {
     render(<Features />);
-    expect(
-      screen.getByRole('heading', { name: /everything a guitarist needs in one place/i })
-    ).toBeInTheDocument();
+    // The heading is "Your Personal" and "Tone Engineer." on separate lines
+    expect(screen.getByRole('heading', { level: 2 })).toBeInTheDocument();
+    expect(screen.getByText(/Your Personal/i)).toBeInTheDocument();
+    expect(screen.getByText(/Tone Engineer/i)).toBeInTheDocument();
   });
 
-  it('renders the "Our Features" badge', () => {
+  it('renders the hashtag badges', () => {
     render(<Features />);
-    expect(screen.getByText(/our features/i)).toBeInTheDocument();
+    expect(screen.getByText('#ai_powered')).toBeInTheDocument();
+    expect(screen.getByText('#gear_match')).toBeInTheDocument();
+    expect(screen.getByText('#instant_tone')).toBeInTheDocument();
   });
 
-  it('renders the subtitle', () => {
+  it('renders "AI-Powered Analysis" feature', () => {
     render(<Features />);
-    expect(screen.getByText(/all-in-one solution for tone management/i)).toBeInTheDocument();
+    // Text is split across <br /> so we check for both parts
+    expect(screen.getByText(/AI-Powered/i)).toBeInTheDocument();
+    expect(screen.getByText(/Describe any tone in plain English/i)).toBeInTheDocument();
   });
 
-  it('renders all 6 feature cards', () => {
+  it('renders "Gear-Specific Settings" feature', () => {
     render(<Features />);
-    expect(screen.getByText(/instant tone generation/i)).toBeInTheDocument();
-    expect(screen.getByText(/gear-specific results/i)).toBeInTheDocument();
-    expect(screen.getByText(/tone library/i)).toBeInTheDocument();
-    expect(screen.getByText(/ai-powered intelligence/i)).toBeInTheDocument();
-    expect(screen.getByText(/endless refinement/i)).toBeInTheDocument();
-    expect(screen.getByText(/stop wasting time/i)).toBeInTheDocument();
+    // Text is split across <br /> so we check for Gear-Specific
+    expect(screen.getByText(/Gear-Specific/i)).toBeInTheDocument();
+    expect(screen.getByText(/Don't just get generic advice/i)).toBeInTheDocument();
   });
 
-  it('renders "Instant Tone Generation" feature', () => {
+  it('renders "Persistent Library" feature', () => {
     render(<Features />);
-    expect(screen.getByText(/instant tone generation/i)).toBeInTheDocument();
-    expect(screen.getByText(/professional amp settings/i)).toBeInTheDocument();
+    // Text is split across <br />
+    expect(screen.getByText(/Persistent/i)).toBeInTheDocument();
+    expect(screen.getByText(/Save your favorite configurations/i)).toBeInTheDocument();
   });
 
-  it('renders "Gear-Specific Results" feature', () => {
+  it('renders all three feature cards', () => {
     render(<Features />);
-    expect(screen.getByText(/gear-specific results/i)).toBeInTheDocument();
-  });
-
-  it('renders "Tone Library" feature', () => {
-    render(<Features />);
-    expect(screen.getByText(/tone library/i)).toBeInTheDocument();
-  });
-
-  it('renders "AI-Powered Intelligence" feature', () => {
-    render(<Features />);
-    expect(screen.getByText(/ai-powered intelligence/i)).toBeInTheDocument();
-  });
-
-  it('renders "Endless Refinement" feature', () => {
-    render(<Features />);
-    expect(screen.getByText(/endless refinement/i)).toBeInTheDocument();
-  });
-
-  it('renders "Stop Wasting Time" feature', () => {
-    render(<Features />);
-    expect(screen.getByText(/stop wasting time/i)).toBeInTheDocument();
+    const h3Elements = screen.getAllByRole('heading', { level: 3 });
+    expect(h3Elements.length).toBe(3);
   });
 });

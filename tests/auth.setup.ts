@@ -13,7 +13,7 @@ async function globalSetup(config: FullConfig) {
     console.log('✅ Navigated to home page');
 
     // Click sign in
-    await page.getByRole('button', { name: 'Sign in' }).click();
+    await page.getByRole('button', { name: /Sign In/i }).click();
     console.log('✅ Clicked Sign in button');
 
     // Wait for Clerk's sign-in page

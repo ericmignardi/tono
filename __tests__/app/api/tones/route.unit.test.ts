@@ -34,10 +34,20 @@ jest.mock('@/lib/rateLimit', () => ({
 }));
 
 jest.mock('@/lib/gemini/toneAiService', () => ({
-  generateToneSettings: jest.fn().mockResolvedValue({
+  generateEnhancedToneSettings: jest.fn().mockResolvedValue({
     ampSettings: { gain: 7, mid: 5, bass: 5, reverb: 5, treble: 5, volume: 5, presence: 5 },
     notes: 'AI generated notes',
   }),
+}));
+
+jest.mock('@/lib/gemini/audioAnalysisService', () => ({
+  analyzeAudioTone: jest.fn(),
+  validateAudioFile: jest.fn().mockReturnValue({ valid: true }),
+}));
+
+jest.mock('@/lib/config/subscriptionTiers', () => ({
+  getUserTier: jest.fn().mockReturnValue('free'),
+  canUseAudioAnalysis: jest.fn().mockReturnValue(false),
 }));
 
 jest.mock('next/cache', () => ({
@@ -47,7 +57,16 @@ jest.mock('next/cache', () => ({
 import { currentUser } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma/database';
 import { toneRateLimit, apiRateLimit } from '@/lib/rateLimit';
-import { generateToneSettings } from '@/lib/gemini/toneAiService';
+import { generateEnhancedToneSettings } from '@/lib/gemini/toneAiService';
+
+// Helper to create FormData for tests
+function createFormData(data: Record<string, string>): FormData {
+  const formData = new FormData();
+  Object.entries(data).forEach(([key, value]) => {
+    formData.append(key, value);
+  });
+  return formData;
+}
 
 describe('/api/tones', () => {
   beforeEach(() => {
@@ -55,7 +74,7 @@ describe('/api/tones', () => {
   });
 
   describe('POST /api/tones', () => {
-    const validBody = {
+    const validFormDataFields = {
       name: 'My Tone',
       artist: 'Artist',
       description: 'Some description',
@@ -74,6 +93,7 @@ describe('/api/tones', () => {
       (prisma.user.findUnique as jest.Mock).mockResolvedValue({
         id: 'db_user_1',
         clerkId: 'clerk_user_123',
+        subscriptions: [],
       });
       (prisma.$transaction as jest.Mock).mockImplementation(async (fn) =>
         fn({
@@ -88,10 +108,10 @@ describe('/api/tones', () => {
       );
       (prisma.tone.create as jest.Mock).mockResolvedValue({ id: 'tone_1', name: 'My Tone' });
 
+      const formData = createFormData(validFormDataFields);
       const req = new NextRequest('http://localhost/api/tones', {
         method: 'POST',
-        body: JSON.stringify(validBody),
-        headers: { 'Content-Type': 'application/json' },
+        body: formData,
       });
 
       const res = await POST(req);
@@ -99,17 +119,17 @@ describe('/api/tones', () => {
 
       expect(res.status).toBe(201);
       expect(json.message).toBe('Successfully created tone');
-      expect(generateToneSettings).toHaveBeenCalled();
+      expect(generateEnhancedToneSettings).toHaveBeenCalled();
       expect(prisma.tone.create).toHaveBeenCalled();
     });
 
     it('should return 401 when unauthorized', async () => {
       (currentUser as jest.Mock).mockResolvedValue(null);
 
+      const formData = createFormData(validFormDataFields);
       const req = new NextRequest('http://localhost/api/tones', {
         method: 'POST',
-        body: JSON.stringify(validBody),
-        headers: { 'Content-Type': 'application/json' },
+        body: formData,
       });
 
       const res = await POST(req);
@@ -117,7 +137,7 @@ describe('/api/tones', () => {
 
       expect(res.status).toBe(401);
       expect(json.error).toBe('Unauthorized');
-      expect(generateToneSettings).not.toHaveBeenCalled();
+      expect(generateEnhancedToneSettings).not.toHaveBeenCalled();
       expect(prisma.tone.create).not.toHaveBeenCalled();
     });
 
@@ -128,10 +148,10 @@ describe('/api/tones', () => {
       });
       (toneRateLimit.limit as jest.Mock).mockResolvedValue({ success: false });
 
+      const formData = createFormData(validFormDataFields);
       const req = new NextRequest('http://localhost/api/tones', {
         method: 'POST',
-        body: JSON.stringify(validBody),
-        headers: { 'Content-Type': 'application/json' },
+        body: formData,
       });
 
       const res = await POST(req);
@@ -139,7 +159,7 @@ describe('/api/tones', () => {
 
       expect(res.status).toBe(429);
       expect(json.error).toBe('Too many tone generation requests. Please slow down.');
-      expect(generateToneSettings).not.toHaveBeenCalled();
+      expect(generateEnhancedToneSettings).not.toHaveBeenCalled();
       expect(prisma.tone.create).not.toHaveBeenCalled();
     });
 
@@ -151,10 +171,10 @@ describe('/api/tones', () => {
       (toneRateLimit.limit as jest.Mock).mockResolvedValue({ success: true });
       (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
 
+      const formData = createFormData(validFormDataFields);
       const req = new NextRequest('http://localhost/api/tones', {
         method: 'POST',
-        body: JSON.stringify(validBody),
-        headers: { 'Content-Type': 'application/json' },
+        body: formData,
       });
 
       const res = await POST(req);
@@ -162,7 +182,7 @@ describe('/api/tones', () => {
 
       expect(res.status).toBe(404);
       expect(json.error).toBe('User not found');
-      expect(generateToneSettings).not.toHaveBeenCalled();
+      expect(generateEnhancedToneSettings).not.toHaveBeenCalled();
       expect(prisma.tone.create).not.toHaveBeenCalled();
     });
 
@@ -175,22 +195,30 @@ describe('/api/tones', () => {
       (prisma.user.findUnique as jest.Mock).mockResolvedValue({
         id: 'db_user_1',
         clerkId: 'clerk_user_123',
+        subscriptions: [],
       });
 
-      const invalidBody = { ...validBody, guitar: null };
+      // Missing required 'guitar' field
+      const invalidFormData = createFormData({
+        name: 'My Tone',
+        artist: 'Artist',
+        description: 'Some description',
+        pickups: 'Single Coil',
+        strings: '10s',
+        amp: 'Marshall',
+      });
 
       const req = new NextRequest('http://localhost/api/tones', {
         method: 'POST',
-        body: JSON.stringify(invalidBody),
-        headers: { 'Content-Type': 'application/json' },
+        body: invalidFormData,
       });
 
       const res = await POST(req);
       const json = await res.json();
 
       expect(res.status).toBe(400);
-      expect(json.error).toBe('Invalid input data');
-      expect(generateToneSettings).not.toHaveBeenCalled();
+      expect(json.error).toBe('Missing required fields');
+      expect(generateEnhancedToneSettings).not.toHaveBeenCalled();
       expect(prisma.tone.create).not.toHaveBeenCalled();
     });
 
@@ -203,6 +231,7 @@ describe('/api/tones', () => {
       (prisma.user.findUnique as jest.Mock).mockResolvedValue({
         id: 'db_user_1',
         clerkId: 'clerk_user_123',
+        subscriptions: [],
       });
       (prisma.$transaction as jest.Mock).mockImplementation(async (fn) =>
         fn({
@@ -216,10 +245,10 @@ describe('/api/tones', () => {
         })
       );
 
+      const formData = createFormData(validFormDataFields);
       const req = new NextRequest('http://localhost/api/tones', {
         method: 'POST',
-        body: JSON.stringify(validBody),
-        headers: { 'Content-Type': 'application/json' },
+        body: formData,
       });
 
       const res = await POST(req);
@@ -227,7 +256,7 @@ describe('/api/tones', () => {
 
       expect(res.status).toBe(403);
       expect(json.error).toBe('No remaining credits. Please upgrade your plan.');
-      expect(generateToneSettings).not.toHaveBeenCalled();
+      expect(generateEnhancedToneSettings).not.toHaveBeenCalled();
       expect(prisma.tone.create).not.toHaveBeenCalled();
     });
 
@@ -240,6 +269,7 @@ describe('/api/tones', () => {
       (prisma.user.findUnique as jest.Mock).mockResolvedValue({
         id: 'db_user_1',
         clerkId: 'clerk_user_123',
+        subscriptions: [],
       });
       (prisma.$transaction as jest.Mock).mockImplementation(async (fn) =>
         fn({
@@ -252,12 +282,14 @@ describe('/api/tones', () => {
           },
         })
       );
-      (generateToneSettings as jest.Mock).mockRejectedValueOnce(new Error('Gemini API timeout'));
+      (generateEnhancedToneSettings as jest.Mock).mockRejectedValueOnce(
+        new Error('Gemini API timeout')
+      );
 
+      const formData = createFormData(validFormDataFields);
       const req = new NextRequest('http://localhost/api/tones', {
         method: 'POST',
-        body: JSON.stringify(validBody),
-        headers: { 'Content-Type': 'application/json' },
+        body: formData,
       });
 
       const res = await POST(req);
@@ -277,6 +309,7 @@ describe('/api/tones', () => {
       (prisma.user.findUnique as jest.Mock).mockResolvedValue({
         id: 'db_user_1',
         clerkId: 'clerk_user_123',
+        subscriptions: [],
       });
       (prisma.$transaction as jest.Mock).mockImplementation(async (fn) =>
         fn({
@@ -293,10 +326,10 @@ describe('/api/tones', () => {
         new Error('Database constraint violation')
       );
 
+      const formData = createFormData(validFormDataFields);
       const req = new NextRequest('http://localhost/api/tones', {
         method: 'POST',
-        body: JSON.stringify(validBody),
-        headers: { 'Content-Type': 'application/json' },
+        body: formData,
       });
 
       const res = await POST(req);
@@ -357,7 +390,7 @@ describe('/api/tones', () => {
         amp: 'Marshall',
       });
 
-      const completeBody = {
+      const completeFormData = createFormData({
         name: 'Complete Tone',
         artist: 'Artist',
         description: 'Test description',
@@ -365,12 +398,11 @@ describe('/api/tones', () => {
         pickups: 'Single Coil',
         strings: '10s',
         amp: 'Marshall',
-      };
+      });
 
       const req = new NextRequest('http://localhost/api/tones', {
         method: 'POST',
-        body: JSON.stringify(completeBody),
-        headers: { 'Content-Type': 'application/json' },
+        body: completeFormData,
       });
 
       const res = await POST(req);
@@ -383,7 +415,7 @@ describe('/api/tones', () => {
         artist: 'Artist',
         guitar: 'Strat',
       });
-      expect(generateToneSettings).toHaveBeenCalled();
+      expect(generateEnhancedToneSettings).toHaveBeenCalled();
       expect(prisma.tone.create).toHaveBeenCalled();
     });
   });

@@ -1,10 +1,11 @@
 import { generateToneSettings, ToneGearConfig } from '@/lib/gemini/toneAiService';
-import { getModel } from '@/lib/gemini/gemini';
+import { getModel, retryGeminiRequest } from '@/lib/gemini/gemini';
 import { getCachedTone, setCachedTone } from '@/lib/gemini/toneCache';
 import { DEFAULT_AMP_SETTINGS } from '@/lib/gemini/toneAiService';
 
 jest.mock('@/lib/gemini/gemini', () => ({
   getModel: jest.fn(),
+  retryGeminiRequest: jest.fn(),
 }));
 
 jest.mock('@/lib/gemini/toneCache', () => ({
@@ -36,12 +37,11 @@ describe('generateToneSettings', () => {
     notes: 'Test notes',
   };
 
-  const mockGenerateContent = jest.fn();
-
   beforeEach(() => {
     jest.clearAllMocks();
+    // Mock getModel to return a model object (even though retryGeminiRequest is mocked)
     (getModel as jest.Mock).mockReturnValue({
-      generateContent: mockGenerateContent,
+      generateContent: jest.fn(),
     });
   });
 
@@ -51,12 +51,12 @@ describe('generateToneSettings', () => {
     const result = await generateToneSettings(mockConfig);
     expect(result).toEqual(mockAiResponse);
     expect(getCachedTone).toHaveBeenCalledWith(mockConfig);
-    expect(mockGenerateContent).not.toHaveBeenCalled();
+    expect(retryGeminiRequest).not.toHaveBeenCalled();
   });
 
   it('should call Gemini API and cache result on cache miss', async () => {
     (getCachedTone as jest.Mock).mockResolvedValue(null);
-    mockGenerateContent.mockResolvedValue({
+    (retryGeminiRequest as jest.Mock).mockResolvedValue({
       response: {
         text: () => JSON.stringify(mockAiResponse),
       },
@@ -69,7 +69,7 @@ describe('generateToneSettings', () => {
 
   it('should handle Gemini API errors gracefully', async () => {
     (getCachedTone as jest.Mock).mockResolvedValue(null);
-    mockGenerateContent.mockRejectedValue(new Error('API error'));
+    (retryGeminiRequest as jest.Mock).mockRejectedValue(new Error('API error'));
 
     const result = await generateToneSettings(mockConfig);
     expect(result).toEqual({
@@ -80,13 +80,14 @@ describe('generateToneSettings', () => {
 
   it('should handle invalid JSON from Gemini', async () => {
     (getCachedTone as jest.Mock).mockResolvedValue(null);
-    mockGenerateContent.mockResolvedValue({
+    (retryGeminiRequest as jest.Mock).mockResolvedValue({
       response: {
         text: () => 'Not JSON',
       },
     });
 
     const result = await generateToneSettings(mockConfig);
+    // When JSON parsing fails, the service falls back to using the raw text as notes
     expect(result).toEqual({
       ampSettings: DEFAULT_AMP_SETTINGS,
       notes: 'Not JSON',

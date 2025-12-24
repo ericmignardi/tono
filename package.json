@@ -11,6 +11,7 @@
     "check-types": "tsc --noEmit",
     "test": "jest",
     "test:unit": "jest --testPathPatterns=\\.unit\\.test\\.ts",
+    "test:component": "jest __tests__/component",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:e2e": "playwright test",
