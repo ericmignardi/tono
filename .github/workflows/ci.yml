@@ -41,6 +41,7 @@ jobs:
           SKIP_ENV_VALIDATION: true
           NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_mock
           CLERK_SECRET_KEY: sk_test_mock
+          CLERK_WEBHOOK_SECRET: whsec_mock
           DATABASE_URL: postgresql://mock:mock@localhost:5432/mock
           GEMINI_API_KEY: mock_key
           KV_REST_API_URL: https://mock.upstash.io
