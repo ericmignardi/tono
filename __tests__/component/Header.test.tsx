@@ -61,7 +61,8 @@ describe('Header', () => {
 
   it('toggles mobile menu when menu button is clicked', async () => {
     const { container } = render(<Header />);
-    const toggleButton = screen.getByRole('button', { name: 'Toggle mobile menu' });
+    // aria-label is now dynamic: "Open menu" when closed, "Close menu" when open
+    const toggleButton = screen.getByRole('button', { name: 'Open menu' });
     await userEvent.click(toggleButton);
     const mobileMenus = container.querySelectorAll('nav');
     const mobileMenu = Array.from(mobileMenus).find(

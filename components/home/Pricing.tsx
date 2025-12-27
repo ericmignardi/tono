@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Mic, Speaker, Music, Check, ArrowUpRight } from 'lucide-react';
+import { Mic, Speaker, Check, ArrowUpRight } from 'lucide-react';
 import { useState } from 'react';
 
 interface PricingProps {
@@ -78,6 +78,7 @@ export default function Pricing({ hasActiveSubscription = false }: PricingProps)
               viewBox="0 0 100 50"
               fill="none"
               stroke="currentColor"
+              aria-hidden="true"
             >
               <path
                 d="M10 40 Q 50 0 90 20"

@@ -157,6 +157,11 @@ export default function GuestToneForm() {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          {/* Screen reader announcement for loading state */}
+          <div aria-live="polite" aria-atomic="true" className="sr-only">
+            {isSubmitting && 'Generating tone, please wait...'}
+          </div>
+
           <FormField
             control={form.control}
             name="artist"
@@ -206,12 +211,12 @@ export default function GuestToneForm() {
           <Button type="submit" className="w-full" disabled={isSubmitting}>
             {isSubmitting ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
                 Processing...
               </>
             ) : (
               <>
-                <Zap className="mr-2 h-4 w-4" />
+                <Zap className="mr-2 h-4 w-4" aria-hidden="true" />
                 Generate Free Tone
               </>
             )}

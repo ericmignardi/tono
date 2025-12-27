@@ -21,21 +21,24 @@ export default function Footer() {
           <div className="flex gap-4">
             <Link
               href="#"
+              aria-label="Follow us on Twitter"
               className="hover:border-primary/30 hover:text-primary border-border bg-card text-muted-foreground flex h-10 w-10 items-center justify-center rounded-full border transition-colors"
             >
-              <Twitter className="h-5 w-5" />
+              <Twitter className="h-5 w-5" aria-hidden="true" />
             </Link>
             <Link
               href="#"
+              aria-label="Follow us on Instagram"
               className="border-border bg-card text-muted-foreground flex h-10 w-10 items-center justify-center rounded-full border transition-colors hover:border-pink-200 hover:text-pink-600"
             >
-              <Instagram className="h-5 w-5" />
+              <Instagram className="h-5 w-5" aria-hidden="true" />
             </Link>
             <Link
               href="#"
+              aria-label="Follow us on Facebook"
               className="border-border bg-card text-muted-foreground flex h-10 w-10 items-center justify-center rounded-full border transition-colors hover:border-blue-200 hover:text-blue-600"
             >
-              <Facebook className="h-5 w-5" />
+              <Facebook className="h-5 w-5" aria-hidden="true" />
             </Link>
           </div>
         </div>

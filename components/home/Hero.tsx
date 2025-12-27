@@ -27,6 +27,7 @@ export default function Hero() {
               className="text-accent absolute -bottom-2 left-0 h-3 w-full"
               viewBox="0 0 100 10"
               preserveAspectRatio="none"
+              aria-hidden="true"
             >
               <path d="M0 5 Q 50 10 100 5" stroke="currentColor" strokeWidth="4" fill="none"></path>
             </svg>

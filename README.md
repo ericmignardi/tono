@@ -1,52 +1,205 @@
 # 🎸 tono - AI-Powered Guitar Tone Assistant
 
-> **📌 Portfolio Demo Project** - This is a demonstration of full-stack development skills. The app uses Stripe test mode and Clerk development mode. Feel free to explore all features!
+<div align="center">
 
 [![Live Demo](https://img.shields.io/badge/demo-live-success?style=for-the-badge)](https://tono-ruby.vercel.app)
 [![GitHub](https://img.shields.io/badge/github-source-blue?style=for-the-badge&logo=github)](https://github.com/ericmignardi/tono)
 
-## 🧪 Try It Out
+![Next.js](https://img.shields.io/badge/Next.js-16-000000?style=flat&logo=next.js&logoColor=white)
+![React](https://img.shields.io/badge/React-19-61DAFB?style=flat&logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat&logo=typescript&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-6-2D3748?style=flat&logo=prisma&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon-4169E1?style=flat&logo=postgresql&logoColor=white)
+![Vercel](https://img.shields.io/badge/Deployed-Vercel-000000?style=flat&logo=vercel&logoColor=white)
 
-**Test Stripe Subscription:**
+</div>
 
-- Card Number: `4242 4242 4242 4242`
-- Expiry: Any future date
-- CVC: Any 3 digits
-- ZIP: Any 5 digits
-
-**Authentication:**
-
-- Create a free account (takes 30 seconds)
-- Or just explore the landing page and features
+> **📌 Portfolio Demo** — This is a production-ready SaaS application showcasing full-stack development skills. Uses Stripe test mode for payments and Clerk development mode for auth.
 
 ---
 
-## 📖 Overview
+## 🎯 What It Does
 
-**tono** is a full-stack AI-powered SaaS application that helps guitarists achieve their desired sound instantly. Simply input your guitar and amp setup along with a creative goal like _"early Van Halen lead tone"_ or _"warm jazz clean sound"_, and tono delivers precise amp settings, effects recommendations, and detailed tone analysis.
+**tono** transforms how guitarists achieve their desired sound. Input your gear setup and describe a tone ("early Van Halen lead" or "warm jazz clean"), and AI delivers precise amp settings with detailed explanations.
 
-### Why tono?
+### The Problem I Solved
 
-- 🎯 **Instant Results** - Get professional tone recommendations in seconds
-- 🔧 **Gear-Specific** - Tailored settings for your exact equipment
-- 💾 **Save Configurations** - Build your personal library of tone presets
-- 🚀 **AI-Powered** - Leverages Google Gemini AI to understand musical context and translate it into technical specs
+As a developer and musician, I spent countless hours tweaking amp settings to recreate specific tones. Existing solutions either require deep technical knowledge or expensive equipment. **tono** bridges this gap with AI-powered recommendations tailored to your exact gear.
 
-## ✨ Features
+---
 
-### Core Functionality
+## 🔥 Technical Highlights
 
-- **🤖 AI Tone Analysis** - Translates descriptive tone requests into actionable technical configurations (gain, EQ, effects)
-- **💾 Persistent Configurations** - Save and manage multiple custom amp and guitar setups
-- **🎛️ Personalized Recommendations** - Tone results tailored to your specific gear
-- **📊 Detailed Breakdowns** - Comprehensive explanations of why each setting works
+### Production-Ready API Architecture
 
-### User Experience
+The application features secure, rate-limited API routes with comprehensive error handling:
 
-- **🔐 Secure Authentication** - Powered by Clerk for seamless sign-in/sign-up
-- **💳 Flexible Subscription Tiers** - Free and Pro plans managed through Stripe
-- **📱 Responsive Design** - Beautiful UI across all devices
-- **⚡ Fast Performance** - Optimized with edge caching and serverless architecture
+```typescript
+// From: app/api/tones/route.ts - Real production code
+export async function POST(req: NextRequest) {
+  const requestId = randomUUID();
+
+  try {
+    const user = await currentUser();
+    if (!user) {
+      throw new APIError('Unauthorized', 401, 'UNAUTHORIZED');
+    }
+
+    // Redis-backed rate limiting (Upstash)
+    const { success } = await toneRateLimit.limit(user.id);
+    if (!success) {
+      throw new APIError(
+        'Too many tone generation requests. Please slow down.',
+        429,
+        'RATE_LIMIT_EXCEEDED'
+      );
+    }
+
+    // Database transaction for credit reservation
+    await prisma.$transaction(async (tx) => {
+      const freshUser = await tx.user.findUnique({
+        where: { id: dbUser.id },
+        select: { generationsUsed: true, generationsLimit: true },
+      });
+
+      if (!freshUser || freshUser.generationsUsed >= freshUser.generationsLimit) {
+        throw new APIError(
+          'No remaining credits. Please upgrade your plan.',
+          403,
+          'CREDITS_EXHAUSTED'
+        );
+      }
+
+      await tx.user.update({
+        where: { id: dbUser.id },
+        data: { generationsUsed: { increment: 1 } },
+      });
+    });
+
+    // AI-powered tone generation
+    const aiResult = await generateEnhancedToneSettings(gearConfig, audioAnalysis);
+
+    return NextResponse.json({ message: 'Successfully created tone', tone }, { status: 201 });
+  } catch (error) {
+    return handleAPIError(error, requestId);
+  }
+}
+```
+
+### AI Integration with Prompt Engineering
+
+Custom prompt engineering translates musical concepts into technical specifications:
+
+```typescript
+// From: lib/gemini/toneAiService.ts - Actual AI service
+const SYSTEM_PROMPT = `You are a guitar tone engineer. Provide SPECIFIC amp settings for the given gear.
+
+Output ONLY valid JSON:
+{
+  "ampSettings": {
+    "gain": number (0-10, 0.5 increments),
+    "treble": number (0-10, 0.5 increments),
+    "mid": number (0-10, 0.5 increments),
+    "bass": number (0-10, 0.5 increments),
+    "volume": number (0-10, 0.5 increments),
+    "presence": number (0-10, 0.5 increments),
+    "reverb": number (0-10, 0.5 increments)
+  },
+  "notes": string (2-3 sentences on WHY these settings work)
+}
+
+REQUIREMENTS:
+1. Analyze full gear: guitar, pickups (single-coil vs humbucker), strings, amp type
+2. Match tone description: bright/dark, compressed/dynamic, clean/overdriven
+3. Adjust for amp characteristics (British/American, tube/solid-state)
+4. Humbuckers need less gain; single-coils may need mid boost
+5. Base on artist's documented settings when possible, adapt to provided gear`;
+```
+
+### Stripe Webhook Handling with Idempotency
+
+Robust payment processing with replay attack prevention:
+
+```typescript
+// From: app/api/webhooks/stripe/route.ts - Production webhook handler
+export async function POST(req: NextRequest) {
+  const body = await req.text();
+  const signature = req.headers.get('stripe-signature');
+
+  // Signature verification
+  let event: Stripe.Event;
+  try {
+    event = stripe.webhooks.constructEvent(body, signature, config.STRIPE_WEBHOOK_SECRET);
+  } catch (err) {
+    return new NextResponse('Webhook signature verification failed', { status: 400 });
+  }
+
+  // Replay attack prevention
+  const existingEvent = await prisma.webhookEvent.findUnique({
+    where: { eventId: event.id },
+  });
+
+  if (existingEvent) {
+    return new NextResponse(JSON.stringify({ received: true }), { status: 200 });
+  }
+
+  // Record event before processing
+  await prisma.webhookEvent.create({
+    data: { eventId: event.id, type: event.type, processed: false },
+  });
+
+  // Handle subscription lifecycle events
+  switch (event.type) {
+    case 'customer.subscription.created':
+      await handleSubscriptionChange(subscription, 'created');
+      break;
+    case 'customer.subscription.updated':
+      await handleSubscriptionChange(subscription, 'updated');
+      break;
+    case 'customer.subscription.deleted':
+      // Downgrade user to free tier
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { generationsLimit: FREE_CREDIT_LIMIT },
+      });
+      break;
+  }
+}
+```
+
+### Rate Limiting Strategy
+
+Multiple rate limiters for different operation types:
+
+```typescript
+// From: lib/rateLimit.ts - Production rate limiting
+import { Ratelimit } from '@upstash/ratelimit';
+import { Redis } from '@upstash/redis';
+
+// AI generation (expensive operation)
+export const toneRateLimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(10, '1 m'),
+  analytics: true,
+  prefix: 'ratelimit:tone',
+});
+
+// Checkout (prevent abuse)
+export const checkoutRateLimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(5, '1 h'),
+  prefix: 'ratelimit:checkout',
+});
+
+// General API (read operations)
+export const apiRateLimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(100, '1 m'),
+  prefix: 'ratelimit:api',
+});
+```
+
+---
 
 ## 🛠️ Technology Stack
 
@@ -56,10 +209,9 @@
 
 ### Frontend
 
-- **Framework:** Next.js 14 (App Router)
-- **Language:** TypeScript
-- **Styling:** Tailwind CSS
-- **UI Components:** Shadcn/UI
+- **Framework:** Next.js 16 (App Router)
+- **Language:** TypeScript (98.4% coverage)
+- **Styling:** Tailwind CSS + Shadcn/UI
 - **Animations:** Framer Motion
 - **Forms:** React Hook Form + Zod
 
@@ -68,189 +220,156 @@
 
 ### Backend
 
-- **Database:** PostgreSQL (Neon)
+- **Database:** PostgreSQL (Neon Serverless)
 - **ORM:** Prisma
 - **Authentication:** Clerk
-- **AI/ML:** Google Gemini API
+- **AI:** Google Gemini API
 - **Payments:** Stripe
-- **Caching:** Vercel KV
-- **Rate Limiting:** Upstash
+- **Rate Limiting:** Upstash Redis
 
 </td>
 </tr>
 </table>
 
-### Testing & Deployment
+### Database Schema
 
-- **Unit Testing:** Jest + React Testing Library
-- **E2E Testing:** Playwright
-- **Hosting:** Vercel (Serverless)
-- **CI/CD:** GitHub Actions
+```prisma
+// From: prisma/schema.prisma
+model User {
+  id               String         @id @default(cuid())
+  clerkId          String         @unique
+  email            String         @unique
+  stripeId         String?        @unique
+  generationsUsed  Int            @default(0)
+  generationsLimit Int            @default(5)
+  tones            Tone[]
+  subscriptions    Subscription[]
+}
 
-### Key Design Principles
+model Tone {
+  id            String   @id @default(cuid())
+  user          User     @relation(fields: [userId], references: [id])
+  userId        String
+  name          String
+  artist        String
+  description   String
+  guitar        String
+  pickups       String
+  amp           String
+  aiAmpSettings Json
+  aiNotes       String
+  audioAnalysis Json?
+  @@index([userId, createdAt])
+}
 
-- **Server Components First** - Fast initial page loads with optimal SEO
-- **Type Safety** - End-to-end TypeScript with Prisma and Zod
-- **API Protection** - Rate limiting and authentication on all endpoints
-- **Caching Strategy** - Edge caching for stable data, on-demand for dynamic content
-
-## 💰 Pricing
-
-| Tier     | Price | Monthly Submissions | Features                                                |
-| -------- | ----- | ------------------- | ------------------------------------------------------- |
-| **Free** | $0    | 5                   | Basic tone generation, Save configurations              |
-| **Pro**  | $9.99 | 50                  | Everything in Free, Priority support, Advanced analysis |
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Node.js 18+ and npm
-- PostgreSQL database (we recommend [Neon](https://neon.tech))
-- API keys for:
-  - [Clerk](https://clerk.com)
-  - [Google AI Studio](https://aistudio.google.com/app/apikey) (Gemini API)
-  - [Stripe](https://stripe.com)
-
-### Installation
-
-1. **Clone the repository**
-
-   ```bash
-   git clone https://github.com/ericmignardi/tono.git
-   cd tono
-   ```
-
-2. **Install dependencies**
-
-   ```bash
-   npm install
-   ```
-
-3. **Set up environment variables**
-
-   ```bash
-   cp .env.example .env.local
-   ```
-
-   Edit `.env.local` with your credentials:
-
-   ```env
-   # Clerk Authentication
-   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
-   CLERK_SECRET_KEY=sk_test_...
-   CLERK_WEBHOOK_SECRET=whsec_...
-   NEXT_PUBLIC_CLERK_SIGN_IN_URL=...
-   NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL=...
-   NEXT_PUBLIC_CLERK_SIGN_UP_URL=...
-   NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL=...
-
-   # Database
-   DATABASE_URL=postgresql://...
-
-   # Google Gemini AI
-   GEMINI_API_KEY=...
-
-   # Stripe
-   STRIPE_SECRET_KEY=sk_test_...
-   STRIPE_WEBHOOK_SECRET=whsec_...
-   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
-   NEXT_PUBLIC_STRIPE_PRICE_ID_PRO=price_...
-
-   # App URL
-   NEXT_PUBLIC_URL=http://localhost:3000
-
-   # Redis
-   UPSTASH_REDIS_REST_URL=...
-   UPSTASH_REDIS_REST_TOKEN=...
-   ```
-
-4. **Set up the database**
-
-   ```bash
-   npx prisma migrate dev
-   npx prisma generate
-   ```
-
-5. **Run the development server**
-
-   ```bash
-   npm run dev
-   ```
-
-6. **Open your browser**
-
-   Navigate to [http://localhost:3000](http://localhost:3000)
-
----
-
-## 📜 Available Scripts
-
-| Command               | Description                  |
-| --------------------- | ---------------------------- |
-| `npm run dev`         | Start development server     |
-| `npm run build`       | Build for production         |
-| `npm run start`       | Start production server      |
-| `npm run lint`        | Lint code with ESLint        |
-| `npm run format`      | Format code with Prettier    |
-| `npm run check-types` | Run TypeScript type checking |
-| `npm run test`        | Run unit tests               |
-| `npm run test:unit`   | Run unit tests               |
-| `npm run test:e2e`    | Run end-to-end tests         |
-
----
-
-## 🧪 Testing
-
-tono uses a simplified testing strategy focused on unit tests and end-to-end tests:
-
-```bash
-# Run all unit tests
-npm run test
-
-# Run unit tests in watch mode
-npm run test:watch
-
-# Run E2E tests
-npm run test:e2e
-
-# Run E2E tests with UI
-npm run test:e2e:ui
+model Subscription {
+  id               String    @id @default(cuid())
+  stripeId         String    @unique
+  status           String
+  priceId          String
+  currentPeriodEnd DateTime?
+  user             User      @relation(fields: [userId], references: [id])
+}
 ```
 
-### Testing Strategy
+---
 
-- **Unit Tests**: Test individual functions and components in isolation
-- **E2E Tests**: Test critical user flows (authentication, tone generation, subscription)
-- **No Integration Tests**: Simplified setup - removed database integration tests for easier maintenance
+## 💼 Skills Demonstrated
+
+| Category         | Technologies & Patterns                                                     |
+| ---------------- | --------------------------------------------------------------------------- |
+| **Frontend**     | React Server Components, TypeScript, Tailwind CSS, Form validation with Zod |
+| **Backend**      | RESTful APIs, Prisma ORM, Webhook processing, Rate limiting                 |
+| **Database**     | PostgreSQL, Relational schema design, Connection pooling, Migrations        |
+| **Integrations** | Clerk Auth, Stripe Payments, Google Gemini AI                               |
+| **DevOps**       | GitHub Actions CI/CD, Vercel deployment, Environment management             |
+| **Testing**      | Jest unit tests, Playwright E2E tests                                       |
 
 ---
 
-## 🚢 Deployment
+## 🧪 Try It Out
 
-### Deploy to Vercel
+**[Live Demo →](https://tono-ruby.vercel.app)**
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/yourusername/tono)
+**Test Payment (Stripe Test Mode):**
 
-1. Push your code to GitHub
-2. Import your repository in Vercel
-3. Add all environment variables
-4. Deploy!
-
-### Post-Deployment Setup
-
-1. **Configure webhooks:**
-   - Clerk webhook: `https://yourdomain.com/api/webhooks/clerk`
-   - Stripe webhook: `https://yourdomain.com/api/webhooks/stripe`
-
-2. **Update environment variables** with production URLs
+- Card: `4242 4242 4242 4242`
+- Expiry: Any future date
+- CVC: Any 3 digits
 
 ---
 
-## 🤝 Contributing
+## 📊 Architecture Overview
 
-We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to get started.
+```
+User Request → Next.js App Router → Clerk Auth Middleware
+                                          ↓
+                               API Route Handler
+                                          ↓
+                    ┌─────────────────────┼─────────────────────┐
+                    ↓                     ↓                     ↓
+             Rate Limiter           Zod Validation        Credits Check
+             (Upstash Redis)                              (Prisma Transaction)
+                                          ↓
+                               Google Gemini AI
+                                          ↓
+                               PostgreSQL (Neon)
+                                          ↓
+                               JSON Response
+```
+
+---
+
+## 🚀 Local Development
+
+```bash
+# Clone and install
+git clone https://github.com/ericmignardi/tono.git
+cd tono && npm install
+
+# Configure environment
+cp .env.example .env.local
+# Add your API keys for Clerk, Stripe, Gemini, Neon, Upstash
+
+# Database setup
+npx prisma migrate dev && npx prisma generate
+
+# Run development server
+npm run dev
+```
+
+### Available Scripts
+
+| Command               | Description              |
+| --------------------- | ------------------------ |
+| `npm run dev`         | Start development server |
+| `npm run build`       | Production build         |
+| `npm run test`        | Run Jest unit tests      |
+| `npm run test:e2e`    | Run Playwright E2E tests |
+| `npm run lint`        | ESLint check             |
+| `npm run check-types` | TypeScript validation    |
+
+---
+
+## 💰 Subscription Model
+
+| Tier     | Price | Monthly Generations | Features                                 |
+| -------- | ----- | ------------------- | ---------------------------------------- |
+| **Free** | $0    | 5                   | Text-based tone generation               |
+| **Pro**  | $9.99 | 50                  | Audio file analysis, Priority processing |
+
+---
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT License — See [LICENSE](LICENSE) for details.
+
+---
+
+<div align="center">
+
+**Built by Eric Mignardi**
+
+[Live Demo](https://tono-ruby.vercel.app) • [GitHub](https://github.com/ericmignardi/tono) • [LinkedIn](https://linkedin.com/in/ericmignardi)
+
+</div>

@@ -75,9 +75,15 @@ export default function Header() {
         <button
           onClick={() => setMobileMenu(!mobileMenu)}
           className="z-20 h-6 w-6 cursor-pointer lg:hidden"
-          aria-label="Toggle mobile menu"
+          aria-label={mobileMenu ? 'Close menu' : 'Open menu'}
+          aria-expanded={mobileMenu}
+          aria-controls="mobile-menu"
         >
-          {mobileMenu ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          {mobileMenu ? (
+            <X className="h-5 w-5" aria-hidden="true" />
+          ) : (
+            <Menu className="h-5 w-5" aria-hidden="true" />
+          )}
         </button>
 
         {/* Mobile Menu */}
@@ -86,8 +92,15 @@ export default function Header() {
             <div
               className="fixed inset-0 z-50 bg-black/50 lg:hidden"
               onClick={() => setMobileMenu(false)}
+              aria-hidden="true"
             />
-            <nav className="bg-background fixed top-0 right-0 z-60 flex h-screen w-[80%] flex-col gap-4 p-8 pt-20 lg:hidden">
+            <nav
+              id="mobile-menu"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Mobile navigation"
+              className="bg-background fixed top-0 right-0 z-60 flex h-screen w-[80%] flex-col gap-4 p-8 pt-20 lg:hidden"
+            >
               <Link
                 href="#features"
                 className="hover:bg-secondary hover:text-primary rounded-lg px-4 py-2 text-sm font-medium"
