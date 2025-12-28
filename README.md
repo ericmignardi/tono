@@ -3,6 +3,7 @@
 <div align="center">
 
 [![Live Demo](https://img.shields.io/badge/demo-live-success?style=for-the-badge)](https://tono-ruby.vercel.app)
+[![Loom Demo](https://img.shields.io/badge/loom-video_demo-blueviolet?style=for-the-badge&logo=loom)](https://www.loom.com/share/e69d2c6f43a24e4f856f5d2ccd78151d)
 [![GitHub](https://img.shields.io/badge/github-source-blue?style=for-the-badge&logo=github)](https://github.com/ericmignardi/tono)
 
 ![Next.js](https://img.shields.io/badge/Next.js-16-000000?style=flat&logo=next.js&logoColor=white)
