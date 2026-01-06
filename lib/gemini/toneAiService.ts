@@ -75,13 +75,6 @@ Amp: ${config.amp}
 Provide exact settings for this gear. If gear can't achieve exact tone, get close and note compromise.`;
 }
 
-/**
- * Generates AI-powered amp settings and recommendations for a guitar tone
- * Checks cache first to avoid unnecessary API calls
- * @param config - The gear configuration and tone description
- * @param bypassCache - If true, skip cache and force new generation
- * @returns AI-generated amp settings and explanatory notes
- */
 export async function generateToneSettings(
   config: ToneGearConfig,
   bypassCache = false
@@ -91,7 +84,6 @@ export async function generateToneSettings(
     notes: 'Default settings applied',
   };
 
-  // Check cache first (unless bypassed)
   if (!bypassCache) {
     const cachedResult = await getCachedTone(config);
     if (cachedResult) {
@@ -99,7 +91,6 @@ export async function generateToneSettings(
     }
   }
 
-  // Cache miss or bypassed - call Gemini API
   try {
     const model = getModel('gemini-2.5-flash');
 
@@ -134,7 +125,6 @@ export async function generateToneSettings(
         notes: parsed.notes || defaultResult.notes,
       };
 
-      // Store in cache for future requests
       await setCachedTone(config, toneResult);
 
       return toneResult;
@@ -157,13 +147,6 @@ export async function generateToneSettings(
   }
 }
 
-/**
- * Safely attempts to generate tone settings, falling back to existing settings on failure
- * Invalidates cache to ensure fresh generation
- * @param config - The gear configuration and tone description
- * @param fallbackSettings - Existing settings to use if generation fails
- * @returns AI-generated settings or fallback settings
- */
 export async function regenerateToneSettings(
   config: ToneGearConfig,
   fallbackSettings: AIToneResult
@@ -180,13 +163,6 @@ export async function regenerateToneSettings(
   }
 }
 
-/**
- * Generates enhanced tone settings using both gear config and audio analysis
- * Audio analysis provides objective tone characteristics to improve accuracy
- * @param config - The gear configuration and tone description
- * @param audioAnalysis - Optional audio analysis results from Gemini
- * @returns AI-generated settings enhanced with audio analysis
- */
 export async function generateEnhancedToneSettings(
   config: ToneGearConfig,
   audioAnalysis?: {

@@ -8,10 +8,6 @@ if (!apiKey) {
 
 export const genAI = new GoogleGenerativeAI(apiKey);
 
-/**
- * Get a Gemini model instance
- * @param modelName - The model to use (default: gemini-2.0-flash-exp)
- */
 export function getModel(modelName: string = 'gemini-2.5-flash') {
   return genAI.getGenerativeModel({ model: modelName });
 }
