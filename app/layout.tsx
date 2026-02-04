@@ -14,7 +14,7 @@ const montserrat = Montserrat({
 export const metadata: Metadata = {
   title: {
     default: 'tono | AI Amp Settings Generator',
-    template: '%s | tono',
+    template: 'tono | %s',
   },
   description:
     'Generate precise guitar amp settings with AI. Describe your dream tone or upload reference audio (Pro) for precision matching. Create, save, and share your perfect sound.',
