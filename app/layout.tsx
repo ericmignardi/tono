@@ -13,11 +13,11 @@ const montserrat = Montserrat({
 
 export const metadata: Metadata = {
   title: {
-    default: 'Tono | The AI Guitar Tone Generator',
-    template: '%s | Tono',
+    default: 'tono | AI Amp Settings Generator',
+    template: '%s | tono',
   },
   description:
-    'Use AI to recreate signature guitar tones or craft your own. Generate, tweak, and save tones in seconds.',
+    'Generate precise guitar amp settings with AI. Describe your dream tone or upload reference audio (Pro) for precision matching. Create, save, and share your perfect sound.',
 };
 
 export default function RootLayout({
