@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import ThemeToggle from '@/components/ThemeToggle';
 
 const routeNames: Record<string, string> = {
   dashboard: 'Dashboard',
@@ -32,7 +33,7 @@ export default function Header() {
   });
 
   return (
-    <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b border-slate-200 bg-white/80 px-8 backdrop-blur-md">
+    <header className="bg-background/80 border-border sticky top-0 z-10 flex h-16 items-center justify-between border-b px-8 backdrop-blur-md">
       <Breadcrumb>
         <BreadcrumbList>
           {breadcrumbs.map((crumb, index) => (
@@ -59,7 +60,8 @@ export default function Header() {
             Create Tone
           </Button>
         </Link>
-        <div className="h-6 w-px bg-slate-200"></div>
+        <div className="bg-border h-6 w-px"></div>
+        <ThemeToggle />
         <SignedIn>
           <UserButton />
         </SignedIn>

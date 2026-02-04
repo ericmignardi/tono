@@ -28,8 +28,8 @@ export default async function Tones() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Tones</h1>
-          <p className="text-slate-500">View and manage your personal library of tones</p>
+          <h1 className="text-foreground text-3xl font-bold tracking-tight">Tones</h1>
+          <p className="text-muted-foreground">View and manage your personal library of tones</p>
         </div>
         <Link href="/dashboard/create">
           <Button>
@@ -41,13 +41,13 @@ export default async function Tones() {
 
       {/* Tones Grid */}
       {tones.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-4 rounded-lg border-2 border-dashed border-slate-200 py-16 text-center">
+        <div className="border-border flex flex-col items-center justify-center gap-4 rounded-lg border-2 border-dashed py-16 text-center">
           <div className="bg-secondary rounded-full p-4">
             <Music2 className="text-primary h-8 w-8" />
           </div>
           <div>
-            <p className="font-medium text-slate-900">No tones yet</p>
-            <p className="text-sm text-slate-500">Create your first tone to get started</p>
+            <p className="text-foreground font-medium">No tones yet</p>
+            <p className="text-muted-foreground text-sm">Create your first tone to get started</p>
           </div>
           <Link href="/dashboard/create">
             <Button>

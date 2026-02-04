@@ -21,14 +21,14 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="z-20 flex h-full w-[280px] shrink-0 flex-col border-r border-slate-200 bg-white">
+    <aside className="bg-sidebar border-border z-20 flex h-full w-[280px] shrink-0 flex-col border-r">
       {/* Brand */}
-      <div className="flex h-16 items-center border-b border-slate-100 px-6">
+      <div className="border-border flex h-16 items-center border-b px-6">
         <Link href="/" className="flex items-center gap-2">
           <div className="bg-primary shadow-primary/20 flex h-10 w-10 rotate-3 items-center justify-center rounded-xl text-white shadow-lg">
             <Music2 className="h-6 w-6" />
           </div>
-          <span className="text-2xl font-bold tracking-tight text-slate-900">tono</span>
+          <span className="text-foreground text-2xl font-bold tracking-tight">tono</span>
         </Link>
       </div>
 
@@ -44,13 +44,13 @@ export default function Sidebar() {
                 'group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all',
                 isActive
                   ? 'bg-secondary text-primary ring-primary/10 shadow-sm ring-1'
-                  : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+                  : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
               )}
             >
               <Icon
                 className={cn(
                   'h-4 w-4',
-                  isActive ? 'text-primary' : 'text-slate-400 group-hover:text-slate-600'
+                  isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'
                 )}
               />
               {label}

@@ -29,8 +29,8 @@ const RecentTones = async ({ userId }: RecentTonesProps) => {
             <ListMusic className="text-primary h-8 w-8" />
           </div>
           <div>
-            <p className="font-medium text-slate-900">No tones yet</p>
-            <p className="text-sm text-slate-500">Create your first tone to get started</p>
+            <p className="text-foreground font-medium">No tones yet</p>
+            <p className="text-muted-foreground text-sm">Create your first tone to get started</p>
           </div>
           <Link href="/dashboard/create">
             <Button>
@@ -56,13 +56,13 @@ const RecentTones = async ({ userId }: RecentTonesProps) => {
                       <ListMusic className="text-primary h-5 w-5" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h3 className="truncate font-medium text-slate-900">{name}</h3>
-                      <p className="truncate text-sm text-slate-500">{artist}</p>
+                      <h3 className="text-foreground truncate font-medium">{name}</h3>
+                      <p className="text-muted-foreground truncate text-sm">{artist}</p>
                     </div>
                   </Link>
                 </TableCell>
                 <TableCell className="text-right">
-                  <span className="text-sm whitespace-nowrap text-slate-500">
+                  <span className="text-muted-foreground text-sm whitespace-nowrap">
                     {formatDistanceToNow(new Date(createdAt), { addSuffix: true })}
                   </span>
                 </TableCell>

@@ -30,7 +30,7 @@ const Stats = async ({ userId }: StatsProps) => {
             <CardDescription className="text-sm">{label}</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-slate-900">{value}</div>
+            <div className="text-foreground text-3xl font-bold">{value}</div>
           </CardContent>
         </Card>
       ))}

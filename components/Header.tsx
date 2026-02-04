@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from '@clerk/nextjs';
 import { ArrowUpRight, Music2, Menu, X } from 'lucide-react';
 import { useState } from 'react';
+import ThemeToggle from './ThemeToggle';
 
 export default function Header() {
   const [mobileMenu, setMobileMenu] = useState<boolean>(false);
@@ -65,9 +66,11 @@ export default function Header() {
                 </div>
               </button>
             </SignUpButton>
+            <ThemeToggle />
           </SignedOut>
           <SignedIn>
             <UserButton />
+            <ThemeToggle />
           </SignedIn>
         </div>
 
@@ -133,6 +136,9 @@ export default function Header() {
                     Start Playing
                   </button>
                 </SignUpButton>
+                <div className="mt-4">
+                  <ThemeToggle />
+                </div>
               </SignedOut>
               <SignedIn>
                 <Link
@@ -142,8 +148,9 @@ export default function Header() {
                 >
                   Dashboard
                 </Link>
-                <div className="mt-4">
+                <div className="mt-4 flex items-center gap-4">
                   <UserButton />
+                  <ThemeToggle />
                 </div>
               </SignedIn>
             </nav>

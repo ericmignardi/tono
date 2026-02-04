@@ -19,7 +19,7 @@ export default function ToneCard({ tone }: { tone: Tone }) {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="flex items-center gap-4 text-sm text-slate-500">
+        <div className="text-muted-foreground flex items-center gap-4 text-sm">
           <div className="flex items-center gap-1.5">
             <Guitar className="h-4 w-4" />
             <span>{tone.guitar}</span>

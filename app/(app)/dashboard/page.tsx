@@ -65,12 +65,12 @@ export default async function Dashboard() {
       {/* Header Section */}
       <div className="flex flex-col gap-1">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+          <h1 className="text-foreground text-3xl font-bold tracking-tight">
             Welcome back, {firstName}!
           </h1>
           {hasActiveSubscription && <ManageSubscriptionButton />}
         </div>
-        <p className="text-slate-500">Here's a quick overview of your tone profile.</p>
+        <p className="text-muted-foreground">Here's a quick overview of your tone profile.</p>
       </div>
 
       {/* Cancellation Notice */}

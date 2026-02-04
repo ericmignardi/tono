@@ -310,24 +310,24 @@ export default function ToneForm({ tone }: ToneFormProps) {
               {!isEditing && (
                 <>
                   {isPro ? (
-                    <div className="rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 p-6">
+                    <div className="bg-muted/30 border-muted-foreground/20 rounded-lg border-2 border-dashed p-6">
                       <div className="mb-2 flex items-center gap-2">
-                        <Sparkles className="h-5 w-5 text-blue-600" />
-                        <label className="text-sm font-medium">
+                        <Sparkles className="text-primary h-5 w-5" />
+                        <label className="text-foreground text-sm font-medium">
                           Upload Reference Audio (Optional)
                         </label>
-                        <span className="ml-2 rounded bg-blue-100 px-2 py-1 text-xs font-semibold text-blue-800">
+                        <span className="bg-primary/10 text-primary border-primary/20 ml-2 rounded border px-2 py-1 text-xs font-semibold">
                           PRO
                         </span>
                       </div>
-                      <p className="mb-4 text-sm text-gray-600">
+                      <p className="text-muted-foreground mb-4 text-sm">
                         Upload an audio clip of your desired tone for AI-enhanced analysis and more
                         accurate recommendations.
                       </p>
                       <div className="flex items-center gap-4">
                         <label
                           htmlFor="audio-upload"
-                          className="flex cursor-pointer items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 transition-colors hover:bg-gray-50"
+                          className="border-input bg-background hover:bg-accent hover:text-accent-foreground flex cursor-pointer items-center gap-2 rounded-md border px-4 py-2 transition-colors"
                         >
                           <Upload className="h-4 w-4" />
                           <span className="text-sm">Choose Audio File</span>
@@ -341,33 +341,33 @@ export default function ToneForm({ tone }: ToneFormProps) {
                         />
                         {audioFile && (
                           <div className="flex items-center gap-2 text-sm">
-                            <span className="font-medium text-green-600">✓ {audioFile.name}</span>
-                            <span className="text-gray-500">
+                            <span className="text-primary font-medium">✓ {audioFile.name}</span>
+                            <span className="text-muted-foreground">
                               ({(audioFile.size / 1024 / 1024).toFixed(2)} MB)
                             </span>
                             <button
                               type="button"
                               onClick={() => setAudioFile(null)}
-                              className="text-xs text-red-600 underline hover:text-red-700"
+                              className="text-destructive hover:text-destructive/80 text-xs underline"
                             >
                               Remove
                             </button>
                           </div>
                         )}
                       </div>
-                      <p className="mt-2 text-xs text-gray-500">
+                      <p className="text-muted-foreground mt-2 text-xs">
                         Supported formats: MP3, WAV, FLAC, AAC, OGG, AIFF (max 20MB)
                       </p>
                     </div>
                   ) : (
-                    <div className="rounded-lg border border-blue-200 bg-blue-50 p-6">
+                    <div className="bg-primary/5 border-primary/20 rounded-lg border p-6">
                       <div className="flex items-start gap-3">
-                        <Sparkles className="mt-0.5 h-5 w-5 text-blue-600" />
+                        <Sparkles className="text-primary mt-0.5 h-5 w-5" />
                         <div className="flex-1">
-                          <h4 className="mb-1 text-sm font-semibold text-blue-900">
+                          <h4 className="text-foreground mb-1 text-sm font-semibold">
                             🎸 Unlock Audio-Enhanced Tone Analysis
                           </h4>
-                          <p className="mb-3 text-sm text-blue-800">
+                          <p className="text-muted-foreground mb-3 text-sm">
                             Upgrade to <strong>Pro</strong> to upload audio clips and get AI-powered
                             tone analysis for incredibly accurate amp settings!
                           </p>
@@ -376,7 +376,7 @@ export default function ToneForm({ tone }: ToneFormProps) {
                             variant="outline"
                             size="sm"
                             onClick={() => router.push('/#pricing')}
-                            className="border-blue-300 bg-white text-blue-700 hover:bg-blue-50"
+                            className="border-primary/20 hover:bg-primary/10 text-primary bg-background"
                           >
                             Upgrade to Pro
                           </Button>
