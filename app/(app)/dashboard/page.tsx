@@ -43,9 +43,8 @@ export default async function Dashboard() {
   const hasActiveSubscription = dbUser?.subscriptions && dbUser.subscriptions.length > 0;
   const activeSubscription = hasActiveSubscription ? dbUser.subscriptions[0] : null;
 
-  // Check if subscription is set to cancel
-  const isCanceling =
-    activeSubscription?.status === 'active' && activeSubscription.currentPeriodEnd;
+  // Check if subscription is set to cancel at period end
+  const isCanceling = activeSubscription?.cancelAtPeriodEnd === true;
   const periodEndDate = activeSubscription?.currentPeriodEnd
     ? new Date(activeSubscription.currentPeriodEnd).toLocaleDateString('en-US', {
         year: 'numeric',

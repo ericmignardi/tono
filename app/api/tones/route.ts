@@ -9,6 +9,7 @@ import { toneRateLimit, apiRateLimit } from '@/lib/rateLimit';
 import { ToneQuerySchema } from '@/utils/validation/toneValidation';
 import { APIError, handleAPIError, logRequest } from '@/lib/api/errorHandler';
 import { randomUUID } from 'crypto';
+import { resetCreditsIfNewPeriod } from '@/lib/credits/resetCredits';
 
 export const maxDuration = 60;
 
@@ -68,7 +69,9 @@ export async function POST(req: NextRequest) {
     let audioAnalysis = null;
     if (audioFile) {
       // Check subscription status
-      const hasActiveSubscription = dbUser.subscriptions.some((sub) => sub.status === 'active');
+      const hasActiveSubscription = dbUser.subscriptions.some(
+        (sub) => sub.status === 'active' || sub.status === 'trialing'
+      );
       const userTier = getUserTier(hasActiveSubscription);
 
       if (!canUseAudioAnalysis(userTier)) {
@@ -98,6 +101,9 @@ export async function POST(req: NextRequest) {
         // Continue without audio analysis - will use text-only generation
       }
     }
+
+    // Reset credits if we've entered a new billing month
+    await resetCreditsIfNewPeriod(dbUser.id);
 
     // Check and reserve credit inside a transaction
     await prisma.$transaction(async (tx) => {

@@ -70,13 +70,6 @@ export async function POST(req: NextRequest) {
         break;
       }
 
-      case 'customer.subscription.created': {
-        const subscription = event.data.object as Stripe.Subscription;
-        console.log(`Subscription created: ${subscription.id}`);
-        await handleSubscriptionChange(subscription, 'created');
-        break;
-      }
-
       case 'customer.subscription.updated': {
         const subscription = event.data.object as Stripe.Subscription;
         console.log(`Subscription updated: ${subscription.id}`);
@@ -176,8 +169,11 @@ export async function POST(req: NextRequest) {
       console.error('Failed to update webhook event:', updateError);
     }
 
-    return new NextResponse(JSON.stringify({ error: 'Webhook handler failed' }), {
-      status: 500,
+    // Return 200 to prevent Stripe from retrying on business logic errors.
+    // Only truly transient failures (e.g. DB connection) should cause retries,
+    // and those would fail before reaching this point.
+    return new NextResponse(JSON.stringify({ error: 'Webhook handler failed', received: true }), {
+      status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
   }
@@ -196,6 +192,8 @@ async function handleSubscriptionChange(
   });
 
   if (!user) {
+    // Log but don't throw — returning here lets the webhook respond with 200
+    // so Stripe won't retry endlessly for a user that genuinely doesn't exist.
     console.error(`User not found for Stripe customer ${customerId}`);
     return;
   }
@@ -209,19 +207,11 @@ async function handleSubscriptionChange(
     return;
   }
 
-  const subscriptionItemWithPeriod = subscriptionItem as Stripe.SubscriptionItem & {
-    current_period_end?: number;
-  };
-
-  const currentPeriodEnd = subscriptionItemWithPeriod.current_period_end;
-
-  if (!currentPeriodEnd) {
-    console.warn(`Subscription item ${subscriptionItem.id} missing current_period_end`);
-    return;
-  }
-
   const priceRaw = subscriptionItem.price;
   const priceId = typeof priceRaw === 'string' ? priceRaw : (priceRaw?.id ?? 'unknown');
+
+  // In Stripe API 2025-10-29.clover, current_period_end is on SubscriptionItem
+  const currentPeriodEnd = subscriptionItem.current_period_end;
   const periodEnd = new Date(currentPeriodEnd * 1000);
 
   console.log(
@@ -258,12 +248,14 @@ async function handleSubscriptionChange(
       status: subscription.status,
       priceId,
       currentPeriodEnd: periodEnd,
+      cancelAtPeriodEnd: subscription.cancel_at_period_end,
     },
     create: {
       stripeId: subscription.id,
       status: subscription.status,
       priceId,
       currentPeriodEnd: periodEnd,
+      cancelAtPeriodEnd: subscription.cancel_at_period_end,
       userId: user.id,
     },
   });

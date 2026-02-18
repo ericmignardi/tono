@@ -29,6 +29,7 @@ model Subscription {
   status            String   // active, canceled, etc.
   priceId           String
   currentPeriodEnd  DateTime?
+  cancelAtPeriodEnd Boolean  @default(false)
   user              User     @relation(fields: [userId], references: [id])
   userId            String
   createdAt         DateTime @default(now())

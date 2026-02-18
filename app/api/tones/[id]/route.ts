@@ -10,6 +10,7 @@ import { ToneUpdateBody } from '@/types/tone/toneValidationTypes';
 import { APIError, handleAPIError, logRequest } from '@/lib/api/errorHandler';
 import { randomUUID } from 'crypto';
 import { z } from 'zod';
+import { resetCreditsIfNewPeriod } from '@/lib/credits/resetCredits';
 
 export const maxDuration = 60;
 
@@ -137,6 +138,9 @@ export async function PUT(req: NextRequest, context: { params: Promise<{ id: str
           'RATE_LIMIT_EXCEEDED'
         );
       }
+
+      // Reset credits if we've entered a new billing month
+      await resetCreditsIfNewPeriod(dbUser.id);
 
       // Use transaction to prevent race condition with credit checking
       await prisma.$transaction(async (tx) => {

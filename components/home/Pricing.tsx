@@ -3,6 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Mic, Speaker, Check, ArrowUpRight } from 'lucide-react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 interface PricingProps {
   hasActiveSubscription?: boolean;
@@ -29,7 +30,7 @@ export default function Pricing({ hasActiveSubscription = false }: PricingProps)
       window.location.href = url;
     } catch (err) {
       console.error(err);
-      alert('Failed to start checkout. Please try again.');
+      toast.error('Failed to start checkout. Please try again.');
       setPremiumLoading(false);
     }
   };
@@ -40,7 +41,6 @@ export default function Pricing({ hasActiveSubscription = false }: PricingProps)
       const res = await fetch('/api/stripe/portal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ priceId: '' }), // Portal doesn't need priceId
       });
 
       if (!res.ok) {
@@ -51,7 +51,7 @@ export default function Pricing({ hasActiveSubscription = false }: PricingProps)
       window.location.href = url;
     } catch (err) {
       console.error(err);
-      alert('Failed to open subscription portal. Please try again.');
+      toast.error('Failed to open subscription portal. Please try again.');
       setPortalLoading(false);
     }
   };
