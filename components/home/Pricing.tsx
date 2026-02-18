@@ -92,14 +92,14 @@ export default function Pricing({ hasActiveSubscription = false }: PricingProps)
 
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
           {/* Free Tier */}
-          <div className="group bg-muted/50 hover:shadow-muted/50 rounded-4xl p-4 pb-8 transition-all hover:shadow-xl">
+          <div className="group bg-muted/50 hover:shadow-muted/50 flex flex-col rounded-4xl p-4 pb-8 transition-all hover:shadow-xl">
             <div className="border-border bg-card relative mb-6 flex h-48 items-center justify-center overflow-hidden rounded-3xl border">
               <Mic className="text-muted-foreground/50 h-16 w-16 transition-transform duration-500 group-hover:scale-110" />
               <div className="bg-foreground text-background absolute bottom-4 left-6 rounded-full px-3 py-1 text-xs font-bold">
                 FREE
               </div>
             </div>
-            <div className="px-4">
+            <div className="flex grow flex-col px-4">
               <h3 className="text-foreground mb-2 text-xl font-bold">Bedroom Rocker</h3>
               <p className="text-muted-foreground mb-6 text-sm">
                 Perfect for learning and practicing at home.
@@ -114,7 +114,7 @@ export default function Pricing({ hasActiveSubscription = false }: PricingProps)
               </ul>
               <button
                 onClick={() => (window.location.href = '/dashboard')}
-                className="border-border text-foreground hover:bg-muted flex w-full items-center justify-center gap-2 rounded-xl border py-3 font-semibold transition-colors"
+                className="border-border text-foreground hover:bg-muted mt-auto flex w-full items-center justify-center gap-2 rounded-xl border py-3 font-semibold transition-colors"
               >
                 Get Started <ArrowUpRight className="h-4 w-4" />
               </button>
@@ -122,7 +122,7 @@ export default function Pricing({ hasActiveSubscription = false }: PricingProps)
           </div>
 
           {/* Pro Tier */}
-          <div className="group bg-secondary hover:shadow-primary/20 relative rounded-4xl p-4 pb-8 transition-all hover:shadow-xl">
+          <div className="group bg-secondary hover:shadow-primary/20 relative flex flex-col rounded-4xl p-4 pb-8 transition-all hover:shadow-xl">
             <div className="bg-accent absolute -top-3 right-8 z-10 rotate-3 rounded-full px-4 py-1 text-xs font-bold text-white shadow-sm">
               POPULAR
             </div>
@@ -132,7 +132,7 @@ export default function Pricing({ hasActiveSubscription = false }: PricingProps)
                 $9.99/mo
               </div>
             </div>
-            <div className="px-4">
+            <div className="flex grow flex-col px-4">
               <h3 className="text-foreground mb-2 text-xl font-bold">Touring Pro</h3>
               <p className="text-muted-foreground mb-6 text-sm">
                 Increased tone generations and exclusive features.
@@ -165,7 +165,7 @@ export default function Pricing({ hasActiveSubscription = false }: PricingProps)
                     handleSubscribe(process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO ?? '');
                   }
                 }}
-                className="bg-primary shadow-primary/20 hover:bg-primary/90 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl py-6 font-semibold text-white shadow-lg transition-colors"
+                className="bg-primary shadow-primary/20 hover:bg-primary/90 mt-auto flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl py-6 font-semibold text-white shadow-lg transition-colors"
               >
                 {premiumLoading || portalLoading
                   ? 'Loading...'
