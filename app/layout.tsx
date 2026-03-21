@@ -1,14 +1,14 @@
 import type { Metadata } from 'next';
-import { Montserrat } from 'next/font/google';
+import { Google_Sans, Inter } from 'next/font/google';
 import './globals.css';
 import { ClerkProvider } from '@clerk/nextjs';
 import { Providers } from './providers';
 import { Toaster } from '@/components/ui/sonner';
 
-const montserrat = Montserrat({
+const googleSans = Google_Sans({
   weight: ['400', '500', '600', '700'],
   subsets: ['latin'],
-  variable: '--font-montserrat',
+  variable: '--font-google-sans',
 });
 
 export const metadata: Metadata = {
@@ -28,7 +28,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
-        <body className={`${montserrat.variable} antialiased`}>
+        <body className={`${googleSans.variable} antialiased`}>
           <Providers>{children}</Providers>
           <Toaster />
         </body>
