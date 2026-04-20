@@ -14,11 +14,16 @@ export class APIError extends Error {
 }
 
 export function handleAPIError(error: unknown, requestId?: string) {
+  const cause = error instanceof Error ? (error as Error & { cause?: unknown }).cause : undefined;
   const logData = {
     requestId,
     timestamp: new Date().toISOString(),
     error: error instanceof Error ? error.message : 'Unknown error',
     stack: error instanceof Error ? error.stack : undefined,
+    cause:
+      cause instanceof Error
+        ? { message: cause.message, code: (cause as { code?: string }).code, stack: cause.stack }
+        : cause,
   };
 
   if (error instanceof APIError) {
