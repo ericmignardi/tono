@@ -1,7 +1,7 @@
 'use client';
 
 import { SignedIn, UserButton } from '@clerk/nextjs';
-import { Zap } from 'lucide-react';
+import { Cpu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Breadcrumb,
@@ -16,9 +16,9 @@ import { usePathname } from 'next/navigation';
 import ThemeToggle from '@/components/ThemeToggle';
 
 const routeNames: Record<string, string> = {
-  dashboard: 'Dashboard',
-  create: 'Create Tone',
-  tones: 'Tones',
+  dashboard: 'Overview',
+  create: 'Synthesis',
+  tones: 'Archive',
 };
 
 export default function Header() {
@@ -33,18 +33,18 @@ export default function Header() {
   });
 
   return (
-    <header className="bg-background/80 border-border sticky top-0 z-10 flex h-16 items-center justify-between border-b px-8 backdrop-blur-md">
+    <header className="bg-background/90 border-border sticky top-0 z-10 flex h-16 items-center justify-between border-b px-8 backdrop-blur-md">
       <Breadcrumb>
-        <BreadcrumbList>
+        <BreadcrumbList className="text-[10px] font-bold uppercase tracking-widest font-mono">
           {breadcrumbs.map((crumb, index) => (
             <div key={crumb.href} className="flex items-center gap-2">
-              {index > 0 && <BreadcrumbSeparator />}
+              {index > 0 && <BreadcrumbSeparator className="text-muted-foreground/40" />}
               <BreadcrumbItem>
                 {crumb.isLast ? (
-                  <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
+                  <BreadcrumbPage className="text-accent">{crumb.label}</BreadcrumbPage>
                 ) : (
                   <BreadcrumbLink asChild>
-                    <Link href={crumb.href}>{crumb.label}</Link>
+                    <Link href={crumb.href} className="text-muted-foreground hover:text-foreground transition-colors">{crumb.label}</Link>
                   </BreadcrumbLink>
                 )}
               </BreadcrumbItem>
@@ -53,14 +53,14 @@ export default function Header() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-6">
         <Link href="/dashboard/create">
-          <Button className="bg-primary shadow-primary/20 hover:bg-primary/90 flex items-center gap-2 rounded-md px-3 py-1.5 text-xs font-semibold text-white shadow-sm">
-            <Zap className="h-3.5 w-3.5 text-white" />
-            Create Tone
+          <Button className="group bg-accent text-background hover:bg-accent/90 flex items-center gap-2 rounded-sm px-4 py-2 shadow-lg transition-transform hover:scale-[1.02]">
+            <Cpu className="h-3.5 w-3.5" />
+            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Deploy Synthesis</span>
           </Button>
         </Link>
-        <div className="bg-border h-6 w-px"></div>
+        <div className="bg-border h-4 w-px"></div>
         <ThemeToggle />
         <SignedIn>
           <UserButton />

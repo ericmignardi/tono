@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from '@clerk/nextjs';
-import { ArrowUpRight, Music2, Menu, X } from 'lucide-react';
+import { ArrowUpRight, Activity, Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import ThemeToggle from './ThemeToggle';
 
@@ -10,82 +10,72 @@ export default function Header() {
   const [mobileMenu, setMobileMenu] = useState<boolean>(false);
 
   return (
-    <nav className="bg-secondary/90 fixed top-0 z-50 w-full px-6 py-6 backdrop-blur-md transition-all">
+    <nav className="fixed top-0 z-50 w-full px-6 py-8 backdrop-blur-sm transition-all">
       <div className="mx-auto flex max-w-7xl items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
-          <div className="bg-primary shadow-primary/20 flex h-10 w-10 rotate-3 items-center justify-center rounded-xl shadow-lg">
-            <Music2 className="h-6 w-6 text-white" />
+        <Link href="/" className="group flex items-center gap-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded border border-accent/30 bg-background glow-amber transition-all group-hover:border-accent">
+            <Activity className="h-4 w-4 text-accent" />
           </div>
-          <span className="text-foreground text-2xl font-bold tracking-tight">tono</span>
+          <span className="font-display text-xl font-black tracking-tighter text-foreground">TONO</span>
         </Link>
 
-        {/* Nav Links (Pill Shape) */}
-        <div className="border-border bg-background/80 hidden items-center gap-1 rounded-full border px-2 py-1.5 shadow-sm md:flex">
+        {/* Technical Nav Links */}
+        <div className="hidden items-center gap-8 md:flex">
           <Link
             href="#features"
-            className="hover:bg-secondary hover:text-primary text-muted-foreground rounded-full px-5 py-2 text-sm font-semibold transition-colors"
+            className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:text-foreground"
           >
-            Features
+            Modules
           </Link>
           <Link
             href="#pricing"
-            className="hover:bg-secondary hover:text-primary text-muted-foreground rounded-full px-5 py-2 text-sm font-semibold transition-colors"
+            className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:text-foreground"
           >
-            Pricing
-          </Link>
-          <Link
-            href="#get-started"
-            className="hover:bg-secondary hover:text-primary text-muted-foreground rounded-full px-5 py-2 text-sm font-semibold transition-colors"
-          >
-            Get Started
+            License
           </Link>
           <SignedIn>
             <Link
               href="/dashboard"
-              className="hover:bg-secondary hover:text-primary text-muted-foreground rounded-full px-5 py-2 text-sm font-semibold transition-colors"
+              className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:text-foreground"
             >
-              Dashboard
+              Terminal
             </Link>
           </SignedIn>
         </div>
 
         {/* CTA */}
-        <div className="hidden items-center gap-4 lg:flex">
+        <div className="hidden items-center gap-6 lg:flex">
           <SignedOut>
             <SignInButton>
-              <button className="hover:text-primary text-muted-foreground text-sm font-semibold">
+              <button className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:text-foreground">
                 Sign In
               </button>
             </SignInButton>
             <SignUpButton>
-              <button className="group bg-primary shadow-primary/20 hover:bg-primary/90 hover:shadow-primary/30 flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5">
-                Start Playing
-                <div className="rounded-full bg-white/20 p-1 transition-transform group-hover:translate-x-1">
-                  <ArrowUpRight className="h-3 w-3" />
-                </div>
+              <button className="group relative flex items-center gap-2 rounded bg-foreground px-5 py-2.5 text-[10px] font-black uppercase tracking-[0.2em] text-background transition-all hover:scale-[1.02] active:scale-[0.98]">
+                Deploy
+                <ArrowUpRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
               </button>
             </SignUpButton>
-            <ThemeToggle />
           </SignedOut>
           <SignedIn>
             <UserButton />
-            <ThemeToggle />
           </SignedIn>
+          <div className="h-4 w-px bg-border"></div>
+          <ThemeToggle />
         </div>
 
         {/* Mobile Menu Toggle */}
         <button
           onClick={() => setMobileMenu(!mobileMenu)}
-          className="z-20 h-6 w-6 cursor-pointer lg:hidden"
+          className="z-20 flex h-8 w-8 items-center justify-center lg:hidden"
           aria-label={mobileMenu ? 'Close menu' : 'Open menu'}
-          aria-expanded={mobileMenu}
-          aria-controls="mobile-menu"
         >
           {mobileMenu ? (
-            <X className="h-5 w-5" aria-hidden="true" />
+            <X className="h-4 w-4 text-foreground" />
           ) : (
-            <Menu className="h-5 w-5" aria-hidden="true" />
+            <Menu className="h-4 w-4 text-foreground" />
           )}
         </button>
 
@@ -93,66 +83,59 @@ export default function Header() {
         {mobileMenu && (
           <>
             <div
-              className="fixed inset-0 z-50 bg-black/50 lg:hidden"
+              className="fixed inset-0 z-50 bg-black/80 lg:hidden"
               onClick={() => setMobileMenu(false)}
-              aria-hidden="true"
             />
             <nav
-              id="mobile-menu"
-              role="dialog"
-              aria-modal="true"
-              aria-label="Mobile navigation"
-              className="bg-background fixed top-0 right-0 z-60 flex h-screen w-[80%] flex-col gap-4 p-8 pt-20 lg:hidden"
+              className="fixed top-0 right-0 z-60 flex h-screen w-[280px] flex-col border-l border-border bg-background p-8 pt-24 lg:hidden"
             >
-              <Link
-                href="#features"
-                className="hover:bg-secondary hover:text-primary rounded-lg px-4 py-2 text-sm font-medium"
-                onClick={() => setMobileMenu(false)}
-              >
-                Features
-              </Link>
-              <Link
-                href="#pricing"
-                className="hover:bg-secondary hover:text-primary rounded-lg px-4 py-2 text-sm font-medium"
-                onClick={() => setMobileMenu(false)}
-              >
-                Pricing
-              </Link>
-              <Link
-                href="#get-started"
-                className="hover:bg-secondary hover:text-primary rounded-lg px-4 py-2 text-sm font-medium"
-                onClick={() => setMobileMenu(false)}
-              >
-                Get Started
-              </Link>
-              <SignedOut>
-                <SignInButton>
-                  <button className="border-border text-muted-foreground w-full rounded-full border py-2 text-sm font-semibold">
-                    Sign In
-                  </button>
-                </SignInButton>
-                <SignUpButton>
-                  <button className="bg-primary w-full rounded-full py-2 text-sm font-semibold text-white">
-                    Start Playing
-                  </button>
-                </SignUpButton>
-                <div className="mt-4">
-                  <ThemeToggle />
-                </div>
-              </SignedOut>
-              <SignedIn>
+              <div className="flex flex-col gap-8">
                 <Link
-                  href="/dashboard"
-                  className="hover:bg-secondary hover:text-primary rounded-lg px-4 py-2 text-sm font-medium"
+                  href="#features"
+                  className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground"
                   onClick={() => setMobileMenu(false)}
                 >
-                  Dashboard
+                  Modules
                 </Link>
-                <div className="mt-4 flex items-center gap-4">
-                  <UserButton />
+                <Link
+                  href="#pricing"
+                  className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground"
+                  onClick={() => setMobileMenu(false)}
+                >
+                  License
+                </Link>
+                <SignedIn>
+                  <Link
+                    href="/dashboard"
+                    className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground"
+                    onClick={() => setMobileMenu(false)}
+                  >
+                    Terminal
+                  </Link>
+                </SignedIn>
+                <div className="h-px w-full bg-border"></div>
+                <SignedOut>
+                  <SignInButton>
+                    <button className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground text-left">
+                      Sign In
+                    </button>
+                  </SignInButton>
+                  <SignUpButton>
+                    <button className="bg-foreground text-background rounded py-3 text-[10px] font-black uppercase tracking-[0.2em]">
+                      Deploy
+                    </button>
+                  </SignUpButton>
+                </SignedOut>
+                <SignedIn>
+                  <div className="flex items-center gap-4">
+                    <UserButton />
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Session Active</span>
+                  </div>
+                </SignedIn>
+                <div className="pt-4">
                   <ThemeToggle />
                 </div>
-              </SignedIn>
+              </div>
             </nav>
           </>
         )}

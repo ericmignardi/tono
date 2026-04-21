@@ -6,7 +6,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-google-sans);
+  --font-sans: var(--font-manrope);
+  --font-display: var(--font-syne);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -31,11 +32,6 @@
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -44,117 +40,110 @@
 }
 
 body {
-  font-family: var(--font-google-sans), sans-serif;
+  font-family: var(--font-manrope), sans-serif;
 }
 
-.blob-shape {
-  border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+.font-display {
+  font-family: var(--font-syne), sans-serif;
+}
+
+.grain {
+  position: relative;
+}
+
+.grain::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.05;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3%3Ffilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  z-index: 1;
 }
 
 :root {
-  --radius: 0.75rem;
+  --radius: 0.5rem;
 
-  /* HSL Values for opacity modifiers (e.g. bg-primary/20) */
-  /* Base: Slate */
+  /* HSL Values for opacity modifiers */
   --background: hsl(0 0% 100%);
-  --foreground: hsl(222 47% 11%); /* Slate 950 */
+  --foreground: hsl(0 0% 10%);
 
-  /* Card: White with slight tint */
   --card: hsl(0 0% 100%);
-  --card-foreground: hsl(222 47% 11%);
+  --card-foreground: hsl(0 0% 10%);
 
   --popover: hsl(0 0% 100%);
-  --popover-foreground: hsl(222 47% 11%);
+  --popover-foreground: hsl(0 0% 10%);
 
-  /* Primary: Indigo 600 - Dynamic, Modern, Premium */
-  --primary: hsl(243 75% 59%);
-  --primary-foreground: hsl(210 40% 98%);
+  --primary: hsl(0 0% 0%);
+  --primary-foreground: hsl(0 0% 100%);
 
-  /* Secondary: Slate 100 (Subtle) */
-  --secondary: hsl(210 40% 96.1%);
-  --secondary-foreground: hsl(222 47% 11.2%);
+  --secondary: hsl(0 0% 96%);
+  --secondary-foreground: hsl(0 0% 10%);
 
-  /* Muted: Slate 100/200 mix */
-  --muted: hsl(210 40% 96.1%);
-  --muted-foreground: hsl(215.4 16.3% 46.9%);
+  --muted: hsl(0 0% 96%);
+  --muted-foreground: hsl(0 0% 45%);
 
-  /* Accent: Violet 100 (Soft highlight) */
-  --accent: hsl(243 75% 96%); /* Very light indigo tint */
-  --accent-foreground: hsl(222 47% 11%);
+  --accent: hsl(45 92% 47%); /* Warm Amber Glow */
+  --accent-foreground: hsl(0 0% 100%);
 
-  --destructive: hsl(0 84.2% 60.2%);
-  --destructive-foreground: hsl(210 40% 98%);
+  --destructive: hsl(0 84% 60%);
+  --destructive-foreground: hsl(0 0% 100%);
 
-  /* Border/Input: Slate 200 */
-  --border: hsl(214.3 31.8% 91.4%);
-  --input: hsl(214.3 31.8% 91.4%);
-  --ring: hsl(243 75% 59%);
-
-  /* Charts: Indigo/Violet gradients */
-  --chart-1: hsl(243 75% 59%);
-  --chart-2: hsl(255 90% 65%);
-  --chart-3: hsl(270 95% 70%);
-  --chart-4: hsl(290 80% 60%);
-  --chart-5: hsl(310 70% 50%);
+  --border: hsl(0 0% 90%);
+  --input: hsl(0 0% 90%);
+  --ring: hsl(0 0% 0%);
 
   --sidebar: hsl(0 0% 98%);
-  --sidebar-foreground: hsl(240 5.3% 26.1%);
-  --sidebar-primary: hsl(240 5.9% 10%);
+  --sidebar-foreground: hsl(0 0% 26%);
+  --sidebar-primary: hsl(0 0% 10%);
   --sidebar-primary-foreground: hsl(0 0% 98%);
-  --sidebar-accent: hsl(240 4.8% 95.9%);
-  --sidebar-accent-foreground: hsl(240 5.9% 10%);
-  --sidebar-border: hsl(220 13% 91%);
-  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+  --sidebar-accent: hsl(0 0% 96%);
+  --sidebar-accent-foreground: hsl(0 0% 10%);
+  --sidebar-border: hsl(0 0% 91%);
+  --sidebar-ring: hsl(0 0% 60%);
 }
 
 .dark {
-  /* Dark Mode: Deep Midnight Slate (almost black but rich blue tint) */
-  --background: hsl(222 47% 6%); /* Slightly richer than pure black */
-  --foreground: hsl(210 40% 98%);
+  /* Dark Mode: Deep Charcoal / Machined Metal */
+  --background: hsl(240 10% 3.9%); /* Slightly cooler charcoal */
+  --foreground: hsl(0 0% 98%);
 
-  --card: hsl(222 47% 8%); /* Slightly lighter than bg */
-  --card-foreground: hsl(210 40% 98%);
+  --card: hsl(240 10% 6%);
+  --card-foreground: hsl(0 0% 98%);
 
-  --popover: hsl(222 47% 8%);
-  --popover-foreground: hsl(210 40% 98%);
+  --popover: hsl(240 10% 6%);
+  --popover-foreground: hsl(0 0% 98%);
 
-  /* Primary: Indigo 500 (Brighter for dark mode contrast) */
-  --primary: hsl(243 75% 65%);
-  --primary-foreground: hsl(210 40% 98%);
+  --primary: hsl(0 0% 98%);
+  --primary-foreground: hsl(240 10% 3.9%);
 
-  /* Secondary: Slate 800 */
-  --secondary: hsl(217.2 32.6% 17.5%);
-  --secondary-foreground: hsl(210 40% 98%);
+  --secondary: hsl(240 4.8% 10%); /* Darker secondary for better layering */
+  --secondary-foreground: hsl(0 0% 98%);
 
-  /* Muted: Slate 800 */
-  --muted: hsl(217.2 32.6% 17.5%);
-  --muted-foreground: hsl(215 20.2% 65.1%);
+  --muted: hsl(240 4.8% 8%); /* Darker muted */
+  --muted-foreground: hsl(240 5% 64.9%);
 
-  /* Accent: Slate 800 with Indigo tint */
-  --accent: hsl(217.2 32.6% 17.5%);
-  --accent-foreground: hsl(210 40% 98%);
+  --accent: hsl(45 92% 55%); /* Amber Glow */
+  --accent-foreground: hsl(0 0% 10%);
 
   --destructive: hsl(0 62.8% 30.6%);
-  --destructive-foreground: hsl(210 40% 98%);
+  --destructive-foreground: hsl(0 0% 98%);
 
-  --border: hsl(217.2 32.6% 17.5%);
-  --input: hsl(217.2 32.6% 17.5%);
-  --ring: hsl(243 75% 65%);
+  --border: hsl(240 4.8% 12%); /* Refined border */
+  --input: hsl(240 4.8% 12%);
+  --ring: hsl(45 92% 55%); /* Ring follows accent in dark mode */
 
-  --chart-1: hsl(243 75% 65%);
-  --chart-2: hsl(255 85% 70%);
-  --chart-3: hsl(270 90% 75%);
-  --chart-4: hsl(290 75% 65%);
-  --chart-5: hsl(310 65% 55%);
-
-  --sidebar: hsl(222 47% 7%);
-  --sidebar-foreground: hsl(240 4.8% 95.9%);
-  --sidebar-primary: hsl(224.3 76.3% 48%);
-  --sidebar-primary-foreground: hsl(0 0% 100%);
-  --sidebar-accent: hsl(240 3.7% 15.9%);
-  --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
-  --sidebar-border: hsl(240 3.7% 15.9%);
-  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+  --sidebar: hsl(240 10% 4%);
+  --sidebar-foreground: hsl(240 4.8% 90%);
+  --sidebar-primary: hsl(45 92% 55%);
+  --sidebar-primary-foreground: hsl(0 0% 10%);
+  --sidebar-accent: hsl(240 4.8% 12%);
+  --sidebar-accent-foreground: hsl(240 4.8% 90%);
+  --sidebar-border: hsl(240 4.8% 12%);
+  --sidebar-ring: hsl(45 92% 55%);
 }
 
 @layer base {
@@ -164,4 +153,46 @@ body {
   body {
     @apply bg-background text-foreground antialiased;
   }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-bold tracking-tight;
+  }
 }
+
+@layer components {
+  .terminal-input {
+    @apply bg-background border-border/50 text-[11px] font-bold tracking-widest uppercase h-11 focus:border-accent/50 focus:ring-1 focus:ring-accent/20 rounded-sm transition-all;
+  }
+  
+  .terminal-label {
+    @apply text-[10px] font-black uppercase tracking-widest text-muted-foreground/60;
+  }
+  
+  .terminal-card {
+    @apply bg-background/40 border-border rounded-xl shadow-2xl backdrop-blur-xs;
+  }
+  
+  .terminal-button-primary {
+    @apply bg-foreground text-background text-[10px] font-black uppercase tracking-[0.2em] h-12 rounded-sm hover:scale-[1.01] transition-transform;
+  }
+}
+
+@layer utilities {
+  .metal-brushed {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.05) 0%,
+      rgba(255, 255, 255, 0) 50%,
+      rgba(255, 255, 255, 0.05) 100%
+    );
+    background-size: 200% 200%;
+  }
+  
+  .glow-amber {
+    box-shadow: 0 0 20px -5px hsl(45 92% 55% / 0.3);
+  }
+  
+  .border-metal {
+    @apply border-border/40 bg-linear-to-b from-white/5 to-transparent;
+  }
+}
+

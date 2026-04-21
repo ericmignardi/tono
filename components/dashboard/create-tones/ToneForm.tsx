@@ -17,7 +17,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Zap, Loader2, Upload, Sparkles } from 'lucide-react';
+import { Cpu, Loader2, Upload, Sparkles, Activity, ShieldAlert } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { ToneCreateSchema } from '@/utils/validation/toneValidation';
@@ -35,9 +35,7 @@ export default function ToneForm({ tone }: ToneFormProps) {
   const isEditing = !!tone;
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [isPro, setIsPro] = useState(false);
-  const [isLoadingSubscription, setIsLoadingSubscription] = useState(true);
 
-  // Fetch user's subscription status from database
   useEffect(() => {
     async function checkSubscription() {
       try {
@@ -46,10 +44,8 @@ export default function ToneForm({ tone }: ToneFormProps) {
           const data = await response.json();
           setIsPro(data.hasActiveSubscription || false);
         }
-      } catch (error) {
-        console.error('Failed to check subscription status:', error);
-      } finally {
-        setIsLoadingSubscription(false);
+      } catch {
+        console.error('Failed to check subscription status');
       }
     }
 
@@ -78,8 +74,6 @@ export default function ToneForm({ tone }: ToneFormProps) {
     const method = isEditing ? 'PUT' : 'POST';
 
     try {
-      // For create, use FormData to support audio upload
-      // For edit, keep using JSON (audio upload not supported on edit)
       if (isEditing) {
         const response = await fetch(url, {
           method,
@@ -94,11 +88,10 @@ export default function ToneForm({ tone }: ToneFormProps) {
           return;
         }
 
-        toast.success('Tone updated successfully!');
+        toast.success('Sequence updated');
         router.push('/dashboard/tones');
         router.refresh();
       } else {
-        // Create new tone with FormData
         const formData = new FormData();
         formData.append('name', data.name);
         formData.append('artist', data.artist);
@@ -124,297 +117,287 @@ export default function ToneForm({ tone }: ToneFormProps) {
           return;
         }
 
-        toast.success(
-          audioFile ? 'Tone created with audio analysis!' : 'Tone created successfully!'
-        );
+        toast.success('Synthesis complete');
         router.push('/dashboard/tones');
         router.refresh();
       }
     } catch (error) {
-      console.error('Error submitting tone:', error);
-      form.setError('root', {
-        message: 'Network error. Please check your connection and try again.',
-      });
+      toast.error('Processing failure');
     }
   };
 
   const handleError = (response: Response, responseData: any) => {
     if (response.status === 403 && responseData.code === 'CREDITS_EXHAUSTED') {
-      form.setError('root', {
-        message: 'No credits remaining. Please upgrade your plan.',
-      });
-    } else if (response.status === 403 && responseData.code === 'FEATURE_NOT_AVAILABLE') {
-      form.setError('root', {
-        message: 'Audio analysis is only available for Pro subscribers.',
-      });
-    } else if (response.status === 429) {
-      form.setError('root', {
-        message: 'Too many requests. Please slow down and try again.',
-      });
-    } else if (response.status === 400 && responseData.code === 'INVALID_AUDIO_FILE') {
-      form.setError('root', {
-        message: responseData.error || 'Invalid audio file. Please check the format and size.',
-      });
-    } else if (responseData.validationErrors) {
-      form.setError('root', {
-        message: 'Please check your input and try again.',
-      });
+      form.setError('root', { message: 'Operational credits depleted. System upgrade required.' });
     } else {
-      form.setError('root', {
-        message: responseData.error || 'Something went wrong. Please try again.',
-      });
+      form.setError('root', { message: responseData.error || 'System error detected' });
     }
   };
 
   return (
-    <div className="mx-auto max-w-3xl p-8">
-      <Card>
-        <CardHeader>
-          <CardTitle>{isEditing ? 'Edit Tone' : 'Create New Tone'}</CardTitle>
-          <CardDescription>
-            {isEditing
-              ? 'Update your tone settings.'
-              : "Describe your desired tone and we'll generate the perfect settings for you."}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              {form.formState.errors.root && (
-                <div className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-800">
-                  {form.formState.errors.root.message}
-                </div>
-              )}
+    <div className="mx-auto max-w-4xl p-8 space-y-12">
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="h-px w-8 bg-accent"></span>
+          <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-accent">Module: {isEditing ? 'UPDATE-01' : 'SYNTH-01'}</span>
+        </div>
+        <h1 className="font-display text-4xl font-bold tracking-tighter text-foreground md:text-5xl uppercase">
+          {isEditing ? 'Modify' : 'Deploy'} <span className="text-muted-foreground/30 italic">Frequency</span>.
+        </h1>
+      </div>
 
-              {/* Name */}
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name *</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g. Warm Jazz Lead" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Artist */}
-              <FormField
-                control={form.control}
-                name="artist"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Artist *</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g. John Mayer, Tame Impala, 80s Metal" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Description */}
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description *</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Describe the tone you're looking for... (e.g. warm, crunchy, smooth, bright)"
-                        rows={4}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="grid gap-6 md:grid-cols-2">
-                {/* Guitar */}
-                <FormField
-                  control={form.control}
-                  name="guitar"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Guitar *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g. Fender Stratocaster" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Pickups */}
-                <FormField
-                  control={form.control}
-                  name="pickups"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Pickups *</FormLabel>
-                      <FormControl>
-                        <select
-                          className="border-input focus-visible:ring-ring flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:ring-1 focus-visible:outline-none"
-                          {...field}
-                        >
-                          <option value="Single Coil">Single Coil</option>
-                          <option value="Humbucker">Humbucker</option>
-                          <option value="P-90">P-90</option>
-                        </select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+      <div className="relative">
+        <div className="absolute -inset-px bg-linear-to-b from-border/50 to-transparent rounded-xl pointer-events-none"></div>
+        <Card className="terminal-card overflow-hidden">
+          <CardHeader className="border-b border-border/50 pb-8">
+            <div className="flex items-center gap-4">
+              <div className="h-10 w-10 flex items-center justify-center rounded border border-border bg-muted/20">
+                <Activity className="h-5 w-5 text-accent" />
               </div>
-
-              <div className="grid gap-6 md:grid-cols-2">
-                {/* Amp */}
-                <FormField
-                  control={form.control}
-                  name="amp"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Amp *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g. Fender Twin Reverb" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Strings */}
-                <FormField
-                  control={form.control}
-                  name="strings"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Strings</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g. .010 - .046" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              <div>
+                <CardTitle className="font-display text-xl font-bold uppercase tracking-tight">Terminal Configuration</CardTitle>
+                <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40 mt-1">Input operational parameters for synthesis</CardDescription>
               </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-8">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
+                {form.formState.errors.root && (
+                  <div className="flex items-center gap-3 p-4 border border-destructive/20 bg-destructive/5 rounded text-[10px] font-bold uppercase tracking-widest text-destructive">
+                    <ShieldAlert className="h-4 w-4" />
+                    {form.formState.errors.root.message}
+                  </div>
+                )}
 
-              {/* Audio Upload Section - Only show for create, not edit */}
-              {!isEditing && (
-                <>
-                  {isPro ? (
-                    <div className="bg-muted/30 border-muted-foreground/20 rounded-lg border-2 border-dashed p-6">
-                      <div className="mb-2 flex items-center gap-2">
-                        <Sparkles className="text-primary h-5 w-5" />
-                        <label className="text-foreground text-sm font-medium">
-                          Upload Reference Audio (Optional)
-                        </label>
-                        <span className="bg-primary/10 text-primary border-primary/20 ml-2 rounded border px-2 py-1 text-xs font-semibold">
-                          PRO
-                        </span>
-                      </div>
-                      <p className="text-muted-foreground mb-4 text-sm">
-                        Upload an audio clip of your desired tone for AI-enhanced analysis and more
-                        accurate recommendations.
-                      </p>
-                      <div className="flex items-center gap-4">
-                        <label
-                          htmlFor="audio-upload"
-                          className="border-input bg-background hover:bg-accent hover:text-accent-foreground flex cursor-pointer items-center gap-2 rounded-md border px-4 py-2 transition-colors"
-                        >
-                          <Upload className="h-4 w-4" />
-                          <span className="text-sm">Choose Audio File</span>
-                        </label>
-                        <input
-                          id="audio-upload"
-                          type="file"
-                          accept="audio/wav,audio/mp3,audio/mpeg,audio/aiff,audio/aac,audio/ogg,audio/flac"
-                          onChange={(e) => setAudioFile(e.target.files?.[0] || null)}
-                          className="hidden"
-                        />
-                        {audioFile && (
-                          <div className="flex items-center gap-2 text-sm">
-                            <span className="text-primary font-medium">✓ {audioFile.name}</span>
-                            <span className="text-muted-foreground">
-                              ({(audioFile.size / 1024 / 1024).toFixed(2)} MB)
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => setAudioFile(null)}
-                              className="text-destructive hover:text-destructive/80 text-xs underline"
+                <div className="space-y-8">
+                  <div className="grid gap-8 md:grid-cols-2">
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem className="space-y-3">
+                          <FormLabel className="terminal-label">Sequence Title</FormLabel>
+                          <FormControl>
+                            <Input placeholder="E.G. NEURAL LEAD" className="terminal-input" {...field} />
+                          </FormControl>
+                          <FormMessage className="text-[9px] font-bold uppercase" />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="artist"
+                      render={({ field }) => (
+                        <FormItem className="space-y-3">
+                          <FormLabel className="terminal-label">Source Blueprint</FormLabel>
+                          <FormControl>
+                            <Input placeholder="ARTIST OR RECORDING REFERENCE" className="terminal-input" {...field} />
+                          </FormControl>
+                          <FormMessage className="text-[9px] font-bold uppercase" />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem className="space-y-3">
+                        <FormLabel className="terminal-label">Descriptive Metadata</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="TONAL CHARACTERISTICS (CRUNCH, WARMTH, GAIN STAGING...)"
+                            rows={3}
+                            className="terminal-input min-h-[100px] py-3 resize-none"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage className="text-[9px] font-bold uppercase" />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="grid gap-8 md:grid-cols-2">
+                    <FormField
+                      control={form.control}
+                      name="guitar"
+                      render={({ field }) => (
+                        <FormItem className="space-y-3">
+                          <FormLabel className="terminal-label">Primary Instrument</FormLabel>
+                          <FormControl>
+                            <Input placeholder="HARDWARE MODEL" className="terminal-input" {...field} />
+                          </FormControl>
+                          <FormMessage className="text-[9px] font-bold uppercase" />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="pickups"
+                      render={({ field }) => (
+                        <FormItem className="space-y-3">
+                          <FormLabel className="terminal-label">Transducer Type</FormLabel>
+                          <FormControl>
+                            <select
+                              className="terminal-input w-full px-3 appearance-none outline-hidden"
+                              {...field}
                             >
-                              Remove
-                            </button>
+                              <option value="Single Coil">Single Coil</option>
+                              <option value="Humbucker">Humbucker</option>
+                              <option value="P-90">P-90</option>
+                            </select>
+                          </FormControl>
+                          <FormMessage className="text-[9px] font-bold uppercase" />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="grid gap-8 md:grid-cols-2">
+                    <FormField
+                      control={form.control}
+                      name="amp"
+                      render={({ field }) => (
+                        <FormItem className="space-y-3">
+                          <FormLabel className="terminal-label">Output Processor</FormLabel>
+                          <FormControl>
+                            <Input placeholder="AMPLIFIER MODEL" className="terminal-input" {...field} />
+                          </FormControl>
+                          <FormMessage className="text-[9px] font-bold uppercase" />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="strings"
+                      render={({ field }) => (
+                        <FormItem className="space-y-3">
+                          <FormLabel className="terminal-label">Gauge Specifications</FormLabel>
+                          <FormControl>
+                            <Input placeholder="E.G. .010 - .046" className="terminal-input" {...field} />
+                          </FormControl>
+                          <FormMessage className="text-[9px] font-bold uppercase" />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+
+                {!isEditing && (
+                  <div className="pt-4">
+                    {isPro ? (
+                      <div className="bg-muted/10 border-border border-2 border-dashed rounded-lg p-8">
+                        <div className="mb-6 flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="h-8 w-8 flex items-center justify-center rounded border border-accent/30 bg-accent/5">
+                              <Sparkles className="text-accent h-4 w-4" />
+                            </div>
+                            <label className="terminal-label text-foreground">
+                              Reference Frequencies
+                            </label>
                           </div>
-                        )}
+                          <span className="bg-accent text-background text-[8px] font-black tracking-widest uppercase px-2 py-0.5 rounded-sm">
+                            PRO-LINK
+                          </span>
+                        </div>
+                        
+                        <div className="flex items-center gap-6">
+                          <label
+                            htmlFor="audio-upload"
+                            className="bg-foreground text-background hover:scale-[1.02] cursor-pointer flex items-center gap-2 rounded-sm px-6 py-3 transition-all"
+                          >
+                            <Upload className="h-3.5 w-3.5" />
+                            <span className="text-[9px] font-black uppercase tracking-widest">Connect Input</span>
+                          </label>
+                          <input
+                            id="audio-upload"
+                            type="file"
+                            accept="audio/wav,audio/mp3,audio/mpeg,audio/aiff,audio/aac,audio/ogg,audio/flac"
+                            onChange={(e) => setAudioFile(e.target.files?.[0] || null)}
+                            className="hidden"
+                          />
+                          {audioFile && (
+                            <div className="flex items-center gap-4">
+                              <span className="text-accent text-[10px] font-bold uppercase tracking-widest">✓ {audioFile.name}</span>
+                              <button
+                                type="button"
+                                onClick={() => setAudioFile(null)}
+                                className="text-destructive text-[9px] font-black uppercase tracking-widest hover:underline"
+                              >
+                                Eject
+                              </button>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                      <p className="text-muted-foreground mt-2 text-xs">
-                        Supported formats: MP3, WAV, FLAC, AAC, OGG, AIFF (max 20MB)
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="bg-primary/5 border-primary/20 rounded-lg border p-6">
-                      <div className="flex items-start gap-3">
-                        <Sparkles className="text-primary mt-0.5 h-5 w-5" />
-                        <div className="flex-1">
-                          <h4 className="text-foreground mb-1 text-sm font-semibold">
-                            🎸 Unlock Audio-Enhanced Tone Analysis
-                          </h4>
-                          <p className="text-muted-foreground mb-3 text-sm">
-                            Upgrade to <strong>Pro</strong> to upload audio clips and get AI-powered
-                            tone analysis for incredibly accurate amp settings!
-                          </p>
+                    ) : (
+                      <div className="bg-accent/5 border border-accent/20 rounded-lg p-8 relative overflow-hidden">
+                        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                          <div className="flex items-start gap-4">
+                            <div className="h-10 w-10 flex items-center justify-center rounded-full border border-accent/30 bg-background shrink-0">
+                              <Sparkles className="text-accent h-5 w-5" />
+                            </div>
+                            <div className="space-y-1">
+                              <h4 className="text-foreground terminal-label">
+                                Frequency Analysis Locked
+                              </h4>
+                              <p className="text-muted-foreground text-[11px] font-medium leading-relaxed opacity-60 max-w-sm">
+                                Upgrade to Tier 02 to enable AI-powered audio signal reconstruction.
+                              </p>
+                            </div>
+                          </div>
                           <Button
                             type="button"
-                            variant="outline"
-                            size="sm"
                             onClick={() => router.push('/#pricing')}
-                            className="border-primary/20 hover:bg-primary/10 text-primary bg-background"
+                            className="bg-accent text-background text-[9px] font-black uppercase tracking-widest px-6 h-10 rounded-sm hover:scale-[1.02]"
                           >
-                            Upgrade to Pro
+                            Activate Pro
                           </Button>
                         </div>
                       </div>
-                    </div>
-                  )}
-                </>
-              )}
+                    )}
+                  </div>
+                )}
 
-              {/* Submit Button */}
-              <div className="flex justify-end gap-3 pt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => router.back()}
-                  disabled={isSubmitting}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      {isEditing ? 'Updating...' : 'Generating...'}
-                    </>
-                  ) : (
-                    <>
-                      <Zap className="h-4 w-4" />
-                      {isEditing ? 'Update Tone' : 'Generate Tone'}
-                    </>
-                  )}
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+                <div className="flex justify-between items-center border-t border-border/50 pt-10">
+                  <div className="flex items-center gap-2">
+                    <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse"></div>
+                    <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Ready for deployment</span>
+                  </div>
+                  <div className="flex gap-4">
+                    <button
+                      type="button"
+                      onClick={() => router.back()}
+                      className="text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors px-4"
+                      disabled={isSubmitting}
+                    >
+                      Abort
+                    </button>
+                    <Button type="submit" disabled={isSubmitting} className="terminal-button-primary px-8">
+                      {isSubmitting ? (
+                        <div className="flex items-center gap-2">
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          <span>Processing...</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <Cpu className="h-3.5 w-3.5" />
+                          <span>{isEditing ? 'Execute Update' : 'Initialize Synthesis'}</span>
+                        </div>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

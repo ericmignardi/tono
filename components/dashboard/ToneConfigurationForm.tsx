@@ -1,326 +1,168 @@
 'use client';
 
-import { Mic2, Zap, CircleDot, Box, CheckCircle2 } from 'lucide-react';
+import { Cpu, CheckCircle2, Sliders } from 'lucide-react';
 
 export default function ToneConfigurationForm() {
   return (
-    <div className="col-span-12 space-y-6 lg:col-span-5">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Tone Configuration</h1>
-        <p className="text-sm text-slate-500">
-          Define the parameters for your AI-generated signal chain.
-        </p>
+    <div className="col-span-12 space-y-8 lg:col-span-5">
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="h-px w-8 bg-accent"></span>
+          <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-accent">Config Module</span>
+        </div>
+        <h1 className="font-display text-3xl font-bold tracking-tighter text-foreground uppercase">
+          Signal <span className="text-muted-foreground/30 italic">Parameters</span>.
+        </h1>
       </div>
 
       {/* Form Card */}
-      <div className="space-y-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        {/* Section 1: Identity */}
-        <div className="space-y-4">
-          <h3 className="flex items-center gap-2 text-xs font-bold tracking-widest text-slate-900 uppercase">
-            <span className="bg-primary h-1.5 w-1.5 rounded-full" aria-hidden="true"></span>
-            Identity
-          </h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="col-span-2">
-              <label
-                htmlFor="preset-name"
-                className="mb-1.5 block text-xs font-medium text-slate-500"
-              >
-                Preset Name
-              </label>
-              <input
-                id="preset-name"
-                type="text"
-                placeholder="e.g. Stratocaster Dreams"
-                className="focus:border-primary focus:ring-primary/20 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-900 placeholder-slate-400 transition-all focus:ring-2 focus:outline-none"
-              />
-            </div>
-            <div className="col-span-2">
-              <label
-                htmlFor="target-artist"
-                className="mb-1.5 block text-xs font-medium text-slate-500"
-              >
-                Target Artist / Style
-              </label>
-              <div className="relative">
-                <Mic2
-                  className="absolute top-2.5 left-3 h-4 w-4 text-slate-400"
-                  aria-hidden="true"
+      <div className="relative">
+        <div className="absolute -inset-px bg-linear-to-b from-border/50 to-transparent rounded-xl pointer-events-none"></div>
+        <div className="space-y-10 rounded-xl border border-border bg-background/40 p-8 shadow-2xl backdrop-blur-xs">
+          {/* Section 1: Identity */}
+          <div className="space-y-6">
+            <h3 className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-foreground">
+              <span className="bg-accent h-1.5 w-1.5 rounded-full animate-pulse" aria-hidden="true"></span>
+              Core Identity
+            </h3>
+            <div className="grid grid-cols-1 gap-6">
+              <div className="space-y-2">
+                <label htmlFor="preset-name" className="terminal-label">
+                  Sequence Designation
+                </label>
+                <input
+                  id="preset-name"
+                  type="text"
+                  placeholder="E.G. NEURAL FLOW"
+                  className="terminal-input w-full px-4 outline-hidden"
                 />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="target-artist" className="terminal-label">
+                  Reference Blueprint
+                </label>
                 <input
                   id="target-artist"
                   type="text"
-                  placeholder="e.g. John Mayer, Tame Impala..."
-                  className="focus:border-primary focus:ring-primary/20 w-full rounded-lg border border-slate-200 bg-slate-50 py-2 pr-3 pl-9 text-sm text-slate-900 placeholder-slate-400 transition-all focus:ring-2 focus:outline-none"
+                  placeholder="ARTIST OR STYLE"
+                  className="terminal-input w-full px-4 outline-hidden"
                 />
               </div>
-            </div>
-            <div className="col-span-2">
-              <label
-                htmlFor="sonic-description"
-                className="mb-1.5 block text-xs font-medium text-slate-500"
-              >
-                Sonic Description
-              </label>
-              <textarea
-                id="sonic-description"
-                rows={3}
-                placeholder="Describe the texture, mood, or specific song reference..."
-                className="focus:border-primary focus:ring-primary/20 w-full resize-none rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-900 placeholder-slate-400 transition-all focus:ring-2 focus:outline-none"
-              ></textarea>
+              <div className="space-y-2">
+                <label htmlFor="sonic-description" className="terminal-label">
+                  Acoustic Metadata
+                </label>
+                <textarea
+                  id="sonic-description"
+                  rows={3}
+                  placeholder="DESCRIBE TEXTURE AND GAIN STRUCTURE..."
+                  className="terminal-input w-full p-4 min-h-[100px] outline-hidden resize-none"
+                ></textarea>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="h-px w-full bg-slate-100"></div>
+          <div className="h-px w-full bg-border/30"></div>
 
-        {/* Section 2: Input Gear */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="flex items-center gap-2 text-xs font-bold tracking-widest text-slate-900 uppercase">
-              <span className="bg-accent h-1.5 w-1.5 rounded-full" aria-hidden="true"></span>
-              Input Gear
-            </h3>
-            <span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] text-slate-400">
-              DETECTED
-            </span>
-          </div>
-
-          {/* Guitar Selector */}
-          <fieldset>
-            <legend className="mb-2 block text-xs font-medium text-slate-500">Guitar Type</legend>
-            <div
-              className="grid grid-cols-3 gap-2"
-              role="radiogroup"
-              aria-label="Guitar type selection"
-            >
-              {/* Option 1 */}
-              <label className="group relative cursor-pointer">
-                <input
-                  type="radio"
-                  name="guitar"
-                  className="peer sr-only"
-                  defaultChecked
-                  aria-label="Stratocaster style guitar"
-                />
-                <div className="peer-checked:border-primary peer-checked:bg-secondary peer-checked:text-primary hover:border-primary/30 flex h-full flex-col items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white p-3 text-center transition-all hover:bg-slate-50">
-                  <Zap
-                    className="group-hover:text-primary peer-checked:text-primary h-5 w-5 text-slate-400 transition-colors"
-                    aria-hidden="true"
-                  />
-                  <span
-                    className="peer-checked:text-primary text-xs font-semibold text-slate-600"
-                    aria-hidden="true"
-                  >
-                    Strat
-                  </span>
-                  <CheckCircle2
-                    className="text-primary absolute top-2 right-2 h-3.5 w-3.5 scale-75 transform opacity-0 transition-all peer-checked:scale-100 peer-checked:opacity-100"
-                    aria-hidden="true"
-                  />
-                </div>
-              </label>
-              {/* Option 2 */}
-              <label className="group relative cursor-pointer">
-                <input
-                  type="radio"
-                  name="guitar"
-                  className="peer sr-only"
-                  aria-label="Les Paul style guitar"
-                />
-                <div className="flex h-full flex-col items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white p-3 text-center transition-all peer-checked:border-violet-500 peer-checked:bg-violet-50 peer-checked:text-violet-700 hover:border-violet-300 hover:bg-slate-50">
-                  <CircleDot
-                    className="h-5 w-5 text-slate-400 transition-colors group-hover:text-violet-500 peer-checked:text-violet-600"
-                    aria-hidden="true"
-                  />
-                  <span
-                    className="text-xs font-semibold text-slate-600 peer-checked:text-violet-700"
-                    aria-hidden="true"
-                  >
-                    LP
-                  </span>
-                  <CheckCircle2
-                    className="absolute top-2 right-2 h-3.5 w-3.5 scale-75 transform text-violet-600 opacity-0 transition-all peer-checked:scale-100 peer-checked:opacity-100"
-                    aria-hidden="true"
-                  />
-                </div>
-              </label>
-              {/* Option 3 */}
-              <label className="group relative cursor-pointer">
-                <input
-                  type="radio"
-                  name="guitar"
-                  className="peer sr-only"
-                  aria-label="Hollow body guitar"
-                />
-                <div className="flex h-full flex-col items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white p-3 text-center transition-all peer-checked:border-violet-500 peer-checked:bg-violet-50 peer-checked:text-violet-700 hover:border-violet-300 hover:bg-slate-50">
-                  <Box
-                    className="h-5 w-5 text-slate-400 transition-colors group-hover:text-violet-500 peer-checked:text-violet-600"
-                    aria-hidden="true"
-                  />
-                  <span
-                    className="text-xs font-semibold text-slate-600 peer-checked:text-violet-700"
-                    aria-hidden="true"
-                  >
-                    Hollow
-                  </span>
-                  <CheckCircle2
-                    className="absolute top-2 right-2 h-3.5 w-3.5 scale-75 transform text-violet-600 opacity-0 transition-all peer-checked:scale-100 peer-checked:opacity-100"
-                    aria-hidden="true"
-                  />
-                </div>
-              </label>
-            </div>
-          </fieldset>
-
-          {/* Pickups Segmented Control */}
-          <fieldset>
-            <legend className="mb-2 block text-xs font-medium text-slate-500">Pickups</legend>
-            <div
-              className="flex rounded-lg bg-slate-100 p-1"
-              role="radiogroup"
-              aria-label="Pickup type selection"
-            >
-              <label className="flex-1 cursor-pointer">
-                <input
-                  type="radio"
-                  name="pickups"
-                  className="peer sr-only"
-                  defaultChecked
-                  aria-label="Single Coil pickups"
-                />
-                <div
-                  className="rounded-md py-1.5 text-center text-xs font-semibold text-slate-500 transition-all peer-checked:bg-white peer-checked:text-slate-900 peer-checked:shadow-sm"
-                  aria-hidden="true"
-                >
-                  Single Coil
-                </div>
-              </label>
-              <label className="flex-1 cursor-pointer">
-                <input
-                  type="radio"
-                  name="pickups"
-                  className="peer sr-only"
-                  aria-label="Humbucker pickups"
-                />
-                <div
-                  className="rounded-md py-1.5 text-center text-xs font-semibold text-slate-500 transition-all peer-checked:bg-white peer-checked:text-slate-900 peer-checked:shadow-sm"
-                  aria-hidden="true"
-                >
-                  Humbucker
-                </div>
-              </label>
-              <label className="flex-1 cursor-pointer">
-                <input
-                  type="radio"
-                  name="pickups"
-                  className="peer sr-only"
-                  aria-label="P-90 pickups"
-                />
-                <div
-                  className="rounded-md py-1.5 text-center text-xs font-semibold text-slate-500 transition-all peer-checked:bg-white peer-checked:text-slate-900 peer-checked:shadow-sm"
-                  aria-hidden="true"
-                >
-                  P-90
-                </div>
-              </label>
-            </div>
-          </fieldset>
-
-          {/* Strings Slider */}
-          <div>
-            <div className="mb-2 flex items-center justify-between">
-              <label htmlFor="strings-gauge" className="block text-xs font-medium text-slate-500">
-                Strings Gauge
-              </label>
-              <span id="strings-gauge-value" className="font-mono text-xs font-bold text-slate-700">
-                .010 - .046
+          {/* Section 2: Input Gear */}
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h3 className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-foreground">
+                <span className="bg-accent h-1.5 w-1.5 rounded-full" aria-hidden="true"></span>
+                Input Source
+              </h3>
+              <span className="border border-border/50 bg-muted/20 px-2 py-0.5 font-mono text-[8px] font-black tracking-widest text-accent uppercase rounded-sm">
+                SIGNAL DETECTED
               </span>
             </div>
-            <input
-              id="strings-gauge"
-              type="range"
-              min="8"
-              max="13"
-              step="1"
-              defaultValue="10"
-              aria-describedby="strings-gauge-value"
-              aria-valuemin={8}
-              aria-valuemax={13}
-              aria-valuenow={10}
-              className="accent-primary w-full"
-            />
-            <div
-              className="mt-1 flex justify-between px-1 text-[10px] font-medium text-slate-400"
-              aria-hidden="true"
-            >
-              <span>Light</span>
-              <span>Heavy</span>
+
+            {/* Guitar Selector */}
+            <fieldset className="space-y-3">
+              <legend className="terminal-label">Hardware Configuration</legend>
+              <div className="grid grid-cols-3 gap-3" role="radiogroup">
+                {['STRAT', 'LP', 'HOLLOW'].map((type, i) => (
+                  <label key={type} className="group relative cursor-pointer">
+                    <input type="radio" name="guitar" className="peer sr-only" defaultChecked={i === 0} />
+                    <div className="peer-checked:border-accent peer-checked:bg-accent/5 flex flex-col items-center justify-center gap-3 rounded-sm border border-border/50 bg-background/50 p-4 transition-all hover:border-accent/50">
+                      <Cpu className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-accent peer-checked:text-accent" />
+                      <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground group-hover:text-foreground peer-checked:text-foreground">{type}</span>
+                      <CheckCircle2 className="text-accent absolute top-2 right-2 h-3 w-3 opacity-0 transition-all peer-checked:opacity-100" />
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+
+            {/* Pickups Segmented Control */}
+            <fieldset className="space-y-3">
+              <legend className="terminal-label">Transducer Map</legend>
+              <div className="flex bg-muted/20 border border-border/50 rounded-sm p-1" role="radiogroup">
+                {['Single Coil', 'Humbucker', 'P-90'].map((type, i) => (
+                  <label key={type} className="flex-1 cursor-pointer">
+                    <input type="radio" name="pickups" className="peer sr-only" defaultChecked={i === 0} />
+                    <div className="rounded-sm py-2 text-center text-[9px] font-black uppercase tracking-widest text-muted-foreground transition-all peer-checked:bg-background peer-checked:text-accent peer-checked:shadow-lg">
+                      {type}
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+
+            {/* Strings Slider */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <label htmlFor="strings-gauge" className="terminal-label">
+                  Tension Matrix
+                </label>
+                <span className="font-mono text-[10px] font-black text-accent">.010 - .046</span>
+              </div>
+              <input
+                id="strings-gauge"
+                type="range"
+                min="8"
+                max="13"
+                step="1"
+                defaultValue="10"
+                className="w-full h-1.5 bg-border rounded-full appearance-none cursor-pointer accent-accent"
+              />
+              <div className="flex justify-between text-[8px] font-black uppercase tracking-widest text-muted-foreground/30">
+                <span>Low Tension</span>
+                <span>High Tension</span>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="h-px w-full bg-slate-100"></div>
+          <div className="h-px w-full bg-border/30"></div>
 
-        {/* Section 3: Amplifier */}
-        <div className="space-y-4">
-          <h3 className="flex items-center gap-2 text-xs font-bold tracking-widest text-slate-900 uppercase">
-            <span className="bg-primary h-1.5 w-1.5 rounded-full" aria-hidden="true"></span>
-            Amplification
-          </h3>
+          {/* Section 3: Amplifier */}
+          <div className="space-y-6">
+            <h3 className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-foreground">
+              <span className="bg-accent h-1.5 w-1.5 rounded-full" aria-hidden="true"></span>
+              Output Processor
+            </h3>
 
-          <div className="group relative">
-            <label htmlFor="amp-type" className="sr-only">
-              Amplifier Type
-            </label>
-            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-              {/* Speaker icon */}
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-4 w-4 text-slate-400"
-                aria-hidden="true"
+            <div className="group relative">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                <Sliders className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-accent transition-colors" />
+              </div>
+              <select
+                id="amp-type"
+                className="terminal-input w-full pl-12 pr-10 appearance-none outline-hidden cursor-pointer"
               >
-                <rect width="16" height="20" x="4" y="2" rx="2" />
-                <circle cx="12" cy="14" r="4" />
-                <line x1="12" x2="12.01" y1="6" y2="6" />
-              </svg>
-            </div>
-            <select
-              id="amp-type"
-              className="focus:border-primary focus:ring-primary/20 w-full cursor-pointer appearance-none rounded-lg border border-slate-200 bg-slate-50 py-2.5 pr-8 pl-10 text-sm text-slate-900 focus:ring-2 focus:outline-none"
-            >
-              <option>American Clean (Fender Style)</option>
-              <option>British Crunch (Vox Style)</option>
-              <option>High Gain Lead (Mesa Style)</option>
-              <option>Digital Modeler (Neutral)</option>
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-              {/* ChevronDown icon */}
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-4 w-4 text-slate-400"
-                aria-hidden="true"
-              >
-                <path d="m6 9 6 6 6-6" />
-              </svg>
+                <option>American Clean (Fender Style)</option>
+                <option>British Crunch (Vox Style)</option>
+                <option>High Gain Lead (Mesa Style)</option>
+                <option>Digital Modeler (Neutral)</option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
+                <div className="h-1.5 w-1.5 border-r border-b border-muted-foreground/40 rotate-45"></div>
+              </div>
             </div>
           </div>
+          
+          <button className="terminal-button-primary w-full h-14 shadow-2xl">
+            Execute Synthesis
+          </button>
         </div>
       </div>
     </div>

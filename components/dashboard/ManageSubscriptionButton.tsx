@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Settings } from 'lucide-react';
+import { ShieldCheck, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -24,15 +24,26 @@ export default function ManageSubscriptionButton() {
       window.location.href = url;
     } catch (err) {
       console.error(err);
-      toast.error('Failed to open subscription portal. Please try again.');
+      toast.error('License portal unreachable');
       setLoading(false);
     }
   };
 
   return (
-    <Button className="cursor-pointer" onClick={handleManage} disabled={loading} variant="outline">
-      <Settings className="mr-2 h-4 w-4" />
-      {loading ? 'Loading...' : 'Manage Subscription'}
+    <Button 
+      className="cursor-pointer border-accent/20 bg-accent/5 text-accent hover:bg-accent/10 hover:border-accent/40 rounded-sm h-10 px-4 transition-all" 
+      onClick={handleManage} 
+      disabled={loading} 
+      variant="outline"
+    >
+      {loading ? (
+        <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+      ) : (
+        <ShieldCheck className="mr-2 h-3.5 w-3.5" />
+      )}
+      <span className="text-[10px] font-black uppercase tracking-widest">
+        {loading ? 'Connecting...' : 'License Protocol'}
+      </span>
     </Button>
   );
 }

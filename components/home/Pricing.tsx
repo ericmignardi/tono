@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Mic, Speaker, Check, ArrowUpRight } from 'lucide-react';
+import { Check, ArrowUpRight, Cpu, Activity } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -57,105 +57,95 @@ export default function Pricing({ hasActiveSubscription = false }: PricingProps)
   };
 
   return (
-    <section
-      id="pricing"
-      className="bg-card rounded-t-[3rem] px-6 py-24 shadow-[0_-20px_40px_-15px_rgba(0,0,0,0.05)]"
-    >
+    <section id="pricing" className="px-6 py-32 bg-background border-y border-border">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-12 flex flex-col items-end justify-between md:flex-row">
-          <div>
-            <h2 className="text-foreground text-4xl font-bold tracking-tight md:text-5xl">
-              Choose your <span className="font-script text-primary">stage</span>
-            </h2>
-            <p className="mt-4 max-w-md text-slate-500">
-              Plans designed for bedroom guitarists, touring pros, and studio engineers.
-            </p>
+        <div className="mb-24">
+          <div className="mb-4 flex items-center gap-2">
+            <span className="h-px w-8 bg-accent"></span>
+            <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-accent">Subscription Tiers</span>
           </div>
-          {/* Doodle Arrow */}
-          <div className="hidden pb-4 md:block">
-            <svg
-              className="text-muted-foreground/50 h-12 w-24"
-              viewBox="0 0 100 50"
-              fill="none"
-              stroke="currentColor"
-              aria-hidden="true"
-            >
-              <path
-                d="M10 40 Q 50 0 90 20"
-                strokeWidth="2"
-                strokeDasharray="5,5"
-                markerEnd="url(#arrowhead)"
-              ></path>
-            </svg>
-          </div>
+          <h2 className="font-display text-4xl font-bold tracking-tighter text-foreground md:text-6xl lg:text-7xl">
+            Access <span className="text-muted-foreground/30 italic">Licenses</span>.
+          </h2>
+          <p className="mt-6 max-w-md text-muted-foreground font-medium text-sm leading-relaxed opacity-60">
+            Select the appropriate processing power for your production environment.
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-12 md:grid-cols-2">
           {/* Free Tier */}
-          <div className="group bg-muted/50 hover:shadow-muted/50 flex flex-col rounded-4xl p-4 pb-8 transition-all hover:shadow-xl">
-            <div className="border-border bg-card relative mb-6 flex h-48 items-center justify-center overflow-hidden rounded-3xl border">
-              <Mic className="text-muted-foreground/50 h-16 w-16 transition-transform duration-500 group-hover:scale-110" />
-              <div className="bg-foreground text-background absolute bottom-4 left-6 rounded-full px-3 py-1 text-xs font-bold">
-                FREE
+          <div className="group relative border border-border bg-card p-1 rounded-2xl transition-all duration-500 hover:border-border/80">
+            <div className="p-8 pb-10">
+              <div className="mb-8 flex items-center justify-between">
+                <div className="h-10 w-10 flex items-center justify-center rounded border border-border bg-muted/30">
+                  <Activity className="h-5 w-5 text-muted-foreground" />
+                </div>
+                <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">Tier 01</div>
               </div>
-            </div>
-            <div className="flex grow flex-col px-4">
-              <h3 className="text-foreground mb-2 text-xl font-bold">Bedroom Rocker</h3>
-              <p className="text-muted-foreground mb-6 text-sm">
-                Perfect for learning and practicing at home.
+              
+              <h3 className="font-display text-3xl font-bold text-foreground mb-1">Standard</h3>
+              <div className="text-accent text-[10px] font-bold uppercase tracking-widest mb-6">Gratis</div>
+              
+              <p className="text-muted-foreground text-sm mb-8 leading-relaxed max-w-[240px]">
+                Essential tools for home-based practice and basic tone exploration.
               </p>
-              <ul className="mb-8 space-y-3">
-                <li className="text-foreground flex items-center gap-2 text-sm">
-                  <div className="flex h-5 w-5 items-center justify-center rounded-full bg-green-100 text-green-600">
-                    <Check className="h-3 w-3" />
-                  </div>{' '}
-                  5 Tone Generations
+
+              <div className="h-px w-full bg-border/50 mb-8" />
+
+              <ul className="space-y-4 mb-10">
+                <li className="flex items-center gap-3 text-xs font-bold uppercase tracking-wider text-foreground">
+                  <Check className="h-3 w-3 text-accent" />
+                  5 Process Generations
+                </li>
+                <li className="flex items-center gap-3 text-xs font-bold uppercase tracking-wider text-muted-foreground/40">
+                  <span className="h-3 w-3 border border-border rounded-full" />
+                  Neural Audio Analysis
                 </li>
               </ul>
+
               <button
                 onClick={() => (window.location.href = '/dashboard')}
-                className="border-border text-foreground hover:bg-muted mt-auto flex w-full items-center justify-center gap-2 rounded-xl border py-3 font-semibold transition-colors"
+                className="w-full flex items-center justify-center gap-2 py-4 px-6 rounded border border-border bg-muted/20 text-[10px] font-black uppercase tracking-[0.2em] text-foreground transition-all hover:bg-muted/40"
               >
-                Get Started <ArrowUpRight className="h-4 w-4" />
+                Initialize <ArrowUpRight className="h-3 w-3" />
               </button>
             </div>
           </div>
 
           {/* Pro Tier */}
-          <div className="group bg-secondary hover:shadow-primary/20 relative flex flex-col rounded-4xl p-4 pb-8 transition-all hover:shadow-xl">
-            <div className="bg-accent absolute -top-3 right-8 z-10 rotate-3 rounded-full px-4 py-1 text-xs font-bold text-white shadow-sm">
-              POPULAR
+          <div className="group relative border border-accent/30 bg-card p-1 rounded-2xl glow-amber transition-all duration-500 hover:border-accent/50">
+            <div className="absolute -top-3 right-8 bg-accent px-3 py-1 rounded text-[8px] font-black uppercase tracking-widest text-background">
+              Recommended
             </div>
-            <div className="bg-primary/10 relative mb-6 flex h-48 items-center justify-center overflow-hidden rounded-3xl">
-              <Speaker className="text-primary h-16 w-16 transition-transform duration-500 group-hover:scale-110" />
-              <div className="bg-primary absolute bottom-4 left-6 rounded-full px-3 py-1 text-xs font-bold text-white">
-                $9.99/mo
+            
+            <div className="p-8 pb-10">
+              <div className="mb-8 flex items-center justify-between">
+                <div className="h-10 w-10 flex items-center justify-center rounded border border-accent/30 bg-accent/5 glow-amber">
+                  <Cpu className="h-5 w-5 text-accent" />
+                </div>
+                <div className="text-[10px] font-black uppercase tracking-widest text-accent/40">Tier 02</div>
               </div>
-            </div>
-            <div className="flex grow flex-col px-4">
-              <h3 className="text-foreground mb-2 text-xl font-bold">Touring Pro</h3>
-              <p className="text-muted-foreground mb-6 text-sm">
-                Increased tone generations and exclusive features.
+              
+              <h3 className="font-display text-3xl font-bold text-foreground mb-1">Professional</h3>
+              <div className="text-accent text-[10px] font-bold uppercase tracking-widest mb-6">$9.99 / Monthly</div>
+              
+              <p className="text-muted-foreground text-sm mb-8 leading-relaxed max-w-[240px]">
+                High-capacity processing for professional studio and stage environments.
               </p>
-              <ul className="mb-8 space-y-3">
-                <li className="text-foreground flex items-center gap-2 text-sm">
-                  <div className="bg-secondary text-primary flex h-5 w-5 items-center justify-center rounded-full">
-                    <Check className="h-3 w-3" />
-                  </div>{' '}
-                  50 Tone Generations
+
+              <div className="h-px w-full bg-border/50 mb-8" />
+
+              <ul className="space-y-4 mb-10">
+                <li className="flex items-center gap-3 text-xs font-bold uppercase tracking-wider text-foreground">
+                  <Check className="h-3 w-3 text-accent" />
+                  50 Process Generations
                 </li>
-                <li className="text-foreground flex items-center gap-2 text-sm">
-                  <div className="bg-secondary text-primary flex h-5 w-5 items-center justify-center rounded-full">
-                    <Check className="h-3 w-3" />
-                  </div>{' '}
-                  <span className="flex items-center gap-1">
-                    Audio Upload Analysis
-                    <span className="ml-1 rounded bg-blue-100 px-1.5 py-0.5 text-xs font-semibold text-blue-700">
-                      NEW
-                    </span>
-                  </span>
+                <li className="flex items-center gap-3 text-xs font-bold uppercase tracking-wider text-foreground">
+                  <Check className="h-3 w-3 text-accent" />
+                  Neural Audio Analysis
                 </li>
               </ul>
+
               <Button
                 disabled={premiumLoading || portalLoading}
                 onClick={() => {
@@ -165,50 +155,17 @@ export default function Pricing({ hasActiveSubscription = false }: PricingProps)
                     handleSubscribe(process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO ?? '');
                   }
                 }}
-                className="bg-primary shadow-primary/20 hover:bg-primary/90 mt-auto flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl py-6 font-semibold text-white shadow-lg transition-colors"
+                className="w-full flex items-center justify-center gap-2 py-4 px-6 rounded bg-accent text-[10px] font-black uppercase tracking-[0.2em] text-background transition-all hover:bg-accent/90"
               >
                 {premiumLoading || portalLoading
-                  ? 'Loading...'
+                  ? 'Processing...'
                   : hasActiveSubscription
                     ? 'Manage Subscription'
-                    : 'Upgrade To Pro'}
-                <ArrowUpRight className="h-4 w-4" />
+                    : 'Activate Pro License'}
+                <ArrowUpRight className="h-3 w-3" />
               </Button>
             </div>
           </div>
-
-          {/* Studio Tier */}
-          {/* <div className="group rounded-4xl bg-amber-50 p-4 pb-8 transition-all hover:shadow-xl hover:shadow-amber-100">
-            <div className="relative mb-6 flex h-48 items-center justify-center overflow-hidden rounded-3xl bg-amber-200">
-              <Music className="h-16 w-16 text-amber-500 transition-transform duration-500 group-hover:scale-110" />
-              <div className="absolute bottom-4 left-6 rounded-full bg-amber-500 px-3 py-1 text-xs font-bold text-white">
-                $29/mo
-              </div>
-            </div>
-            <div className="px-4">
-              <h3 className="mb-2 text-xl font-bold text-slate-900">Studio Master</h3>
-              <p className="mb-6 text-sm text-slate-500">
-                High fidelity export and commercial license.
-              </p>
-              <ul className="mb-8 space-y-3">
-                <li className="flex items-center gap-2 text-sm text-slate-700">
-                  <div className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-200 text-amber-700">
-                    <Check className="h-3 w-3" />
-                  </div>{' '}
-                  96kHz / 24-bit
-                </li>
-                <li className="flex items-center gap-2 text-sm text-slate-700">
-                  <div className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-200 text-amber-700">
-                    <Check className="h-3 w-3" />
-                  </div>{' '}
-                  STEMS Separation
-                </li>
-              </ul>
-              <button className="flex w-full items-center justify-center gap-2 rounded-xl border border-amber-200 bg-amber-100 py-3 font-semibold text-amber-900 transition-colors hover:bg-amber-200">
-                Go Studio <ArrowUpRight className="h-4 w-4" />
-              </button>
-            </div>
-          </div> */}
         </div>
       </div>
     </section>

@@ -1,14 +1,18 @@
 import type { Metadata } from 'next';
-import { Google_Sans, Inter } from 'next/font/google';
+import { Syne, Manrope } from 'next/font/google';
 import './globals.css';
 import { ClerkProvider } from '@clerk/nextjs';
 import { Providers } from './providers';
 import { Toaster } from '@/components/ui/sonner';
 
-const googleSans = Google_Sans({
-  weight: ['400', '500', '600', '700'],
+const syne = Syne({
   subsets: ['latin'],
-  variable: '--font-google-sans',
+  variable: '--font-syne',
+});
+
+const manrope = Manrope({
+  subsets: ['latin'],
+  variable: '--font-manrope',
 });
 
 export const metadata: Metadata = {
@@ -28,7 +32,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
-        <body className={`${googleSans.variable} antialiased`}>
+        <body className={`${syne.variable} ${manrope.variable} font-sans antialiased`}>
           <Providers>{children}</Providers>
           <Toaster />
         </body>
