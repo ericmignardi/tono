@@ -33,25 +33,33 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    // Check for duplicate events (replay attack prevention)
+    // Skip only if a prior delivery fully processed this event. If a previous
+    // attempt crashed mid-handler, `processed` is still false and we must retry
+    // — otherwise Stripe's redelivery would be silently dropped and we'd lose
+    // the upgrade/cancel/payment event permanently.
     const existingEvent = await prisma.webhookEvent.findUnique({
       where: { eventId: event.id },
     });
 
-    if (existingEvent) {
-      console.log(`Duplicate event ${event.id}, skipping`);
+    if (existingEvent?.processed) {
+      console.log(`Event ${event.id} already processed, skipping`);
       return new NextResponse(JSON.stringify({ received: true }), {
         status: 200,
         headers: { 'Content-Type': 'application/json' },
       });
     }
 
-    // Record this event
-    await prisma.webhookEvent.create({
-      data: {
+    // Record (or reset) this event. Upsert lets us retry a previously failed
+    // attempt without violating the unique constraint.
+    await prisma.webhookEvent.upsert({
+      where: { eventId: event.id },
+      create: {
         eventId: event.id,
         type: event.type,
         processed: false,
+      },
+      update: {
+        error: null,
       },
     });
 
@@ -100,7 +108,7 @@ export async function POST(req: NextRequest) {
                 user.generationsUsed > FREE_CREDIT_LIMIT ? FREE_CREDIT_LIMIT : user.generationsUsed,
             },
           });
-          console.log(`User ${user.email} downgraded to free tier`);
+          console.log(`User ${user.id} downgraded to free tier`);
         }
 
         await prisma.subscription.deleteMany({
@@ -111,20 +119,7 @@ export async function POST(req: NextRequest) {
 
       case 'invoice.payment_failed': {
         const invoice = event.data.object as Stripe.Invoice;
-
-        const invoiceWithSubscription = invoice as Stripe.Invoice & {
-          subscription?: string | Stripe.Subscription;
-        };
-
-        let subscriptionId: string | undefined;
-        if (typeof invoiceWithSubscription.subscription === 'string') {
-          subscriptionId = invoiceWithSubscription.subscription;
-        } else if (
-          invoiceWithSubscription.subscription &&
-          typeof invoiceWithSubscription.subscription === 'object'
-        ) {
-          subscriptionId = invoiceWithSubscription.subscription.id;
-        }
+        const subscriptionId = extractSubscriptionId(invoice);
 
         if (!subscriptionId) {
           console.warn('Invoice has no subscription ID, skipping');
@@ -136,6 +131,45 @@ export async function POST(req: NextRequest) {
           data: { status: 'past_due' },
         });
         console.warn(`Payment failed for subscription: ${subscriptionId}`);
+        break;
+      }
+
+      case 'invoice.payment_succeeded': {
+        const invoice = event.data.object as Stripe.Invoice;
+
+        // Only reset credits on actual renewal cycles. The initial subscription
+        // payment is handled by checkout.session.completed (which resets via
+        // handleSubscriptionChange), and manual/one-off invoices shouldn't
+        // touch the credit counter.
+        if (invoice.billing_reason !== 'subscription_cycle') {
+          break;
+        }
+
+        const subscriptionId = extractSubscriptionId(invoice);
+        if (!subscriptionId) {
+          console.warn('Renewal invoice has no subscription ID, skipping');
+          break;
+        }
+
+        const sub = await prisma.subscription.findUnique({
+          where: { stripeId: subscriptionId },
+          select: { userId: true },
+        });
+
+        if (!sub) {
+          console.error(`Subscription ${subscriptionId} not found for renewal`);
+          break;
+        }
+
+        await prisma.user.update({
+          where: { id: sub.userId },
+          data: {
+            generationsUsed: 0,
+            generationsLimit: PRO_CREDIT_LIMIT,
+            lastResetDate: new Date(),
+          },
+        });
+        console.log(`Renewed: credits reset for user ${sub.userId}`);
         break;
       }
 
@@ -221,13 +255,17 @@ async function handleSubscriptionChange(
   const isActiveSubscription = ['active', 'trialing'].includes(subscription.status);
 
   if (eventType === 'created' && isActiveSubscription) {
+    // Fresh upgrade: reset usage so the user gets a full Pro allotment from
+    // the moment they pay, not "Pro limit minus whatever they used on Free".
     await prisma.user.update({
       where: { id: user.id },
       data: {
         generationsLimit: PRO_CREDIT_LIMIT,
+        generationsUsed: 0,
+        lastResetDate: new Date(),
       },
     });
-    console.log(`User ${user.email} upgraded to PRO (${PRO_CREDIT_LIMIT} credits)`);
+    console.log(`User ${user.id} upgraded to PRO (${PRO_CREDIT_LIMIT} credits)`);
   } else if (eventType === 'updated') {
     if (isActiveSubscription) {
       await prisma.user.update({
@@ -236,9 +274,9 @@ async function handleSubscriptionChange(
           generationsLimit: PRO_CREDIT_LIMIT,
         },
       });
-      console.log(`User ${user.email} subscription active - PRO limits maintained`);
+      console.log(`User ${user.id} subscription active - PRO limits maintained`);
     } else if (['canceled', 'unpaid', 'past_due'].includes(subscription.status)) {
-      console.warn(`User ${user.email} subscription status: ${subscription.status}`);
+      console.warn(`User ${user.id} subscription status: ${subscription.status}`);
     }
   }
 
@@ -260,7 +298,18 @@ async function handleSubscriptionChange(
     },
   });
 
-  console.log(`Subscription synced: ${subscription.id} for user ${user.email}`);
+  console.log(`Subscription synced: ${subscription.id} for user ${user.id}`);
+}
+
+// In Stripe API 2025-10-29.clover, `invoice.subscription` was removed in favor
+// of `invoice.parent.subscription_details.subscription`. Centralize the lookup
+// so all invoice handlers stay in sync.
+function extractSubscriptionId(invoice: Stripe.Invoice): string | undefined {
+  const parent = invoice.parent;
+  if (parent?.type !== 'subscription_details') return undefined;
+  const sub = parent.subscription_details?.subscription;
+  if (!sub) return undefined;
+  return typeof sub === 'string' ? sub : sub.id;
 }
 
 // Reject other methods

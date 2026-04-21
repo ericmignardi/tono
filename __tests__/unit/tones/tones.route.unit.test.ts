@@ -367,6 +367,7 @@ describe('/api/tones', () => {
       (prisma.user.findUnique as jest.Mock).mockResolvedValue({
         id: 'db_user_1',
         clerkId: 'clerk_user_123',
+        subscriptions: [],
       });
       (prisma.$transaction as jest.Mock).mockImplementation(async (fn) =>
         fn({

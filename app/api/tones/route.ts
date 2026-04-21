@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { generateEnhancedToneSettings } from '@/lib/gemini/toneAiService';
 import { analyzeAudioTone, validateAudioFile } from '@/lib/gemini/audioAnalysisService';
 import { getUserTier, canUseAudioAnalysis } from '@/lib/config/subscriptionTiers';
+import { FREE_CREDIT_LIMIT, PRO_CREDIT_LIMIT } from '@/lib/config';
 import { toneRateLimit, apiRateLimit } from '@/lib/rateLimit';
 import { ToneQuerySchema } from '@/utils/validation/toneValidation';
 import { APIError, handleAPIError, logRequest } from '@/lib/api/errorHandler';
@@ -105,14 +106,24 @@ export async function POST(req: NextRequest) {
     // Reset credits if we've entered a new billing month
     await resetCreditsIfNewPeriod(dbUser.id);
 
+    // Derive the effective limit from current subscription state rather than
+    // trusting the stored `generationsLimit`. The stored value can drift from
+    // reality if a Stripe webhook (e.g. customer.subscription.deleted) fails
+    // — without this guard, a downgrade that never reached us would leave the
+    // user on the Pro limit indefinitely.
+    const hasActivePaidSubscription = dbUser.subscriptions.some(
+      (sub) => sub.status === 'active' || sub.status === 'trialing'
+    );
+    const effectiveLimit = hasActivePaidSubscription ? PRO_CREDIT_LIMIT : FREE_CREDIT_LIMIT;
+
     // Check and reserve credit inside a transaction
     await prisma.$transaction(async (tx) => {
       const freshUser = await tx.user.findUnique({
         where: { id: dbUser.id },
-        select: { generationsUsed: true, generationsLimit: true },
+        select: { generationsUsed: true },
       });
 
-      if (!freshUser || freshUser.generationsUsed >= freshUser.generationsLimit) {
+      if (!freshUser || freshUser.generationsUsed >= effectiveLimit) {
         throw new APIError(
           'No remaining credits. Please upgrade your plan.',
           403,
