@@ -24,9 +24,9 @@ describe('Hero', () => {
 
   it('renders heading text content', () => {
     render(<Hero />);
-    // The heading is split across multiple elements, so check each part
-    expect(screen.getByText(/The best place to/i)).toBeInTheDocument();
-    expect(screen.getByText(/the perfect tones/i)).toBeInTheDocument();
+    const heading = screen.getByRole('heading', { level: 1 });
+    expect(heading).toHaveTextContent(/The best place to/i);
+    expect(heading).toHaveTextContent(/the perfect tones/i);
   });
 
   it('renders the description text', () => {

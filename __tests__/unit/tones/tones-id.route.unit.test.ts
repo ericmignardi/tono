@@ -39,6 +39,10 @@ jest.mock('@/lib/gemini/toneAiService', () => ({
   }),
 }));
 
+jest.mock('@/lib/credits/resetCredits', () => ({
+  resetCreditsIfNewPeriod: jest.fn().mockResolvedValue(false),
+}));
+
 jest.mock('next/cache', () => ({
   revalidatePath: jest.fn(),
 }));

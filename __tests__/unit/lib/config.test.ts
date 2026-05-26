@@ -40,8 +40,8 @@ describe('Config Validation', () => {
     process.env = {
       ...originalEnv,
       NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: 'pk_test_mock',
-      // CLERK_SECRET_KEY is missing
     };
+    delete process.env.CLERK_SECRET_KEY;
 
     expect(() => {
       require('@/lib/config');
