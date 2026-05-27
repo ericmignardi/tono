@@ -18,7 +18,7 @@ describe('Config Validation', () => {
       CLERK_SECRET_KEY: 'sk_test_mock',
       CLERK_WEBHOOK_SECRET: 'whsec_mock',
       DATABASE_URL: 'postgresql://mock:5432/db',
-      OPENAI_API_KEY: 'sk-mock',
+      GEMINI_API_KEY: 'gemini_mock',
       STRIPE_SECRET_KEY: 'sk_test_stripe',
       STRIPE_WEBHOOK_SECRET: 'whsec_stripe',
       NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: 'pk_test_stripe',
